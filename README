@@ -1,0 +1,8 @@
+README
+======
+
+What is ServerGroveLiveChat?
+----------------------------
+
+ServerGroveLiveChat is a PHP 5.3 Symfony 2 application that allows website visitors to engage in a web-based chat
+with operators of a website. It allows a company to offer live chat support.
