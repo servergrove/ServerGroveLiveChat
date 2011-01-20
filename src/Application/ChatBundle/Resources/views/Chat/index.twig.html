@@ -1,0 +1,36 @@
+{% extends "ChatBundle::layout.twig.html" %}
+{% block content %}
+<form action="#" method="post">
+    <div>
+        <fieldset>
+            <div>
+                <label>
+                    Name
+                </label>
+                <div>
+                    <input type="text" name="chat[name]" />
+                </div>
+            </div>
+            <div>
+                <label>
+                    Email
+                </label>
+                <div>
+                    <input type="text" name="chat[email]" />
+                </div>
+            </div>
+            <div>
+                <label>
+                    Question
+                </label>
+                <div>
+                    <textarea name="chat[question]"></textarea>
+                </div>
+            </div>
+            <div>
+                <input type="submit" value="Start Chat" />
+            </div>
+        </fieldset>
+    </div>
+</form>
+{% endblock %}

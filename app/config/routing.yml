@@ -4,3 +4,6 @@ homepage:
 
 hello:
     resource: HelloBundle/Resources/config/routing.yml
+
+chat:
+  resource: ChatBundle/Resources/config/routing.yml

@@ -1,0 +1,11 @@
+chat_homepage:
+    pattern:  /livechat
+    defaults: { _controller: ChatBundle:Chat:index }
+
+chat_load:
+  pattern: /livechat/load
+  defaults: { _controller: ChatBundle:Chat:load }
+
+chat_done:
+  pattern: /livechat/done
+  defaults: { _controller: ChatBundle:Chat:done }

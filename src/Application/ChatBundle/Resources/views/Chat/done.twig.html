@@ -1,0 +1,34 @@
+{% extends "ChatBundle::layout.twig.html" %}
+{% block content %}
+<form action="#" method="post">
+    <div>
+        <fieldset>
+            <div>
+                <label>
+                    Rating
+                </label>
+                <div>
+                    <select name="rating[stars]">
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Star</option>
+                        <option value="3">3 Star</option>
+                        <option value="4">4 Star</option>
+                        <option value="5" selected="selected">5 Stars</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label>
+                    Comments
+                </label>
+                <div>
+                    <textarea name="chat[question]"></textarea>
+                </div>
+            </div>
+            <div>
+                <input type="submit" value="Submit" />
+            </div>
+        </fieldset>
+    </div>
+</form>
+{% endblock %}
