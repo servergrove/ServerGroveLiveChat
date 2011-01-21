@@ -88,7 +88,7 @@ class ChatController extends BaseController
             setcookie('vsid', $visit->getKey(), time() + 86400, '/'); # TODO Use $response()->headers->setCookie();
         }
 
-        return $visitor;
+        return $visit;
     }
 
     /**
