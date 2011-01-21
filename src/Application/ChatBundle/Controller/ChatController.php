@@ -125,9 +125,13 @@ class ChatController extends BaseController
     {
         $visitor = $this->getVisitorByKey();
 
+
         if ($this->getRequest()->getMethod() == 'POST') {
             $visitor->setEmail($this->getRequest()->get('email'));
             $visitor->setName($this->getRequest()->get('name'));
+
+            $this->getDocumentManager()->persist($visitor);
+            $this->getDocumentManager()->flush();
 
             /* @var $chatSession Application\ChatBundle\Document\Session */
             $chatSession = new ChatSession();
@@ -143,7 +147,7 @@ class ChatController extends BaseController
             return $this->redirect($this->generateUrl('chat_load'));
         }
 
-        return $this->renderTemplate('ChatBundle:Chat:index.twig.html');
+        return $this->renderTemplate('ChatBundle:Chat:index.twig.html', array('visitor' => $visitor));
     }
 
     public function getChatSessionForCurrentUser()
@@ -230,11 +234,18 @@ class ChatController extends BaseController
      */
     public function doneAction()
     {
-        if ($this->getRequest()->getMethod() == "POST") {
-            return $this->render('ChatBundle:Chat:rated.twig.html');
+        if (!$chatSession = $this->getChatSessionForCurrentUser()) {
+            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            return $this->redirect($this->generateUrl('chat_homepage'));
         }
 
-        return $this->renderTemplate('ChatBundle:Chat:done.twig.html');
+        $visitor = $this->getVisitorByKey();
+
+        if ($this->getRequest()->getMethod() != "POST") {
+            return $this->renderTemplate('ChatBundle:Chat:done.twig.html', array('email' => $visitor->getEmail()));
+        }
+
+        return $this->render('ChatBundle:Chat:rated.twig.html');
     }
 
     /**

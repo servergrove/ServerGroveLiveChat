@@ -43,10 +43,10 @@ class Session
      */
     private $visitor_id;
     /**
-     * @var integer
-     * @mongodb:Integer
+     * @var Operator
+     * @mongodb:ReferenceOne(targetDocument="Operator")
      */
-    private $chat_operator_id;
+    private $operator;
     /**
      * @var integer
      * @mongodb:Integer
@@ -80,12 +80,12 @@ class Session
         $this->setUpdatedAt(date('Y-m-d H:i:s'));
     }
 
-    public function addChatMessage($content, $chatOperatorId = null)
+    public function addChatMessage($content, $operator = null)
     {
         $m = new Message();
         $m->setContent($content);
-        if (!is_null($chatOperatorId)) {
-            $m->setChatOperatorId($chatOperatorId);
+        if (!is_null($operator)) {
+            $m->setOperator($operator);
         }
         $this->messages[] = $m;
     }
@@ -181,18 +181,18 @@ class Session
     /**
      * @return integer $chat_operator_id
      */
-    public function getChatOperatorId()
+    public function getOperator()
     {
-        return $this->chat_operator_id;
+        return $this->operator;
     }
 
     /**
      * @param integer $chat_operator_id
      * @return void
      */
-    public function setChatOperatorId($chat_operator_id)
+    public function setOperator($operator)
     {
-        $this->chat_operator_id = $chat_operator_id;
+        $this->operator = $operator;
     }
 
     /**

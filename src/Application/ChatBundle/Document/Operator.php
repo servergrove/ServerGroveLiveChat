@@ -16,48 +16,51 @@ class Operator
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $name;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $email;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $created_at;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $updated_at;
-
     /**
      * @var boolean
      * @mongodb:Boolean
      */
     private $is_online;
-
     /**
      * @var boolean
      * @mongodb:Boolean
      */
     private $is_active;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $passwd;
+    /**
+     * @var Operator\Rating
+     * @mongodb:ReferenceMany(targetDocument="Operator\Rating")
+     */
+    private $ratings = array();
+
+    public function addRating(Operator\Rating $rating)
+    {
+        $this->ratings[] = $rating;
+    }
 
     /**
      * @mongodb:PrePersist

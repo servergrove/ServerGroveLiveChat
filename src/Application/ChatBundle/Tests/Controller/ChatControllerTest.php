@@ -13,7 +13,7 @@ class ChatControllerTest extends WebTestCase
         
         $crawler = $client->request('GET', '/');
         
-        $this->assertTrue($crawler->filter('html:contains("")')
+        $this->assertTrue($crawler->filter('html:contains("Start Chat")')
             ->count() > 0);
     }
 }

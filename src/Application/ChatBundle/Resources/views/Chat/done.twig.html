@@ -1,34 +1,58 @@
 {% extends "ChatBundle::layout.twig.html" %}
 {% block content %}
-<form action="#" method="post">
-    <div>
-        <fieldset>
-            <div>
-                <label>
-                    Rating
-                </label>
-                <div>
-                    <select name="rating[stars]">
-                        <option value="1">1 Star</option>
-                        <option value="2">2 Star</option>
-                        <option value="3">3 Star</option>
-                        <option value="4">4 Star</option>
-                        <option value="5" selected="selected">5 Stars</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                <label>
-                    Comments
-                </label>
-                <div>
-                    <textarea name="chat[question]"></textarea>
-                </div>
-            </div>
-            <div>
-                <input type="submit" value="Submit" />
-            </div>
-        </fieldset>
+<div style="margin-left: 20px;margin-right: 20px;">
+    <form method="POST">
+        <h3>Thanks for using our Live Chat. 
+            <br>
+            <br>
+            Please rate the level of satisfaction with this session. If you have any comments, please include them in the Comments box. 
+            <br>
+            <br>
+            We appreciate all feedback as it help us provide a better experience for our Customers. 
+        </h3>
+        <div class="inputname">
+            Rating
+        </div>
+        <div class="inputbox">
+        <select id="rating">
+            <option value="5">5 Star</option>
+            <option value="4">4 Star</option>
+            <option value="3">3 Star</option>
+            <option value="2">2 Star</option>
+            <option value="1">1 Star</option>
+        </select>
+        </span>
+        <br/>
+        <br/>
+        <div class="inputname">
+            Comments
+        </div>
+        <div class="inputbox">
+            <textarea id="comments" cols="70" rows="6">
+            </textarea>
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+        Transcripts
+    </span>
+    <div class="inputbox">
+        <input type="checkbox" id="transcripts" />Yes, send me the transcripts of this session.
     </div>
-</form>
+    <p>
+    </p>
+    <div class="inputname">
+        Email
+    </div>
+    <div class="inputbox">
+        <input style="width: 300px" type="text" id="email" value="{{email}}"/>
+    </div>
+    <p>
+    </p>
+    <input type="button" value="Submit"/>
+    </form>
+</div><h3 class="error" style="text-align: center;">
+    <div id="returnMessage">
+    </div>
+</h3>
 {% endblock %}

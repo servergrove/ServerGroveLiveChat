@@ -1,0 +1,117 @@
+{
+    padding: 0em;
+    margin: 0em;
+}
+
+body
+{
+    background-color: #f2f2f2;
+    padding: 0px;
+    margin: 0px;
+    font-family: "Gill Sans", "Microsoft Sans Serif", Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+br {
+    padding: 0px;
+    margin: 0px;
+    height: 1px;
+}
+
+.vspacer {
+    clear: both;
+    padding: 3px 0px 0px 0px;
+    margin: 0px;
+}
+
+#chatWin_header
+{
+    background: url('../images/header_bgr.jpg') repeat-x top;
+    height: 37px;
+}
+
+img.logo {
+    float: left;
+}
+
+#buttons {
+    float: right;
+}
+
+img.header_buttons {
+    padding: 0px;
+    margin: 0px;
+    border-style: none;
+}
+
+.left {
+    padding: 0px 0px 0px 5px;
+    float: left;
+    width: 548px;
+}
+
+.right {
+    float: right;
+    width: 123px;
+}
+
+#messages {
+    width: 543px;
+    height: 360px;
+    border: solid 1px #d4dae8;
+    background-color: #ffffff;
+}
+
+
+
+textarea#msg {
+    width: 539px;
+    height: 72px;
+    border: solid 1px #d4dae8;
+    background-color: #ffffff;
+    padding: 2px;
+    font-family: Tahoma, sans-serif;
+}
+
+img.secure_chat {
+    padding: 0px 0px 0px 7px;
+    margin: 0px;
+}
+
+.inputname {
+    width: 100px;
+    color: #222;
+    display: inline;
+}
+
+h3 {
+    color: #555;
+    font-size: 13px;
+}
+
+li {
+    padding-left: 10px;
+}
+
+h3.error {
+    color: red;
+}
+
+.name {
+    text-align: right;
+    width: 60px;
+    overflow: hidden;
+}
+
+.client {
+    color: #72346b;
+}
+
+.operator {
+    color: #084B8A;
+}
+
+.hspacer {
+    clear: both;
+    margin: 10px;
+}
