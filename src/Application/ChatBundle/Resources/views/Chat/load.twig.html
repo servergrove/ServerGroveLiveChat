@@ -1,2 +1,126 @@
 {% extends "ChatBundle::layout.twig.html" %}
-{% block content %}{% endblock %}
+{% block content %}
+<div class="left">
+    <div id="connecting" style=" margin-left: 50px;">
+        <h3 style="background-color: #fff; border: 1px #777 solid; text-align: center; padding: 10px;">
+            {% if operator %}
+            Waiting for visitor's response. Please wait... <a href="<?php echo url_for( 'chat/rejectInvite?id='.$chat->getId() )?>">Cancel request</a>
+            {%else%}
+            Please wait while we find an agent to assist you...
+            {% endif %}
+            <p>
+                <img src="/sglivechat/images/loader.gif" alt="Please wait..."/>
+            </p>
+        </h3>{% render "ChatBundle:Chat:faq" %}
+        <br>
+        <h3>If you prefer, you can <a href="https://secure.servergrove.com/clients/submitticket.php">submit a support ticket</a>.</h3>
+    </div>
+</div>
+<div id="chat" style="display: none;">
+    <div class="left">
+        <div id="messages" style="overflow: auto;height: 400px;">
+        </div>
+    </div>
+    <div class="right">
+        <img src="/sglivechat/images/banner.gif" width="114" height="223" alt="How can we help?" />
+    </div>
+    <div class="hspacer">
+    </div>
+    <div class="left">
+        <textarea id="msg"></textarea>
+    </div>
+    <div class="right">
+        <input id="btnSend" type="button" name="send" value="Send" disabled="disabled" />
+        <?php if( $operator ): ?>
+        <input id="btnClear" type="button" value="Clear"/>
+        <?php endif; ?>
+    </div>
+    <div class="vspacer"></div>
+    <img src="/sglivechat/images/secure_chat.gif" width="79" height="18" alt="Email" class="secure_chat" alt="This chat is encrypted for your safety" />
+</div>
+<script type="text/javascript">
+    var Chat = function() {
+        this.initialize();
+    }
+
+    Chat._instance = null;
+    Chat.create = function() {
+        Chat._instance = new Chat();
+    }
+
+    Chat.get = function() {
+        return Chat._instance;
+    }
+
+    Chat.prototype = {
+        cmdClear: null,
+        cmdSend: null,
+        txtMessage: null,
+        initialize: function() {
+            this.cmdSend = document.getElementById("btnSend");
+            this.cmdClear = document.getElementById("btnClear");
+            this.txtMessage = document.getElementById("msg");
+            this.loadEvents();
+        },
+        loadEvents: function() {
+            var cmdSend = this.cmdSend;
+            var cmdClear = this.cmdClear;
+            var txtMessage = this.txtMessage;
+            jQuery(this.txtMessage).keyup(function(event) {
+                cmdSend.disabled = jQuery(this).val().trim().length == 0;
+                if (!cmdSend.disabled && event.keyCode == 13) {
+                    jQuery(cmdSend).click();
+                }
+            }).change(function(){
+                cmdSend.disabled = jQuery(this).val().trim().length == 0;
+            });
+
+            jQuery(this.cmdClear).click(function() {
+                jQuery(txtMessage).val('').focus();
+            });
+
+            jQuery(this.cmdSend).click(function() {
+                Chat.get().sendMessage(jQuery(txtMessage).val());
+                jQuery(cmdClear).click();
+            });
+        }, sendMessage: function(text) {
+            jQuery.ajax({
+                type: "POST",
+                url: "{{ path('chat_send')}}",
+                data: {
+                    msg: text.trim()
+                },
+                cache: false,
+                success: function(msg){
+                }
+            });
+        }, updateMessages: function() {
+            jQuery.ajax({
+                type: "GET",
+                url: "{{ path('chat_messages')}}",
+                cache: false,
+                success: function(result){
+                    window.setTimeout(function(){
+                        jQuery('#messages').html(result);
+                        Chat.get().scrollMessagesContainer();
+                        Chat.get().updateMessages();
+                    }, 500);
+                }
+            });
+        }, scrollMessagesContainer: function() {
+            var container = jQuery('#messages');
+            container.scrollTop = container.scrollHeight;
+        }
+    };
+
+
+    jQuery(document).ready(function(){
+        window.setTimeout(function(){
+            jQuery('#connecting').hide();
+            jQuery('#chat').show();
+            Chat.create();
+            Chat.get().updateMessages();
+        }, 500);
+    });
+</script>
+{% endblock %}

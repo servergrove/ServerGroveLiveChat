@@ -1,0 +1,22 @@
+{% block content %}
+<table border="0" cellpadding="3" cellspacing="0" width="100%">
+    {% for message in messages %}
+    {% if message.getChatOperatorId() %}
+        <tr valign="top" style="background-color: #F8F8F8;">
+    {% else %}
+        <tr valign="top">
+    {% endif %}
+        <td width="70">
+            {% if message.getChatOperatorId() %}
+                <div class="name operator">Operator:</div>
+            {% else %}
+            <div class="name client">User:</div>
+            {% endif %}
+        </td>
+        <td>
+            {{message.getContent()}}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

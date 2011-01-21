@@ -17,55 +17,46 @@ class Session
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $session_id;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $created_at;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $updated_at;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $remote_addr;
-
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $visitor_id;
-
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $chat_operator_id;
-
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $visit_id;
-
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $status_id;
-
     /**
      * @var ChatMessage[]
      * @mongodb:EmbedMany(targetDocument="Message")
@@ -89,13 +80,19 @@ class Session
         $this->setUpdatedAt(date('Y-m-d H:i:s'));
     }
 
-    public function addChatMessage($content)
+    public function addChatMessage($content, $chatOperatorId = null)
     {
         $m = new Message();
         $m->setContent($content);
+        if (!is_null($chatOperatorId)) {
+            $m->setChatOperatorId($chatOperatorId);
+        }
         $this->messages[] = $m;
     }
 
+    public function getMessages() {
+        return $this->messages;
+    }
     /**
      * @return string $session_id
      */

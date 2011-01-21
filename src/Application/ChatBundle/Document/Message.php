@@ -6,7 +6,7 @@ namespace Application\ChatBundle\Document;
  * Description of Message
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="chat_message")
+ * @mongodb:EmbeddedDocument
  * @mongodb:HasLifecycleCallbacks
  */
 use Doctrine\ODM\MongoDB\Mapping\Date;

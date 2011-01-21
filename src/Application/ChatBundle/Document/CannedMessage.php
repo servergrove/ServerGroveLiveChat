@@ -16,25 +16,21 @@ class CannedMessage
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $content;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $title;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $created_at;
-
     /**
      * @var string
      * @mongodb:Date
@@ -128,6 +124,21 @@ class CannedMessage
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param array $vars
+     * @return string
+     */
+    public function renderContent(array $vars)
+    {
+        $content = $this->getContent();
+
+        foreach ($vars as $key => $value) {
+            $content = \str_replace('%' . $key . '%', $value, $content);
+        }
+
+        return $content;
     }
 
 }

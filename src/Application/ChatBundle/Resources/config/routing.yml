@@ -9,3 +9,13 @@ chat_load:
 chat_done:
   pattern: /livechat/done
   defaults: { _controller: ChatBundle:Chat:done }
+
+chat_send:
+  pattern: /livechat/send
+  defaults: { _controller: ChatBundle:Chat:send }
+  requirements: { _method: post }
+
+chat_messages:
+  pattern: /livechat/messages
+  defaults: { _controller: ChatBundle:Chat:messages }
+  requirements: { _method: get }
