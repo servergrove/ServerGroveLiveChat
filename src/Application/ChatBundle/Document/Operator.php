@@ -6,7 +6,10 @@ namespace Application\ChatBundle\Document;
  * Description of Operator
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="chat_operator")
+ * @mongodb:Document(
+ * collection="chat_operator",
+ * repositoryClass="Application\ChatBundle\Document\SessionRepository"
+ * )
  */
 class Operator
 {
@@ -16,41 +19,49 @@ class Operator
      * @mongodb:Id
      */
     private $id;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $name;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $email;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $created_at;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $updated_at;
+
     /**
      * @var boolean
      * @mongodb:Boolean
      */
     private $is_online;
+
     /**
      * @var boolean
      * @mongodb:Boolean
      */
     private $is_active;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $passwd;
+
     /**
      * @var Operator\Rating
      * @mongodb:ReferenceMany(targetDocument="Operator\Rating")

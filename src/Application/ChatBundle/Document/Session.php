@@ -6,7 +6,10 @@ namespace Application\ChatBundle\Document;
  * Description of Session
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="chat_session")
+ * @mongodb:Document(
+ * collection="chat_session",
+ * repositoryClass="Application\ChatBundle\Document\SessionRepository"
+ * )
  * @mongodb:HasLifecycleCallbacks
  */
 class Session
@@ -17,46 +20,55 @@ class Session
      * @mongodb:Id
      */
     private $id;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $session_id;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $created_at;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $updated_at;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $remote_addr;
+
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $visitor_id;
+
     /**
      * @var Operator
      * @mongodb:ReferenceOne(targetDocument="Operator")
      */
     private $operator;
+
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $visit_id;
+
     /**
      * @var integer
      * @mongodb:Integer
      */
     private $status_id;
+
     /**
      * @var ChatMessage[]
      * @mongodb:EmbedMany(targetDocument="Message")
@@ -90,9 +102,11 @@ class Session
         $this->messages[] = $m;
     }
 
-    public function getMessages() {
+    public function getMessages()
+    {
         return $this->messages;
     }
+
     /**
      * @return string $session_id
      */
@@ -179,7 +193,7 @@ class Session
     }
 
     /**
-     * @return integer $chat_operator_id
+     * @return Application\ChatBundle\Document\Operator
      */
     public function getOperator()
     {

@@ -6,7 +6,10 @@ namespace Application\ChatBundle\Document\Operator;
  * Description of Rating
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="operator_rating")
+ * @mongodb:Document(
+ *  collection="operator_rating",
+ *  repositoryClass="Application\ChatBundle\Document\Operator\RatingRepository"
+ * )
  */
 class Rating
 {

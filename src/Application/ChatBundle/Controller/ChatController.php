@@ -129,17 +129,15 @@ class ChatController extends BaseController
         if ($this->getRequest()->getMethod() == 'POST') {
             $visitor->setEmail($this->getRequest()->get('email'));
             $visitor->setName($this->getRequest()->get('name'));
-
             $this->getDocumentManager()->persist($visitor);
-            $this->getDocumentManager()->flush();
 
             /* @var $chatSession Application\ChatBundle\Document\Session */
             $chatSession = new ChatSession();
             $chatSession->setRemoteAddr($visitor->getRemoteAddr());
             $chatSession->setVisitorId($visitor->getId());
             $chatSession->setVisitId($this->getVisitByKey($visitor)->getId());
-
             $this->getDocumentManager()->persist($chatSession);
+
             $this->getDocumentManager()->flush();
 
             $this->getHttpSession()->set('chatsession', $chatSession->getId());
@@ -239,7 +237,18 @@ class ChatController extends BaseController
         if ($this->getRequest()->getMethod() != "POST") {
             return $this->renderTemplate('ChatBundle:Chat:done.twig.html', array('email' => $visitor->getEmail()));
         }
-        
+
+        $rating = new Rating();
+        $rating->setComments($this->getRequest()->get('comments'));
+        $rating->setGrade($this->getRequest()->get('rating'));
+        $rating->setChatSessionId($chatSession->getId());
+        if ($chatSession->getOperator()) {
+            $rating->setChatOperatorId($chatSession->getOperator()->getId());
+        }
+
+        $this->getDocumentManager()->persist($rating);
+        $this->getDocumentManager()->flush();
+
         return $this->render('ChatBundle:Chat:rated.twig.html');
     }
 
