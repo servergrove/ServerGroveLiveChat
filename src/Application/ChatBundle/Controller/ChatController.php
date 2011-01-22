@@ -20,34 +20,47 @@ class ChatController extends BaseController
 {
 
     /**
-     * @return Application\ChatBundle\Document\Visitor
+     * @return Application\ChatBundle\Document\VisitorRepository
      */
-    public function createVisitor()
+    private function getVisitorRepository()
     {
-        $visitor = new Visitor();
-        $visitor->setAgent($_SERVER['HTTP_USER_AGENT']);
-        $visitor->setKey(md5(time() . $visitor->getAgent() . rand(0, 100)));
-        $visitor->setRemoteAddr($this->getRequest()->getClientIp());
-        $visitor->setLanguages(implode(';', $this->getRequest()->getLanguages()));
+        return $this->getDocumentManager()->getRepository('ChatBundle:Visitor');
+    }
 
-        return $visitor;
+    /**
+     * @return Application\ChatBundle\Document\VisitRepository
+     */
+    private function getVisitRepository()
+    {
+        return $this->getDocumentManager()->getRepository('ChatBundle:Visit');
     }
 
     /**
      * @return Application\ChatBundle\Document\Visitor
      */
-    public function getVisitorByKey()
+    private function createVisitor()
+    {
+        return $this->getVisitorRepository()->create(array(
+            'agent' => $_SERVER['HTTP_USER_AGENT'],
+            'remoteAddr' => $this->getRequest()->getClientIp(),
+            'languages' => implode(';', $this->getRequest()->getLanguages())
+        ));
+    }
+
+    /**
+     * @return Application\ChatBundle\Document\Visitor
+     */
+    private function getVisitorByKey()
     {
         $key = $this->getRequest()->cookies->get('vtrid');
-        $visitor = null;
-        if (!is_null($key)) {
-            $visitor = $this->getDocumentManager()->getRepository('ChatBundle:Visitor')->findOneBy(array('key' => $key));
-        }
+        $visitor = $this->getVisitorRepository()->getByKey($key);
 
         if (!$visitor) {
             $visitor = $this->createVisitor();
-            $this->getDocumentManager()->persist($visitor);
-            $this->getDocumentManager()->flush();
+            $this->getVisitorRepository()->persist($visitor);
+        }
+
+        if ($visitor && !$this->getRequest()->cookies->has('vtrid')) {
             #$this->getResponse()->headers->setCookie(new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
             setcookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'); # TODO Use $response()->headers->setCookie();
         }
@@ -58,34 +71,13 @@ class ChatController extends BaseController
     /**
      * @return Application\ChatBundle\Document\Visit
      */
-    public function createVisit(Visitor $visitor)
-    {
-        $visit = new Visit();
-        $visit->setVisitor($visitor);
-        $visit->setKey(md5(time() . $visitor->getAgent() . $visitor->getId()));
-        #$visit->setLocalTime($local_time);
-
-
-        return $visit;
-    }
-
-    /**
-     * @return Application\ChatBundle\Document\Visit
-     */
-    public function getVisitByKey(Visitor $visitor)
+    private function getVisitByKey(Visitor $visitor)
     {
         $key = $this->getRequest()->cookies->get('vsid');
-        $visit = null;
-        if (!is_null($key)) {
-            $visit = $this->getDocumentManager()->getRepository('ChatBundle:Visit')->findOneBy(array('key' => $key));
-        }
+        $visit = $this->getVisitRepository()->getByKey($key, $visitor);
 
-        if (!$visit) {
-            $visit = $this->createVisit($visitor);
-            $this->getDocumentManager()->persist($visit);
-            $this->getDocumentManager()->flush();
-            #$this->getResponse()->headers->setCookie(new \Symfony\Component\HttpFoundation\Cookie('vsid', $visit->getKey(), time() + 86400, '/'));
-            setcookie('vsid', $visit->getKey(), time() + 86400, '/'); # TODO Use $response()->headers->setCookie();
+        if ($visit && !$this->getRequest()->cookies->has('vsid')) {
+            setcookie('vsid', $visit->getKey(), time() + 86400, '/');
         }
 
         return $visit;
@@ -94,15 +86,23 @@ class ChatController extends BaseController
     /**
      * @return Application\ChatBundle\Document\Session
      */
-    public function getChatSession($id)
+    private function getChatSession($id)
     {
         return $this->getDocumentManager()->getRepository('ChatBundle:Session')->find($id);
     }
 
     /**
+     * @return Application\ChatBundle\Document\Session
+     */
+    public function getChatSessionForCurrentUser()
+    {
+        return $this->getChatSession($this->getHttpSession()->has('operator') ? $this->getRequest()->get('id') : $this->getHttpSession()->get('chatsession'));
+    }
+
+    /**
      * @return Application\ChatBundle\Document\Operator
      */
-    public function getOperator()
+    private function getOperator()
     {
         if (!$this->getHttpSession()->has('operator')) {
             return null;
@@ -113,7 +113,7 @@ class ChatController extends BaseController
     /**
      * @return Application\ChatBundle\Document\CannedMessage[]
      */
-    public function getCannedMessages()
+    private function getCannedMessages()
     {
         return $this->getDocumentManager()->getRepository('ChatBundle:CannedMessage')->findAll();
     }
@@ -148,11 +148,6 @@ class ChatController extends BaseController
         }
 
         return $this->renderTemplate('ChatBundle:Chat:index.twig.html', array('visitor' => $visitor));
-    }
-
-    public function getChatSessionForCurrentUser()
-    {
-        return $this->getChatSession($this->getHttpSession()->has('operator') ? $this->getRequest()->get('id') : $this->getHttpSession()->get('chatsession'));
     }
 
     /**
@@ -244,7 +239,7 @@ class ChatController extends BaseController
         if ($this->getRequest()->getMethod() != "POST") {
             return $this->renderTemplate('ChatBundle:Chat:done.twig.html', array('email' => $visitor->getEmail()));
         }
-
+        
         return $this->render('ChatBundle:Chat:rated.twig.html');
     }
 

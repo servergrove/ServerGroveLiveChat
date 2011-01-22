@@ -5,7 +5,10 @@ namespace Application\ChatBundle\Document;
 /**
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="visitors")
+ * @mongodb:Document(
+ *  collection="visitors",
+ *  repositoryClass="Application\ChatBundle\Document\VisitorRepository"
+ * )
  */
 class Visitor
 {
