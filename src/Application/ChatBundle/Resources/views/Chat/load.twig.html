@@ -1,8 +1,8 @@
 {% extends "ChatBundle::layout.twig.html" %}
 {% block head_buttons %}
 <div id="buttons">
-        <a href="{{ path('chat_done')}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a>
-        <a href="{{ path('chat_done')}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
+    <a href="{{ path('chat_done')}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a>
+    <a href="{{ path('chat_done')}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
 </div>
 {%endblock%}
 {% block content %}
@@ -87,7 +87,7 @@
 
             jQuery(this.cmdSend).click(function() {
                 Chat.get().sendMessage(jQuery(txtMessage).val());
-                jQuery(cmdClear).click();
+                jQuery(txtMessage).val('').focus();
             });
         }, sendMessage: function(text) {
             jQuery.ajax({
