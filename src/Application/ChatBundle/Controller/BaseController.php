@@ -16,12 +16,17 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 abstract class BaseController extends Controller
 {
 
+    private $request, $response, $session, $dm;
+
     /**
      * @return Symfony\Component\HttpFoundation\Request
      */
     public function getRequest()
     {
-        return $this->get('request');
+        if (is_null($this->request)) {
+            $this->request = $this->get('request');
+        }
+        return $this->request;
     }
 
     /**
@@ -29,7 +34,10 @@ abstract class BaseController extends Controller
      */
     public function getResponse()
     {
-        return $this->get('response');
+        if (is_null($this->response)) {
+            $this->response = $this->get('response');
+        }
+        return $this->response;
     }
 
     /**
@@ -37,7 +45,10 @@ abstract class BaseController extends Controller
      */
     public function getHttpSession()
     {
-        return $this->getRequest()->getSession();
+        if (is_null($this->session)) {
+            $this->session = $this->getRequest()->getSession();
+        }
+        return $this->session;
     }
 
     /**
@@ -45,6 +56,9 @@ abstract class BaseController extends Controller
      */
     public function getDocumentManager()
     {
-        return $this->get('doctrine.odm.mongodb.document_manager');
+        if (is_null($this->dm)) {
+            $this->dm = $this->get('doctrine.odm.mongodb.document_manager');
+        }
+        return $this->dm;
     }
 }
