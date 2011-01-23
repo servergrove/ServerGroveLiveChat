@@ -13,7 +13,7 @@
 >
   <testsuites>
       <testsuite name="Project Test Suite">
-          <directory>../src/Application/*/Tests</directory>
+          <directory>../src/Application/ChatBundle/Tests</directory>
       </testsuite>
   </testsuites>
 
