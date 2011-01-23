@@ -1,7 +1,7 @@
 <?php
 
 namespace Application\ChatBundle\Controller;
-
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -40,11 +40,7 @@ class ChatController extends BaseController
      */
     private function createVisitor()
     {
-        return $this->getVisitorRepository()->create(array(
-            'agent' => $_SERVER['HTTP_USER_AGENT'],
-            'remoteAddr' => $this->getRequest()->getClientIp(),
-            'languages' => implode(';', $this->getRequest()->getLanguages())
-        ));
+        return $this->getVisitorRepository()->create(array('agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'), 'remoteAddr' => $this->getRequest()->getClientIp(), 'languages' => implode(';', $this->getRequest()->getLanguages())));
     }
 
     /**
@@ -61,8 +57,7 @@ class ChatController extends BaseController
         }
 
         if ($visitor && !$this->getRequest()->cookies->has('vtrid')) {
-            #$this->getResponse()->headers->setCookie(new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
-            setcookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'); # TODO Use $response()->headers->setCookie();
+            $this->getResponse()->headers->setCookie(new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
         }
 
         return $visitor;
@@ -77,7 +72,7 @@ class ChatController extends BaseController
         $visit = $this->getVisitRepository()->getByKey($key, $visitor);
 
         if ($visit && !$this->getRequest()->cookies->has('vsid')) {
-            setcookie('vsid', $visit->getKey(), time() + 86400, '/');
+            $this->getResponse()->headers->setCookie(new Cookie('vsid', $visit->getKey(), time() + 86400, '/'));
         }
 
         return $visit;
@@ -118,13 +113,18 @@ class ChatController extends BaseController
         return $this->getDocumentManager()->getRepository('ChatBundle:CannedMessage')->findAll();
     }
 
+    public function redirect($url, $status = 302)
+    {
+        $this->getResponse()->setRedirect($url, $status);
+        return $this->getResponse();
+    }
+
     /**
      * @return Symfony\Component\HttpFoundation\Response
      */
     public function indexAction()
     {
         $visitor = $this->getVisitorByKey();
-
 
         if ($this->getRequest()->getMethod() == 'POST') {
             $visitor->setEmail($this->getRequest()->get('email'));
@@ -165,11 +165,7 @@ class ChatController extends BaseController
             if (($cannedMessages = $this->getCannedMessages()) !== false) {
                 /* @var $cannedMessage Application\ChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
-                    $arrCannedMessages[] = $cannedMessage->renderContent(array(
-                                'operator' => $operator,
-                                'currtime' => date('H:i:s'),
-                                'currdate' => date('m-d-Y'),
-                            ));
+                    $arrCannedMessages[] = $cannedMessage->renderContent(array('operator' => $operator, 'currtime' => date('H:i:s'), 'currdate' => date('m-d-Y')));
                 }
             }
         }
