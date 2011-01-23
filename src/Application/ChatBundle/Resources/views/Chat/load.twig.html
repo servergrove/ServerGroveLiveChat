@@ -37,9 +37,9 @@
     </div>
     <div class="right">
         <input id="btnSend" type="image" src="{{asset('images/btn_send.gif')}}" name="send" disabled="disabled" />
-        <?php if( $operator ): ?>
+        {% if operator %}
         <input id="btnClear" type="button" value="Clear"/>
-        <?php endif; ?>
+        {% endif %}
     </div>
     <div class="vspacer"></div>
     <img src="{{asset('images/secure_chat.gif')}}" width="79" height="18" alt="Email" class="secure_chat" alt="This chat is encrypted for your safety" />
