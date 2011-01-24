@@ -49,4 +49,14 @@ class ChatControllerTest extends WebTestCase
         unset($client, $crawler);
     }
 
+    public function testLoad()
+    {
+        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
+        $client = $this->createClient();
+
+        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
+        $crawler = $client->request('GET', '/livechat/load');
+
+        $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
+    }
 }
