@@ -11,32 +11,9 @@ use Symfony\Component\HttpFoundation\Cookie;
 class ChatControllerTest extends WebTestCase
 {
 
-    /**
-     * @var Symfony\Bundle\FrameworkBundle\Client
-     */
-    private $client;
-
-    /**
-     * @return Symfony\Bundle\FrameworkBundle\Client
-     */
-    protected function getClient()
-    {
-        return $this->client;
-    }
-
-    /**
-     * @return Doctrine\ODM\MongoDB\DocumentManager
-     */
-    protected function getDocumentManager()
-    {
-        return $this->getClient()->getContainer()->get('doctrine.odm.mongodb.document_manager');
-    }
-
     protected function setUp()
     {
         parent::setUp();
-        $this->client = $this->createClient(array(), array('HTTP_HOST' => 'sglivechat-sg.v2.dev', 'HTTP_USER_AGENT' => 'MySuperBrowser/1.0'));
-        $this->getClient()->insulate();
     }
 
     protected function tearDown()
@@ -44,21 +21,32 @@ class ChatControllerTest extends WebTestCase
         parent::tearDown();
     }
 
-    public function testIndex()
+    public function testIndexGet()
     {
-        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/livechat');
+        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
+        $client = $this->createClient();
 
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode(), 'GET response not successful');
+        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
+        $crawler = $client->request('GET', '/livechat');
+
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful');
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Question")')->count(), 'HTML not contains "Question"');
 
-        $this->getClient()->submit($crawler->selectButton('Start Chat')->form(), array('name' => 'Ismael', 'email' => 'ismael@servergrove.com', 'question' => 'This is my comment'));
-        $this->assertTrue($this->getClient()->getResponse()->isRedirect(), 'Is not redirecting');
+        $client->submit($crawler->selectButton('Start Chat')->form(), array('name' => 'Ismael', 'email' => 'ismael@servergrove.com', 'question' => 'This is my comment'));
+        $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
+        unset($client, $crawler);
+    }
+
+    public function testIndexPost()
+    {
+        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
+        $client = $this->createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->getClient()->followRedirect();
+        $crawler = $client->request('POST', '/livechat', array('name' => 'Ismael', 'email' => 'ismael@servergrove.com', 'question' => 'This is my comment'));
 
-        $this->assertGreaterThan(0, $crawler->filter('html:contains("submit a support ticket")')->count(), 'HTML not contains "submit a spport ticket"');
+        $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
+        unset($client, $crawler);
     }
 
 }
