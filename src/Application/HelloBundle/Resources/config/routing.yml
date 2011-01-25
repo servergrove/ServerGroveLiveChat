@@ -1,3 +1,0 @@
-hello:
-    pattern:  /hello/{name}
-    defaults: { _controller: HelloBundle:Hello:index }
