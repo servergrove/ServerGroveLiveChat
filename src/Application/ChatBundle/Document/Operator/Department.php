@@ -1,6 +1,6 @@
 <?php
 
-namespace Application\ChatBundle\Document;
+namespace Application\ChatBundle\Document\Operator;
 
 /**
  * Description of Department
