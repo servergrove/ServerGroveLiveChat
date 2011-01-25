@@ -61,4 +61,13 @@ abstract class BaseController extends Controller
         }
         return $this->dm;
     }
+
+    /**
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function renderTemplate($view, array $parameters = array())
+    {
+        return $this->render($view, $parameters, $this->getResponse());
+    }
+
 }

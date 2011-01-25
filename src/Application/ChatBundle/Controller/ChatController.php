@@ -248,12 +248,4 @@ class ChatController extends BaseController
         return $this->render('ChatBundle:Chat:rated.twig.html');
     }
 
-    /**
-     * @return Symfony\Component\HttpFoundation\Response
-     */
-    public function renderTemplate($view, array $parameters = array())
-    {
-        return $this->render($view, $parameters, $this->getResponse());
-    }
-
 }
