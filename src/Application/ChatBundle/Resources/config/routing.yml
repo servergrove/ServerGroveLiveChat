@@ -19,3 +19,17 @@ chat_messages:
   pattern: /livechat/messages
   defaults: { _controller: ChatBundle:Chat:messages }
   requirements: { _method: get }
+  
+track_index:
+  pattern: /livechat/tracker
+  defaults: { _controller: ChatBundle:Track:index }
+  requirements: { _method: get }
+
+track_updater:
+  pattern: /livechat/tracker/update
+  defaults: { _controller: ChatBundle:Track:update }
+  requirements: { _method: get }
+
+track_status:
+  pattern: /livechat/tracker/status.{_format}
+  defaults: { _controller: ChatBundle:Track:status, _format: html }

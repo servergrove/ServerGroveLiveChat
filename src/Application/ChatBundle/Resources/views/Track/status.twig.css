@@ -1,0 +1,4 @@
+.chatstatus
+{
+    background-image: url('{%if online%}https://secure.servergrove.com/sglivechat/images/livechat.png{%else%}https://secure.servergrove.com/sglivechat/images/livechat_off.png{%endif%}');
+}
