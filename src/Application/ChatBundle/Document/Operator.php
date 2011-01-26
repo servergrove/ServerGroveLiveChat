@@ -7,9 +7,13 @@ namespace Application\ChatBundle\Document;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- * collection="chat_operator",
- * repositoryClass="Application\ChatBundle\Document\SessionRepository"
+ * collection="operators",
+ * repositoryClass="Application\ChatBundle\Document\OperatorRepository"
  * )
+ * @mongodb:InheritanceType("SINGLE_COLLECTION")
+ * @mongodb:DiscriminatorField(fieldName="type")
+ * @mongodb:DiscriminatorMap({"admin"="Administrator", "operator"="Operator"})
+ * @mongodb:HasLifecycleCallbacks
  */
 class Operator
 {
@@ -29,6 +33,7 @@ class Operator
     /**
      * @var string
      * @mongodb:String
+     * @mongodb:UniqueIndex(order="asc")
      */
     private $email;
 
@@ -63,8 +68,8 @@ class Operator
     private $passwd;
 
     /**
-     * @var Operator\Rating
-     * @mongodb:ReferenceMany(targetDocument="Operator\Rating")
+     * @var Application\ChatBundle\Document\Operator\Rating
+     * @mongodb:ReferenceMany(targetDocument="Application\ChatBundle\Document\Operator\Rating")
      */
     private $ratings = array();
 
@@ -214,7 +219,7 @@ class Operator
      */
     public function setPasswd($passwd)
     {
-        $this->passwd = $passwd;
+        $this->passwd = md5($passwd);
     }
 
 }
