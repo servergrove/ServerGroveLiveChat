@@ -70,4 +70,12 @@ abstract class BaseController extends Controller
         return $this->render($view, $parameters, $this->getResponse());
     }
 
+    /**
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    public function redirect($url, $status = 302)
+    {
+        $this->getResponse()->setRedirect($url, $status);
+        return $this->getResponse();
+    }
 }

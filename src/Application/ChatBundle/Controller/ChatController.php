@@ -113,12 +113,6 @@ class ChatController extends BaseController
         return $this->getDocumentManager()->getRepository('ChatBundle:CannedMessage')->findAll();
     }
 
-    public function redirect($url, $status = 302)
-    {
-        $this->getResponse()->setRedirect($url, $status);
-        return $this->getResponse();
-    }
-
     /**
      * @return Symfony\Component\HttpFoundation\Response
      */
