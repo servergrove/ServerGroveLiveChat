@@ -7,78 +7,99 @@ namespace Application\ChatBundle\Document;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- * collection="chat_session",
+ * collection="chat_sessions",
  * repositoryClass="Application\ChatBundle\Document\SessionRepository"
  * )
  * @mongodb:HasLifecycleCallbacks
  */
 class Session
 {
+    const STATUS_WAITING = 1;
+    const STATUS_IN_PROGRESS = 2;
+    const STATUS_CLOSED = 3;
+    const STATUS_CANCELED = 4;
+    const STATUS_INVITE = 5;
+
+    private static $statuses = array(1 => 'Waiting', 2 => 'In Progress', 3 => 'Closed',
+        4 => 'Canceled',
+        5 => 'Invite',
+    );
+
+    public function getStatus()
+    {
+        return self::$statuses[$this->getStatusId()];
+    }
 
     /**
      * @var integer
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
-    private $session_id;
-
+    private $sessionId;
     /**
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
-
+    private $createdAt;
     /**
      * @var string
      * @mongodb:Date
      */
-    private $updated_at;
-
+    private $updatedAt;
     /**
      * @var string
      * @mongodb:String
      */
-    private $remote_addr;
-
+    private $remoteAddr;
     /**
-     * @var integer
-     * @mongodb:Integer
+     * @var Operator
+     * @mongodb:ReferenceOne(targetDocument="Visitor")
      */
-    private $visitor_id;
-
+    private $visitor;
     /**
      * @var Operator
      * @mongodb:ReferenceOne(targetDocument="Operator")
      */
     private $operator;
-
+    /**
+     * @var Operator
+     * @mongodb:ReferenceOne(targetDocument="Visit")
+     */
+    private $visit;
+    /**
+     * @var string
+     * @mongodb:String
+     */
+    private $question;
     /**
      * @var integer
-     * @mongodb:Integer
+     * @mongodb:Field(type="int")
      */
-    private $visit_id;
-
-    /**
-     * @var integer
-     * @mongodb:Integer
-     */
-    private $status_id;
-
+    private $statusId;
     /**
      * @var ChatMessage[]
      * @mongodb:EmbedMany(targetDocument="Message")
      */
     private $messages = array();
+    /**
+     * @var Application\ChatBundle\Document\Operator\Rating
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Operator\Rating")
+     */
+    private $rating;
+
+    public function __construct()
+    {
+        $this->setStatusId(self::STATUS_WAITING);
+    }
 
     /**
      * @mongodb:PrePersist
      */
-    public function registerCreatedDate()
+    public function registerFirstMessage()
     {
         $this->setCreatedAt(date('Y-m-d H:i:s'));
         $this->registerUpdatedDate();
@@ -92,14 +113,38 @@ class Session
         $this->setUpdatedAt(date('Y-m-d H:i:s'));
     }
 
-    public function addChatMessage($content, $operator = null)
+    /**
+     * @mongodb:PrePersist
+     */
+    public function registerCreatedDate()
+    {
+        $this->addChatMessage($this->getQuestion());
+    }
+
+    public function addChatMessage($content, Operator $operator = null)
     {
         $m = new Message();
         $m->setContent($content);
-        if (!is_null($operator)) {
+        if ($operator instanceof Operator) {
             $m->setOperator($operator);
         }
+        $m->setSession($this);
         $this->messages[] = $m;
+    }
+
+    public function start()
+    {
+        $this->setStatusId(self::STATUS_IN_PROGRESS);
+    }
+
+    public function close()
+    {
+        $this->setStatusId(self::STATUS_CLOSED);
+    }
+
+    public function cancel()
+    {
+        $this->setStatusId(self::STATUS_CANCELED);
     }
 
     public function getMessages()
@@ -108,88 +153,88 @@ class Session
     }
 
     /**
-     * @return string $session_id
+     * @return string $sessionId
      */
     public function getSessionId()
     {
-        return $this->session_id;
+        return $this->sessionId;
     }
 
     /**
-     * @param string $session_id
+     * @param string $sessionId
      * @return void
      */
-    public function setSessionId($session_id)
+    public function setSessionId($sessionId)
     {
-        $this->session_id = $session_id;
+        $this->sessionId = $sessionId;
     }
 
     /**
-     * @return string $created_at
+     * @return string $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      * @return void
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @return string $updated_at
+     * @return string $updatedAt
      */
     public function getUpdatedAt()
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
-     * @param string $updated_at
+     * @param string $updatedAt
      * @return void
      */
-    public function setUpdatedAt($updated_at)
+    public function setUpdatedAt($updatedAt)
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
     }
 
     /**
-     * @return string $remote_addr
+     * @return string $remoteAddr
      */
     public function getRemoteAddr()
     {
-        return $this->remote_addr;
+        return $this->remoteAddr;
     }
 
     /**
-     * @param string $remote_addr
+     * @param string $remoteAddr
      * @return void
      */
-    public function setRemoteAddr($remote_addr)
+    public function setRemoteAddr($remoteAddr)
     {
-        $this->remote_addr = $remote_addr;
+        $this->remoteAddr = $remoteAddr;
     }
 
     /**
-     * @return integer $visitor_id
+     * @return Visitor $visitor
      */
-    public function getVisitorId()
+    public function getVisitor()
     {
-        return $this->visitor_id;
+        return $this->visitor;
     }
 
     /**
-     * @param integer $visitor_id
+     * @param Visitor $visitorId
      * @return void
      */
-    public function setVisitorId($visitor_id)
+    public function setVisitor($visitor)
     {
-        $this->visitor_id = $visitor_id;
+        $this->visitor = $visitor;
     }
 
     /**
@@ -201,7 +246,7 @@ class Session
     }
 
     /**
-     * @param integer $chat_operator_id
+     * @param Application\ChatBundle\Document\Operator $operator
      * @return void
      */
     public function setOperator($operator)
@@ -210,37 +255,47 @@ class Session
     }
 
     /**
-     * @return integer $visit_id
+     * @return Visit $visit
      */
-    public function getVisitId()
+    public function getVisit()
     {
-        return $this->visit_id;
+        return $this->visit;
     }
 
     /**
-     * @param integer $visit_id
+     * @param Visit $visit
      * @return void
      */
-    public function setVisitId($visit_id)
+    public function setVisit($visit)
     {
-        $this->visit_id = $visit_id;
+        $this->visit = $visit;
+    }
+
+    public function getQuestion()
+    {
+        return $this->question;
+    }
+
+    public function setQuestion($question)
+    {
+        $this->question = $question;
     }
 
     /**
-     * @return integer $status_id
+     * @return integer $statusId
      */
     public function getStatusId()
     {
-        return $this->status_id;
+        return $this->statusId;
     }
 
     /**
-     * @param integer $status_id
+     * @param integer $statusId
      * @return void
      */
-    public function setStatusId($status_id)
+    public function setStatusId($statusId)
     {
-        $this->status_id = $status_id;
+        $this->statusId = $statusId;
     }
 
     /**
@@ -249,6 +304,29 @@ class Session
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return Application\ChatBundle\Document\Rating
+     */
+    public function getRating()
+    {
+        if (!$this->rating) {
+            $this->rating = new Operator\Rating();
+            $this->rating->setOperator($this->getOperator());
+            $this->rating->setSession($this);
+        }
+
+        return $this->rating;
+    }
+
+    /**
+     * @param Application\ChatBundle\Document\Rating $rating
+     * @return void
+     */
+    public function setRating($rating)
+    {
+        $this->rating = $rating;
     }
 
 }

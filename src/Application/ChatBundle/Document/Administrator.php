@@ -10,4 +10,11 @@ namespace Application\ChatBundle\Document;
 class Administrator extends Operator
 {
 
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return array('ROLE_USER', 'ROLE_ADMIN');
+    }
 }

@@ -33,25 +33,25 @@ class Visit
      * @var string
      * @mongodb:String
      */
-    private $remote_addr;
+    private $remoteAddr;
 
     /**
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
+    private $createdAt;
 
     /**
      * @var string
      * @mongodb:Date
      */
-    private $updated_at;
+    private $updatedAt;
 
     /**
      * @var string
      * @mongodb:Timestamp
      */
-    private $local_time;
+    private $localTime;
 
     /**
      * @mongodb:PrePersist
@@ -95,35 +95,35 @@ class Visit
     }
 
     /**
-     * @return string $remote_addr
+     * @return string $remoteAddr
      */
     public function getRemoteAddr()
     {
-        return $this->remote_addr;
+        return $this->remoteAddr;
     }
 
     /**
-     * @return string $created_at
+     * @return string $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @return string $updated_at
+     * @return string $updatedAt
      */
     public function getUpdatedAt()
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
-     * @return string $local_time
+     * @return string $localTime
      */
     public function getLocalTime()
     {
-        return $this->local_time;
+        return $this->localTime;
     }
 
     /**
@@ -145,39 +145,39 @@ class Visit
     }
 
     /**
-     * @param string $remote_addr
+     * @param string $remoteAddr
      * @return void
      */
-    public function setRemoteAddr($remote_addr)
+    public function setRemoteAddr($remoteAddr)
     {
-        $this->remote_addr = $remote_addr;
+        $this->remoteAddr = $remoteAddr;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      * @return void
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @param string $updated_at
+     * @param string $updatedAt
      * @return void
      */
-    public function setUpdatedAt($updated_at)
+    public function setUpdatedAt($updatedAt)
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
     }
 
     /**
-     * @param string $local_time
+     * @param string $localTime
      * @return void
      */
-    public function setLocalTime($local_time)
+    public function setLocalTime($localTime)
     {
-        $this->local_time = $local_time;
+        $this->localTime = $localTime;
     }
 
 }

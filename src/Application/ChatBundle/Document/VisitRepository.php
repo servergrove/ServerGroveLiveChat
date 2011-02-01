@@ -20,7 +20,7 @@ class VisitRepository extends DocumentRepository
         $visit = new Visit();
         $visit->setVisitor($visitor);
         $visit->setKey(md5(time() . $visitor->getAgent() . $visitor->getId()));
-        #$visit->setLocalTime($local_time);
+        #$visit->setLocalTime($localTime);
 
         return $visit;
     }

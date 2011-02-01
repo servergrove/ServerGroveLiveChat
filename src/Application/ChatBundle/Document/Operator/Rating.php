@@ -19,36 +19,31 @@ class Rating
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var integer
-     * @mongodb:Integer
+     * @mongodb:Field(type="int")
      */
     private $grade;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $comments;
-
     /**
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
-
+    private $createdAt;
     /**
-     * @var integer
-     * @mongodb:Integer
+     * @var Application\ChatBundle\Document\Session
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Session")
      */
-    private $chat_session_id;
-
+    private $session;
     /**
-     * @var integer
-     * @mongodb:Integer
+     * @var Application\ChatBundle\Document\Operator
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Operator")
      */
-    private $chat_operator_id;
+    private $operator;
 
     /**
      * @mongodb:PrePersist
@@ -93,54 +88,54 @@ class Rating
     }
 
     /**
-     * @return string $created_at
+     * @return string $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      * @return void
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @return integer $chat_session_id
+     * @return integer $chatSession
      */
-    public function getChatSessionId()
+    public function getSession()
     {
-        return $this->chat_session_id;
+        return $this->session;
     }
 
     /**
-     * @param integer $chat_session_id
+     * @param integer $session
      * @return void
      */
-    public function setChatSessionId($chat_session_id)
+    public function setSession($session)
     {
-        $this->chat_session_id = $chat_session_id;
+        $this->session = $session;
     }
 
     /**
-     * @return integer $chat_operator_id
+     * @return integer $operator
      */
-    public function getChatOperatorId()
+    public function getOperator()
     {
-        return $this->chat_operator_id;
+        return $this->operator;
     }
 
     /**
-     * @param integer $chat_operator_id
+     * @param integer $operator
      * @return void
      */
-    public function setChatOperatorId($chat_operator_id)
+    public function setOperator($operator)
     {
-        $this->chat_operator_id = $chat_operator_id;
+        $this->operator = $operator;
     }
 
     /**

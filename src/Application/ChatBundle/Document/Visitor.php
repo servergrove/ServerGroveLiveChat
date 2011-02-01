@@ -47,7 +47,7 @@ class Visitor
      * @var string
      * @mongodb:String
      */
-    private $remote_addr;
+    private $remoteAddr;
 
     /**
      * @var string
@@ -59,7 +59,7 @@ class Visitor
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
+    private $createdAt;
 
     /**
      * @return the $agent
@@ -126,19 +126,19 @@ class Visitor
     }
 
     /**
-     * @return the $remote_addr
+     * @return the $remoteAddr
      */
     public function getRemoteAddr()
     {
-        return $this->remote_addr;
+        return $this->remoteAddr;
     }
 
     /**
-     * @param string $remote_addr
+     * @param string $remoteAddr
      */
-    public function setRemoteAddr($remote_addr)
+    public function setRemoteAddr($remoteAddr)
     {
-        $this->remote_addr = $remote_addr;
+        $this->remoteAddr = $remoteAddr;
     }
 
     /**
@@ -158,19 +158,19 @@ class Visitor
     }
 
     /**
-     * @return the $created_at
+     * @return the $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**

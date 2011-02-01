@@ -30,12 +30,12 @@ class CannedMessage
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
+    private $createdAt;
     /**
      * @var string
      * @mongodb:Date
      */
-    private $updated_at;
+    private $updatedAt;
 
     /**
      * @mongodb:PrePersist
@@ -87,35 +87,35 @@ class CannedMessage
     }
 
     /**
-     * @return the $created_at
+     * @return the $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @return the $updated_at
+     * @return the $updatedAt
      */
     public function getUpdatedAt()
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
-     * @param string $updated_at
+     * @param string $updatedAt
      */
-    public function setUpdatedAt($updated_at)
+    public function setUpdatedAt($updatedAt)
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
     }
 
     /**

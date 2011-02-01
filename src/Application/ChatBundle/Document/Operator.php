@@ -2,6 +2,9 @@
 
 namespace Application\ChatBundle\Document;
 
+use Symfony\Component\Security\Encoder\PasswordEncoderInterface;
+use Symfony\Component\Security\User\AccountInterface;
+
 /**
  * Description of Operator
  *
@@ -15,7 +18,7 @@ namespace Application\ChatBundle\Document;
  * @mongodb:DiscriminatorMap({"admin"="Administrator", "operator"="Operator"})
  * @mongodb:HasLifecycleCallbacks
  */
-class Operator
+class Operator implements AccountInterface, PasswordEncoderInterface
 {
 
     /**
@@ -23,50 +26,42 @@ class Operator
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $name;
-
     /**
      * @var string
      * @mongodb:String
      * @mongodb:UniqueIndex(order="asc")
      */
     private $email;
-
     /**
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
-
+    private $createdAt;
     /**
      * @var string
      * @mongodb:Date
      */
-    private $updated_at;
-
+    private $updatedAt;
     /**
      * @var boolean
      * @mongodb:Boolean
      */
-    private $is_online;
-
+    private $isOnline;
     /**
      * @var boolean
      * @mongodb:Boolean
      */
-    private $is_active;
-
+    private $isActive;
     /**
      * @var string
      * @mongodb:String
      */
     private $passwd;
-
     /**
      * @var Application\ChatBundle\Document\Operator\Rating
      * @mongodb:ReferenceMany(targetDocument="Application\ChatBundle\Document\Operator\Rating")
@@ -138,71 +133,71 @@ class Operator
     }
 
     /**
-     * @return string $created_at
+     * @return string $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      * @return void
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**
-     * @return string $updated_at
+     * @return string $updatedAt
      */
     public function getUpdatedAt()
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
     /**
-     * @param string $updated_at
+     * @param string $updatedAt
      * @return void
      */
-    public function setUpdatedAt($updated_at)
+    public function setUpdatedAt($updatedAt)
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
     }
 
     /**
-     * @return boolean $is_online
+     * @return boolean $isOnline
      */
     public function getIsOnline()
     {
-        return $this->is_online;
+        return $this->isOnline;
     }
 
     /**
-     * @param boolean $is_online
+     * @param boolean $isOnline
      * @return void
      */
-    public function setIsOnline($is_online)
+    public function setIsOnline($isOnline)
     {
-        $this->is_online = $is_online;
+        $this->isOnline = $isOnline;
     }
 
     /**
-     * @return boolean $is_active
+     * @return boolean $isActive
      */
     public function getIsActive()
     {
-        return $this->is_active;
+        return $this->isActive;
     }
 
     /**
-     * @param boolean $is_active
+     * @param boolean $isActive
      * @return void
      */
-    public function setIsActive($is_active)
+    public function setIsActive($isActive)
     {
-        $this->is_active = $is_active;
+        $this->isActive = $isActive;
     }
 
     /**
@@ -219,7 +214,71 @@ class Operator
      */
     public function setPasswd($passwd)
     {
-        $this->passwd = md5($passwd);
+        $this->passwd = $this->encodePassword($passwd, $this->getSalt());
+    }
+
+    # -- AccountInterface implementation ----------------
+    /**
+     * @return string
+     */
+
+    public function __toString()
+    {
+        return strtr('(:id) :name, :email', array(
+            ':email' => $this->getEmail(),
+            ':name' => $this->getName(),
+            ':id' => $this->getId()));
+    }
+
+    /**
+     * @param AccountInterface $account
+     * @return boolean
+     */
+    public function equals(AccountInterface $account)
+    {
+        return $account instanceof Operator && $account->getId() == $this->getId();
+    }
+
+    public function eraseCredentials()
+    {
+
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->getPasswd();
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return array(
+            'ROLE_USER');
+    }
+
+    public function getSalt()
+    {
+        return __NAMESPACE__ . '\\' . __CLASS__;
+    }
+
+    public function getUsername()
+    {
+        return $this->getEmail();
+    }
+
+    public function encodePassword($raw, $salt)
+    {
+        return md5(md5($raw) . '-' . $salt);
+    }
+
+    public function isPasswordValid($encoded, $raw, $salt)
+    {
+        return $encoded == $this->encodePassword($raw, $salt);
     }
 
 }

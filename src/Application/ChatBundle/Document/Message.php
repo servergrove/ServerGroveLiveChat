@@ -21,17 +21,23 @@ class Message
     private $id;
 
     /**
-     * @var integer
-     * @mongodb:Integer
+     * @var Operator
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Operator")
      */
-    private $chat_operator_id;
+    private $operator;
+
+    /**
+     * @var Session
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Session")
+     */
+    private $session;
 
     /**
      * @var string
      * @mongodb:Date
      */
-    private $created_at;
-
+    private $createdAt;
+    
     /**
      * @var string
      * @mongodb:String
@@ -55,35 +61,60 @@ class Message
     }
 
     /**
-     * @return the $chat_operator_id
+     * @return the $operator
      */
-    public function getChatOperatorId()
+    public function getOperator()
     {
-        return $this->chat_operator_id;
+        return $this->operator;
     }
 
     /**
-     * @param Integer $chat_operator_id
+     * @param Integer $operator
      */
-    public function setChatOperatorId($chat_operator_id)
+    public function setOperator($operator)
     {
-        $this->chat_operator_id = $chat_operator_id;
+        $this->operator = $operator;
+    }
+
+    public function getOperatorId()
+    {
+        if ($this->getOperator()) {
+            return $this->getOperator()->getId();
+        }
+
+        return null;
     }
 
     /**
-     * @return the $created_at
+     * @return the $session
+     */
+    public function getSession()
+    {
+        return $this->session;
+    }
+
+    /**
+     * @param Integer $session
+     */
+    public function setSession($session)
+    {
+        $this->session = $session;
+    }
+
+    /**
+     * @return the $createdAt
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * @param string $created_at
+     * @param string $createdAt
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($createdAt)
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
     }
 
     /**

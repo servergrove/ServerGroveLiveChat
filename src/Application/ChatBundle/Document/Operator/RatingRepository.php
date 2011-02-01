@@ -15,7 +15,7 @@ class RatingRepository extends DocumentRepository
 
     public function getOperatorRatings(Operator $operator)
     {
-        return $this->findBy(array('chat_operator_id' => $operator));
+        return $this->findBy(array('chatOperatorId' => $operator));
     }
 
 }

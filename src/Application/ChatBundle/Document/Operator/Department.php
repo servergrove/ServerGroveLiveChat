@@ -27,7 +27,7 @@ class Department
      * @var boolean
      * @mongodb:Boolean
      */
-    private $is_active;
+    private $isActive;
 
     /**
      * @return string $name
@@ -47,20 +47,20 @@ class Department
     }
 
     /**
-     * @return boolean $is_active
+     * @return boolean $isActive
      */
     public function getIsActive()
     {
-        return $this->is_active;
+        return $this->isActive;
     }
 
     /**
-     * @param boolean $is_active
+     * @param boolean $isActive
      * @return void
      */
-    public function setIsActive($is_active)
+    public function setIsActive($isActive)
     {
-        $this->is_active = $is_active;
+        $this->isActive = $isActive;
     }
 
     /**
