@@ -1,10 +1,12 @@
 <?php
 
 namespace Application\ChatBundle\Controller;
+
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Swift_Message;
 use Application\ChatBundle\Document\Operator\Rating;
 use Application\ChatBundle\Document\Visit;
 use Application\ChatBundle\Document\Visitor;
@@ -40,7 +42,11 @@ class ChatController extends BaseController
      */
     private function createVisitor()
     {
-        return $this->getVisitorRepository()->create(array('agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'), 'remoteAddr' => $this->getRequest()->getClientIp(), 'languages' => implode(';', $this->getRequest()->getLanguages())));
+        return $this->getVisitorRepository()->create(
+                array(
+                    'agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'),
+                    'remoteAddr' => $this->getRequest()->getClientIp(),
+                    'languages' => implode(';', $this->getRequest()->getLanguages())));
     }
 
     /**
@@ -83,7 +89,7 @@ class ChatController extends BaseController
      */
     private function getChatSession($id)
     {
-        return $this->getDocumentManager()->getRepository('ChatBundle:Session')->find($id);
+        return $this->getDocumentManager()->getRepository('ChatBundle:Session')->getSessionIfNotFinished($id);
     }
 
     /**
@@ -91,7 +97,7 @@ class ChatController extends BaseController
      */
     public function getChatSessionForCurrentUser()
     {
-        return $this->getChatSession($this->getHttpSession()->has('operator') ? $this->getRequest()->get('id') : $this->getHttpSession()->get('chatsession'));
+        return $this->getChatSession($this->getHttpSession()->has('_operator') ? $this->getRequest()->get('id') : $this->getHttpSession()->get('chatsession'));
     }
 
     /**
@@ -99,10 +105,10 @@ class ChatController extends BaseController
      */
     private function getOperator()
     {
-        if (!$this->getHttpSession()->has('operator')) {
+        if (!$this->getHttpSession()->has('_operator')) {
             return null;
         }
-        return $this->getDocumentManager()->getRepository('ChatBundle:Operator')->find($this->getHttpSession()->get('operator'));
+        return $this->getDocumentManager()->find('ChatBundle:Operator', $this->getHttpSession()->get('_operator'));
     }
 
     /**
@@ -128,18 +134,60 @@ class ChatController extends BaseController
             /* @var $chatSession Application\ChatBundle\Document\Session */
             $chatSession = new ChatSession();
             $chatSession->setRemoteAddr($visitor->getRemoteAddr());
-            $chatSession->setVisitorId($visitor->getId());
-            $chatSession->setVisitId($this->getVisitByKey($visitor)->getId());
+            $chatSession->setVisitor($visitor);
+            $chatSession->setVisit($this->getVisitByKey($visitor));
+            $chatSession->setStatusId(ChatSession::STATUS_WAITING);
+            $chatSession->setQuestion($this->getRequest()->get('question'));
             $this->getDocumentManager()->persist($chatSession);
 
             $this->getDocumentManager()->flush();
 
             $this->getHttpSession()->set('chatsession', $chatSession->getId());
 
-            return $this->redirect($this->generateUrl('chat_load'));
+            return $this->redirect($this->generateUrl('sglc_chat_load'));
         }
 
-        return $this->renderTemplate('ChatBundle:Chat:index.twig.html', array('visitor' => $visitor));
+        return $this->renderTemplate('ChatBundle:Chat:index.twig.html', array(
+            'visitor' => $visitor,
+            'errorMsg' => $this->getHttpSession()->getFlash('errorMsg', null)));
+    }
+
+    public function acceptAction($id)
+    {
+        $operator = $this->getOperator();
+
+        if (!$operator) {
+            $this->getHttpSession()->setFlash('errorMsg', 'Unauthorized access.');
+
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        }
+
+        if (!($chatSession = $this->getChatSession($id))) {
+            $this->getHttpSession()->setFlash('errorMsg', 'Chat not found');
+
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        }
+
+        if ($this->getRequest()->getMethod() == 'POST') {
+            if (!$chatSession->getOperator() || $chatSession->getOperator()->getId() == $operator->getId()) {
+                $chatSession->setOperator($operator);
+                $chatSession->addChatMessage('You are now connected with ' . $operator->getName(), $operator);
+                $chatSession->start();
+
+                $this->getDocumentManager()->persist($chatSession);
+                $this->getDocumentManager()->flush();
+
+                return $this->redirect($this->generateUrl('sglc_chat_load', array(
+                            'id' => $chatSession->getId())));
+            }
+        }
+
+        return $this->renderTemplate('ChatBundle:Chat:accept.twig.html',
+                array(
+                    'chat' => $chatSession,
+                    'visitor' => $chatSession->getVisitor(),
+                    'messages' => $chatSession->getMessages(),
+                    'operator' => $operator));
     }
 
     /**
@@ -148,10 +196,9 @@ class ChatController extends BaseController
     public function loadAction()
     {
         $operator = $this->getOperator();
-
-        if (!$chatSession = $this->getChatSessionForCurrentUser()) {
+        if (!($chatSession = $this->getChatSessionForCurrentUser())) {
             $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('chat_homepage'));
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
         $arrCannedMessages = array();
@@ -159,12 +206,22 @@ class ChatController extends BaseController
             if (($cannedMessages = $this->getCannedMessages()) !== false) {
                 /* @var $cannedMessage Application\ChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
-                    $arrCannedMessages[] = $cannedMessage->renderContent(array('operator' => $operator, 'currtime' => date('H:i:s'), 'currdate' => date('m-d-Y')));
+                    $arrCannedMessages[] = $cannedMessage->renderContent(array(
+                                'operator' => $operator,
+                                'currtime' => date('H:i:s'),
+                                'currdate' => date('m-d-Y')));
                 }
             }
         }
 
-        return $this->renderTemplate('ChatBundle:Chat:load.twig.html', array('chat' => $chatSession, 'canned' => $arrCannedMessages, 'operator' => $operator));
+        $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), '');
+
+        $this->getHttpSession()->set('lastMessageId', '');
+
+        return $this->renderTemplate('ChatBundle:Chat:load.twig.html', array(
+            'chat' => $chatSession,
+            'canned' => $arrCannedMessages,
+            'operator' => $operator));
     }
 
     /**
@@ -183,33 +240,39 @@ class ChatController extends BaseController
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
             $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('chat_homepage'));
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
         $operator = $this->getOperator();
-        $chatOperatorId = $operator ? $operator->getId() : null;
-        $chatSession->addChatMessage($this->getRequest()->get('msg'), $chatOperatorId);
+        $chatSession->addChatMessage($this->getRequest()->get('msg'), $operator);
 
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
-        return $this->renderTemplate('ChatBundle:Chat:send.twig.html', array('texto' => $this->getRequest()->get('msg')));
+        return $this->renderTemplate('ChatBundle:Chat:send.twig.html', array(
+            'texto' => $this->getRequest()->get('msg')));
     }
 
     public function messagesAction()
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
-            throw new NotFoundHttpException();
+            //throw new NotFoundHttpException();
         }
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            throw new NotFoundHttpException();
+            $this->getResponse()->setContent('No chat session found. <a href="' . $this->generateUrl('sglc_chat_homepage') . '">Please start a new chat</a>.<br />');
+            return $this->getResponse();
         }
 
         $messages = $chatSession->getMessages();
 
-        return $this->renderTemplate('ChatBundle:Chat:messages.twig.html', array('messages' => $messages));
+        $this->getDocumentManager()->persist($chatSession);
+        $this->getDocumentManager()->flush();
+
+        $this->getHttpSession()->set('lastMessageId', $messages[count($messages) - 1]->getId());
+
+        return $this->renderTemplate('ChatBundle:Chat:messages.twig.html', array(
+            'messages' => $messages));
     }
 
     /**
@@ -219,27 +282,86 @@ class ChatController extends BaseController
     {
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
             $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('chat_homepage'));
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
         $visitor = $this->getVisitorByKey();
 
         if ($this->getRequest()->getMethod() != "POST") {
-            return $this->renderTemplate('ChatBundle:Chat:done.twig.html', array('email' => $visitor->getEmail()));
+            $chatSession->close();
+
+            return $this->renderTemplate('ChatBundle:Chat:done.twig.html', array(
+                'email' => $visitor->getEmail()));
         }
 
         $rating = new Rating();
         $rating->setComments($this->getRequest()->get('comments'));
         $rating->setGrade($this->getRequest()->get('rating'));
-        $rating->setChatSessionId($chatSession->getId());
+        $rating->setSession($chatSession);
         if ($chatSession->getOperator()) {
-            $rating->setChatOperatorId($chatSession->getOperator()->getId());
+            $rating->setOperator($chatSession->getOperator());
         }
 
         $this->getDocumentManager()->persist($rating);
         $this->getDocumentManager()->flush();
 
-        return $this->render('ChatBundle:Chat:rated.twig.html');
+        if ($this->getRequest()->get('transcripts', 0)) {
+            $messages = $chatSession->getMessages();
+            $contents = array();
+            /* @var $message Application\ChatBundle\Document\Message */
+            foreach ($messages as $message) {
+                $contents[] = sprintf('%s: %s', $message->getOperator() ? 'Operator' : 'User', $message->getContent());
+            }
+
+            $mailer = $this->get('mailer');
+            $message = Swift_Message::newInstance()
+                            ->setSubject('Transcripts for: ' . $chatSession->getQuestion())
+                            ->setFrom(array('help@servergrove.com' => 'ServerGrove Support'))
+                            ->setTo($this->getRequest()->get('email'))
+                            ->setBody(implode(PHP_EOL, $contents));
+            $mailer->send($message);
+        }
+
+        return $this->render('ChatBundle:Chat:rated.twig.html', array('transcripts' => $this->getRequest()->get('transcripts', 0), 'email' => $this->getRequest()->get('email')));
+    }
+
+    public function statusAction()
+    {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundHttpException();
+        }
+
+        if (!$chatSession = $this->getChatSessionForCurrentUser()) {
+            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+            $this->getResponse()->setContent(sprintf('location.href = %s;', var_export($this->generateUrl('sglc_chat_homepage'), true)));
+
+            return $this->getResponse();
+        }
+
+        if ($chatSession->getOperator() && $chatSession->getStatusId() == ChatSession::STATUS_IN_PROGRESS && $this->getHttpSession()->get('chatStatus' . $chatSession->getId()) != 'started') {
+            $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), 'started');
+            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+            $this->getResponse()->setContent('Chat.get().start()');
+
+            return $this->getResponse();
+        }
+
+        if ($chatSession->getStatusId() == ChatSession::STATUS_CLOSED || $chatSession->getStatusId() == ChatSession::STATUS_CANCELED) {
+            $this->getHttpSession()->setFlash('errorMsg', 'Chat has been ' . $chatSession->getStatus());
+            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+
+            $this->getResponse()->setContent(sprintf('location.href = %s;', var_export($this->generateUrl('sglc_chat_homepage'), true)));
+
+            return $this->getResponse();
+        }
+
+        $this->getDocumentManager()->persist($chatSession);
+        $this->getDocumentManager()->flush();
+
+        $this->getResponse()->headers->set('Content-type', 'application/json; charset=utf-8');
+
+        return $this->getResponse();
     }
 
 }

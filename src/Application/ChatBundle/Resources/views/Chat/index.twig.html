@@ -6,7 +6,7 @@
         <br><br>
         If you prefer, you can also <a href="https://secure.servergrove.com/clients/submitticket.php">submit a ticket</a> or search our <a href="http://secure.servergrove.com/clients/knowledgebase.php" target="_blank">knowledge base</a>.
     </h3>
-    <form action="{{path('chat_homepage')}}" method="post">
+    <form action="{{path('sglc_chat_homepage')}}" method="post">
         <div class="inputname">
             Name
         </div>
@@ -29,7 +29,7 @@
         </div>
         <p></p>
         <input type="submit" value="Start Chat" />
-
     </form>
+	<h3 class="error">{{errorMsg}}</h3>
 </div>
 {% endblock %}

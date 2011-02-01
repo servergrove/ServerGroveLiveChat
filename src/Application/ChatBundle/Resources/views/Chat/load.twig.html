@@ -1,8 +1,8 @@
 {% extends "ChatBundle::layout.twig.html" %}
 {% block head_buttons %}
 <div id="buttons">
-    <a href="{{ path('chat_done')}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a>
-    <a href="{{ path('chat_done')}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
+    <a href="{{ path('sglc_chat_done')}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a>
+    <a href="{{ path('sglc_chat_done')}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
 </div>
 {%endblock%}
 {% block content %}
@@ -92,7 +92,7 @@
         }, sendMessage: function(text) {
             jQuery.ajax({
                 type: "POST",
-                url: "{{ path('chat_send')}}",
+                url: "{{ path('sglc_chat_send', {'id': chat.getId()})}}",
                 data: {
                     msg: text.trim()
                 },
@@ -100,13 +100,15 @@
                 success: function(msg){
                 }
             });
-        }, updateMessages: function() {
+        },
+        _updateInterval: null,
+        updateMessages: function() {
             jQuery.ajax({
                 type: "GET",
-                url: "{{ path('chat_messages')}}",
+                url: "{{ path('sglc_chat_messages', {'id': chat.getId()})}}",
                 cache: false,
                 success: function(result){
-                    window.setTimeout(function(){
+                    Chat.get()._updateInterval = window.setTimeout(function(){
                         jQuery('#messages').html(result);
                         Chat.get().scrollMessagesContainer();
                         Chat.get().updateMessages();
@@ -116,17 +118,34 @@
         }, scrollMessagesContainer: function() {
             var container = jQuery('#messages');
             container.scrollTop = container.scrollHeight;
+        },
+        _checkStatusEnabled : true,
+        checkStatus:function() {
+            jQuery.ajax({
+                type: "GET",
+                url: "{{ path('sglc_chat_status', {'id': chat.getId()})}}",
+                dataType: 'script',
+                cache: false,
+                success: function(){
+                    if (Chat.get()._checkStatusEnabled) {
+                        window.setTimeout(function(){
+                            Chat.get().checkStatus();
+                        }, 1000);
+                    }
+                }
+            });
+        }, start: function() {
+            jQuery('#connecting').hide();
+            jQuery('#chat').show();
+            Chat.get()._checkStatusEnabled = false;
+            Chat.get().updateMessages();
         }
     };
 
 
     jQuery(document).ready(function(){
-        window.setTimeout(function(){
-            jQuery('#connecting').hide();
-            jQuery('#chat').show();
-            Chat.create();
-            Chat.get().updateMessages();
-        }, 500);
+        Chat.create();
+        Chat.get().checkStatus();
     });
 </script>
 {% endblock %}
