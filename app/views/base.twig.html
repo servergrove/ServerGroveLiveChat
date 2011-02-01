@@ -5,6 +5,7 @@
         <title>{% block title %}Chat Application{% endblock %}</title>
         <script type="text/javascript" src="{{asset('js/jquery.js')}}"></script>
         <link type="text/css" href="{{asset('css/main-lc.css')}}" rel="stylesheet" media="all" />
+        {% block stylesheets %}{% endblock %}
     </head>
     <body>
         {% block body %}{% endblock %}
