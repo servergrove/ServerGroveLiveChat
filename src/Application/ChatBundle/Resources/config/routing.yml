@@ -1,43 +1,98 @@
 # -- Live Chat -----------------------------------------------------------------
 
-chat_homepage:
-    pattern:  /livechat
+sglc_chat_homepage:
+    pattern:  /sglivechat
     defaults: { _controller: ChatBundle:Chat:index }
 
-chat_load:
-  pattern: /livechat/load
+sglc_chat_load:
+  pattern: /sglivechat/load
   defaults: { _controller: ChatBundle:Chat:load }
 
-chat_done:
-  pattern: /livechat/done
+sglc_chat_accept:
+  pattern: /sglivechat/accept/{id}
+  defaults: { _controller: ChatBundle:Chat:accept }
+
+sglc_chat_reject:
+  pattern: /sglivechat/reject/{id}
+  defaults: { _controller: ChatBundle:Chat:reject }
+
+sglc_chat_done:
+  pattern: /sglivechat/done
   defaults: { _controller: ChatBundle:Chat:done }
 
-chat_send:
-  pattern: /livechat/send
+sglc_chat_send:
+  pattern: /sglivechat/send
   defaults: { _controller: ChatBundle:Chat:send }
   requirements: { _method: post }
 
-chat_messages:
-  pattern: /livechat/messages
+sglc_chat_messages:
+  pattern: /sglivechat/messages
   defaults: { _controller: ChatBundle:Chat:messages }
+  requirements: { _method: get }
+  
+sglc_chat_status:
+  pattern: /sglivechat/status
+  defaults: { _controller: ChatBundle:Chat:status }
   requirements: { _method: get }
 
 
 # -- Tracker -------------------------------------------------------------------
 
-track_index:
-  pattern: /livechat-tracker
+sglc_track_index:
+  pattern: /sglivechat-tracker
   defaults: { _controller: ChatBundle:Track:index }
   requirements: { _method: get }
 
-track_updater:
-  pattern: /livechat-tracker/update
+sglc_track_updater:
+  pattern: /sglivechat-tracker/update
   defaults: { _controller: ChatBundle:Track:update }
   requirements: { _method: get }
 
-track_status:
-  pattern: /livechat-tracker/status.{_format}
+sglc_track_status:
+  pattern: /sglivechat-tracker/status.{_format}
   defaults: { _controller: ChatBundle:Track:status, _format: html }
 
 # -- Admin ---------------------------------------------------------------------
 
+sglc_admin_index:
+  pattern: /admin/sglivechat
+  defaults: { _controller: ChatBundle:Admin:index }
+  requirements: { _method: get }
+
+#sglc_admin_login:
+#  pattern: /admin/sglivechat/login
+#  defaults: { _controller: ChatBundle:Admin:login }
+
+
+#sglc_admin_check_login:
+#  pattern: /admin/sglivechat/login/check
+#  defaults: { _controller: ChatBundle:Admin:checkLogin }
+  
+_security_login:
+  pattern: /admin/sglivechat/login
+  defaults: { _controller: ChatBundle:Admin:login }
+
+_security_check:
+  pattern: /admin/sglivechat/login/check
+  defaults: { _controller: ChatBundle:Admin:checkLogin }
+  requirements: { _method: post }
+
+sglc_admin_operator:
+  pattern: /admin/sglivechat/operator
+  defaults: { _controller: ChatBundle:Admin:operator }
+
+sglc_admin_operator_department:
+  pattern: /admin/sglivechat/operator/department
+  defaults: { _controller: ChatBundle:Admin:operatorDepartment }
+
+sglc_admin_console_sessions:
+  pattern: /admin/sglivechat/console/sessions
+  defaults: { _controller: ChatBundle:Admin:sessions }
+
+sglc_admin_console_requested_chats:
+  pattern: /admin/sglivechat/console/requested-chats
+  defaults: { _controller: ChatBundle:Admin:requestedChats }
+
+sglc_admin_console_close:
+  pattern: /admin/sglivechat/console/close/{id}
+  defaults: { _controller: ChatBundle:Admin:closeChat }
