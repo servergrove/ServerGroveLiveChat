@@ -1,0 +1,42 @@
+{% extends "ChatBundle::admin-layout.twig.html" %}
+{% block metas %}
+<meta http-equiv="refresh" content="10" />
+{% endblock %}
+
+{% block stylesheets %}
+<link type="text/css" href="{{asset('css/admin.css')}}" rel="stylesheet" media="all" />
+<link type="text/css" href="{{asset('css/admin-lc.css')}}" rel="stylesheet" media="all" />
+{% endblock %}
+
+{% block content %}
+{% include "ChatBundle:Admin:header.twig.html" %}
+{% if chats %}
+<script type="text/javascript">
+    var loadTimeout = function() {
+        window.setTimeout(function() {
+            refreshRequestedChats();
+        }, 5000);
+    }
+    var refreshRequestedChats = function() {
+        jQuery.ajax({
+            type : "GET",
+            url : "{{ path('sglc_admin_console_requested_chats')}}",
+            cache : false,
+            success : function(response) {
+                jQuery('#requestChats').replaceWith(response);
+                loadTimeout();
+            },
+            error : function(XMLHttpRequest) {
+                if (XMLHttpRequest.status == 401) {
+                    location.href = '{{ path("_security_login")}}';
+                } else {
+                    loadTimeout();
+                }
+            }
+        });
+    }
+    loadTimeout();
+</script>
+{% include "ChatBundle:Admin:requestedChats.twig.html" with {'chats': chats} only %}
+{% endif %}
+{% endblock %}
