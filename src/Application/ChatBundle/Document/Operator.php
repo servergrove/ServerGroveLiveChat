@@ -4,6 +4,7 @@ namespace Application\ChatBundle\Document;
 
 use Symfony\Component\Security\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\User\AccountInterface;
+use Application\ChatBundle\Document\Operator\Department;
 
 /**
  * Description of Operator
@@ -49,12 +50,12 @@ class Operator implements AccountInterface, PasswordEncoderInterface
     private $updatedAt;
     /**
      * @var boolean
-     * @mongodb:Boolean
+     * @mongodb:Field(type="boolean")
      */
     private $isOnline;
     /**
      * @var boolean
-     * @mongodb:Boolean
+     * @mongodb:Field(type="boolean")
      */
     private $isActive;
     /**
@@ -67,6 +68,11 @@ class Operator implements AccountInterface, PasswordEncoderInterface
      * @mongodb:ReferenceMany(targetDocument="Application\ChatBundle\Document\Operator\Rating")
      */
     private $ratings = array();
+    /**
+     * @var Department[]
+     * @mongodb:ReferenceMany(targetDocument="Application\ChatBundle\Document\Operator\Department")
+     */
+    private $departments;
 
     public function addRating(Operator\Rating $rating)
     {
@@ -217,11 +223,23 @@ class Operator implements AccountInterface, PasswordEncoderInterface
         $this->passwd = $this->encodePassword($passwd, $this->getSalt());
     }
 
+    /**
+     * @return Department[] $departments
+     */
+    public function getDepartments()
+    {
+        return $this->departments;
+    }
+
+    public function addDepartment(Department $department) {
+        $this->departments[] = $department;
+    }
+
     # -- AccountInterface implementation ----------------
+
     /**
      * @return string
      */
-
     public function __toString()
     {
         return strtr('(:id) :name, :email', array(
