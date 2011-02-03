@@ -7,6 +7,7 @@ use Symfony\Component\Security\User\UserProviderInterface;
 use Doctrine\ODM\MongoDB\DocumentRepository;
 use Application\ChatBundle\Document\Operator;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
+use MongoDate;
 
 /**
  * Description of OperatorRepository
@@ -39,6 +40,19 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
         }
 
         return $operator;
+    }
+
+    public function getOnlineOperatorsCount()
+    {
+        return $this->createQueryBuilder()->field('isOnline')->equals(true)->getQuery()->count();
+    }
+
+    public function closeOldLogins()
+    {
+        $this->createQueryBuilder()
+                ->field('isOnline')->set(false)
+                ->field('isOnline')->equals(true)
+                ->field('updatedAt')->lt(new MongoDate(time() - 300))->update()->getQuery()->execute();
     }
 
 }
