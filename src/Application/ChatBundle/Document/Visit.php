@@ -5,8 +5,8 @@ namespace Application\ChatBundle\Document;
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- *  collection="visits",
- *  repositoryClass="Application\ChatBundle\Document\VisitRepository"
+ * collection="visits",
+ * repositoryClass="Application\ChatBundle\Document\VisitRepository"
  * )
  */
 class Visit
@@ -52,6 +52,21 @@ class Visit
      * @mongodb:Timestamp
      */
     private $localTime;
+
+    /**
+     * @mongodb:ReferenceMany(targetDocument="VisitHit")
+     */
+    private $hits;
+
+    public function getHits()
+    {
+        return $this->hits;
+    }
+
+    public function addHit(VisitHit $hit)
+    {
+        $this->getHits()->add($hit);
+    }
 
     /**
      * @mongodb:PrePersist
@@ -130,7 +145,7 @@ class Visit
      * @param field_type $visitor
      * @return void
      */
-    public function setVisitor($visitor)
+    public function setVisitor(Visitor $visitor)
     {
         $this->visitor = $visitor;
     }
