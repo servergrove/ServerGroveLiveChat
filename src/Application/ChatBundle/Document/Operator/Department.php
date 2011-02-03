@@ -2,6 +2,8 @@
 
 namespace Application\ChatBundle\Document\Operator;
 
+use Application\ChatBundle\Document\Operator;
+
 /**
  * Description of Department
  *
@@ -16,18 +18,21 @@ class Department
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $name;
-
     /**
      * @var boolean
-     * @mongodb:Boolean
+     * @mongodb:Field(type="boolean")
      */
     private $isActive;
+    /**
+     * @var \Application\ChatBundle\Document\Operator[]
+     * @mongodb:ReferenceMany(targetDocument="Application\ChatBundle\Document\Operator")
+     */
+    private $operators = array();
 
     /**
      * @return string $name
@@ -69,6 +74,15 @@ class Department
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getOperators() {
+        return $this->operators;
+    }
+
+    public function addOperator(Operator $operator)
+    {
+        $this->operators[] = $operator;
     }
 
 }
