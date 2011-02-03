@@ -81,9 +81,26 @@ sglc_admin_operator:
   pattern: /admin/sglivechat/operator
   defaults: { _controller: ChatBundle:Admin:operator }
 
+sglc_admin_operator_departments:
+  pattern: /admin/sglivechat/operator/departments
+  defaults: { _controller: ChatBundle:Admin:operatorDepartments }
+
 sglc_admin_operator_department:
   pattern: /admin/sglivechat/operator/department
   defaults: { _controller: ChatBundle:Admin:operatorDepartment }
+  
+
+sglc_admin_operator_department_edit:
+  pattern: /admin/sglivechat/operator/department/{id}
+  defaults: { _controller: ChatBundle:Admin:operatorDepartment }
+
+sglc_admin_operator_edit:
+  pattern: /admin/sglivechat/operator/{id}
+  defaults: { _controller: ChatBundle:Admin:operator }
+
+sglc_admin_operators:
+  pattern: /admin/sglivechat/operators
+  defaults: { _controller: ChatBundle:Admin:operators }
 
 sglc_admin_console_sessions:
   pattern: /admin/sglivechat/console/sessions

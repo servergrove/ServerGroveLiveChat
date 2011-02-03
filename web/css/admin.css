@@ -15,3 +15,7 @@ ul li { display: inline; padding-left: 10px; }
 .td1 {
     background-color: #FFF;
 }
+
+table tbody a img {
+    border: none;
+}

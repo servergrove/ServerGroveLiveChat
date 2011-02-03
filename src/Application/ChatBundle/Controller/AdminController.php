@@ -2,6 +2,12 @@
 
 namespace Application\ChatBundle\Controller;
 
+use Application\ChatBundle\Document\Operator\Department;
+
+use Doctrine\ODM\MongoDB\Mapping\Document;
+
+use Application\ChatBundle\Form\OperatorDepartmentForm;
+use Application\ChatBundle\Form\OperatorForm;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\SecurityContext;
 use Symfony\Component\Form\PasswordField;
@@ -51,7 +57,7 @@ class AdminController extends BaseController
 
         if (!$form->isValid()) {
             return $this->redirect($this->generateUrl("_security_login", array(
-                        'e' => __LINE__)));
+                'e' => __LINE__)));
         }
         try {
             /* @var $operator Application\ChatBundle\Document\Operator */
@@ -64,7 +70,7 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getHttpSession()->setFlash('_error', $e->getMessage());
             return $this->redirect($this->generateUrl("_security_login", array(
-                        'e' => __LINE__)));
+                'e' => __LINE__)));
         }
 
         return $this->redirect($this->generateUrl("sglc_admin_index"));
@@ -111,8 +117,7 @@ class AdminController extends BaseController
         $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();
 
         return $this->renderTemplate('ChatBundle:Admin:requests.twig.html', array(
-            'chats' => $this->getRequestedChats())
-        );
+            'chats' => $this->getRequestedChats()));
     }
 
     public function requestedChatsAction()
@@ -130,8 +135,7 @@ class AdminController extends BaseController
         $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();
 
         return $this->renderTemplate('ChatBundle:Admin:requestedChats.twig.html', array(
-            'chats' => $this->getRequestedChats())
-        );
+            'chats' => $this->getRequestedChats()));
     }
 
     /**
@@ -158,59 +162,109 @@ class AdminController extends BaseController
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
-        return $this->renderTemplate('ChatBundle:Admin:operators.twig.html');
+
+        $operators = $this->getDocumentManager()->getRepository('ChatBundle:Operator')->findAll();
+        $msg = $this->getHttpSession()->getFlash('msg', '');
+        return $this->renderTemplate('ChatBundle:Admin:operators.twig.html', array(
+            'operators' => $operators,
+            'msg' => $msg));
     }
 
-    public function operatorDepartmentAction()
-    {
-        $this->checkLogin();
-        return $this->renderTemplate('ChatBundle:Admin:operator-department.twig.html');
-    }
-
-    /**
-     *
-     */
-    public function operatorAction()
+    public function operatorDepartmentAction($id = null)
     {
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
 
-        $operator = $this->getDocumentManager()->find('ChatBundle:Operator', $this->getHttpSession()->get('_operator'));
-        $form = null;
+        $message = null;
+
+        if ($id) {
+            $department = $this->getDocumentManager()->find('ChatBundle:Operator\Department', $id);
+        } else {
+            $department = new Department();
+        }
+
+        $form = new OperatorDepartmentForm('department', $department, $this->get('validator'));
 
         switch ($this->getRequest()->getMethod()) {
             case 'POST':
-                break;
             case 'PUT':
+                $params = $this->getRequest()->request->get($form->getName());
+                if (!empty($params['name'])) {
+                    $department->setName($params['name']);
+                    $department->setIsActive(isset($params['isActive']) && $params['isActive']);
+                    $this->getDocumentManager()->persist($department);
+                    $this->getDocumentManager()->flush();
+                    $this->getHttpSession()->setFlash('msg', 'The department has been successfully updated');
+
+                    return $this->redirect($this->generateUrl('sglc_admin_operator_departments'));
+                }
+                //}
                 break;
             case 'DELETE':
                 break;
         }
 
-        $form = new Form('operator', $operator, $this->get('validator'));
-        return $this->renderTemplate('ChatBundle:Admin:operator.twig.html');
+        return $this->renderTemplate('ChatBundle:Admin:operator-department.twig.html', array(
+            'department' => $department,
+            'form' => $form));
     }
 
-    protected function addOperator()
+    public function operatorDepartmentsAction()
+    {
+        $this->checkLogin();
+
+        $departments = $this->getDocumentManager()->getRepository('ChatBundle:Operator\Department')->findAll();
+        $msg = $this->getHttpSession()->getFlash('msg', '');
+
+        return $this->renderTemplate('ChatBundle:Admin:operator-departments.twig.html', array(
+            'departments' => $departments,
+            'msg' => $msg));
+    }
+
+    /**
+     *
+     */
+    public function operatorAction($id = null)
     {
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
-    }
 
-    protected function editOperator()
-    {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
-        }
-    }
+        $message = null;
 
-    protected function removeOperator()
-    {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
+        if ($id) {
+            $operator = $this->getDocumentManager()->find('ChatBundle:Operator', $id);
+        } else {
+            $operator = new Operator();
         }
+
+        $form = new OperatorForm('operator', $operator, $this->get('validator'));
+
+        switch ($this->getRequest()->getMethod()) {
+            case 'POST':
+            case 'PUT':
+                $params = $this->getRequest()->request->get($form->getName());
+                if (!empty($params['name']) && !empty($params['email']['first']) && !empty($params['passwd']['first'])) {
+                    $operator->setName($params['name']);
+                    $operator->setEmail($params['email']['first']);
+                    $operator->setPasswd($params['passwd']['first']);
+                    $operator->setIsActive(isset($params['isActive']) && $params['isActive']);
+                    $this->getDocumentManager()->persist($operator);
+                    $this->getDocumentManager()->flush();
+                    $this->getHttpSession()->setFlash('msg', 'The operator has been successfully updated');
+
+                    return $this->redirect($this->generateUrl('sglc_admin_operators'));
+                }
+                //}
+                break;
+            case 'DELETE':
+                break;
+        }
+
+        return $this->renderTemplate('ChatBundle:Admin:operator.twig.html', array(
+            'operator' => $operator,
+            'form' => $form));
     }
 
 }

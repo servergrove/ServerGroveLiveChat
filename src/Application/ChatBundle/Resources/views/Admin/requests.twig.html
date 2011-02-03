@@ -3,11 +3,6 @@
 <meta http-equiv="refresh" content="10" />
 {% endblock %}
 
-{% block stylesheets %}
-<link type="text/css" href="{{asset('css/admin.css')}}" rel="stylesheet" media="all" />
-<link type="text/css" href="{{asset('css/admin-lc.css')}}" rel="stylesheet" media="all" />
-{% endblock %}
-
 {% block content %}
 {% include "ChatBundle:Admin:header.twig.html" %}
 {% if chats %}
