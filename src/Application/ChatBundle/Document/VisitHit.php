@@ -7,12 +7,13 @@ namespace Application\ChatBundle\Document;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(collection="visit_hit")
+ * @mongodb:HasLifecycleCallbacks
  */
 class VisitHit
 {
 
     /**
-     * @var integer
+     * @mongodb:Id
      */
     private $id;
 
@@ -27,9 +28,22 @@ class VisitHit
     private $referer;
 
     /**
-     * @mongodb:Field(type="int")
+     * @mongodb:ReferenceOne(targetDocument="Visit")
      */
-    private $visitLinkId;
+    private $visit;
+
+    /**
+     * @mongodb:ReferenceOne(targetDocument="VisitLink")
+     */
+    private $visitLink;
+
+    /**
+     * @mongodb:PrePersist
+     */
+    public function registerCreatedDate()
+    {
+        $this->setCreatedAt(date('Y-m-d H:i:s'));
+    }
 
     /**
      * @return the $createdAt
@@ -64,19 +78,37 @@ class VisitHit
     }
 
     /**
-     * @return the $visitLinkId
+     * @return the $visitLink
      */
-    public function getVisitLinkId()
+    public function getVisitLink()
     {
-        return $this->visitLinkId;
+        return $this->visitLink;
     }
 
     /**
-     * @param field_type $visitLinkId
+     * @param field_type $visitLink
      */
-    public function setVisitLinkId($visitLinkId)
+    public function setVisitLink(VisitLink $visitLink)
     {
-        $this->visitLinkId = $visitLinkId;
+        $this->visitLink = $visitLink;
+        $this->getVisitLink()->addHit($this);
+    }
+
+    /**
+     * @return the $visit
+     */
+    public function getVisit()
+    {
+        return $this->visit;
+    }
+
+    /**
+     * @param field_type $visit
+     */
+    public function setVisit(Visit $visit)
+    {
+        $this->visit = $visit;
+        $this->getVisit()->addHit($this);
     }
 
     /**
