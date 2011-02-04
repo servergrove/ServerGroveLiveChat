@@ -1,0 +1,1 @@
+SGChatTracker.callUpdater(true);

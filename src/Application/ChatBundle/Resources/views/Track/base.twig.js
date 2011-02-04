@@ -78,27 +78,26 @@ if (typeof(SGChatTracker) == 'undefined') {
         },
         callUpdater: function(first){
             var _data = null;
+            var _type = 'GET';
+  
             if (typeof(first) != 'undefined' && first != null && first) {
                 _data = {
-                    lt: escape(new Date)
+                    lt: escape(new Date().getTime()),
+                    tz: SGChatTracker._getTimeZone(),
+                    r: encodeURIComponent(document.referrer)
                 };
+                _type = 'POST';
             } else {
                 _data = {
-                    lt: escape(new Date),
-                    tz: SGChatTracker._getTimeZone(),
-                    r: document.referrer
+                    lt: escape(new Date().getTime())
                 };
             }
             jQuery.ajax({
-                type: "GET",
-                url: "{{ path('track_updater')}}",
-                dataType: 'json',
+                type: _type,
+                url: "{{ path('sglc_track_updater')}}",
                 data: _data,
                 cache: false,
-                success: function(json){
-                    if (true || json) {
-                        alert(json);// Why??
-                    }
+                success: function(){
                     SGChatTracker.loadUpdater();
                 },
                 error: function(){

@@ -39,17 +39,19 @@ sglc_chat_status:
 # -- Tracker -------------------------------------------------------------------
 
 sglc_track_index:
-  pattern: /sglivechat-tracker
+  pattern: /js/sglivechat-tracker
   defaults: { _controller: ChatBundle:Track:index }
   requirements: { _method: get }
 
 sglc_track_updater:
-  pattern: /sglivechat-tracker/update
+  pattern: /js/sglivechat-tracker/update
   defaults: { _controller: ChatBundle:Track:update }
-  requirements: { _method: get }
 
+sglc_track_reset:
+  pattern: /js/sglivechat-tracker/reset
+  defaults: { _controller: ChatBundle:Track:reset }
 sglc_track_status:
-  pattern: /sglivechat-tracker/status.{_format}
+  pattern: /js/sglivechat-tracker/status.{_format}
   defaults: { _controller: ChatBundle:Track:status, _format: html }
 
 # -- Admin ---------------------------------------------------------------------
@@ -57,6 +59,11 @@ sglc_track_status:
 sglc_admin_index:
   pattern: /admin/sglivechat
   defaults: { _controller: ChatBundle:Admin:index }
+  requirements: { _method: get }
+
+sglc_admin_logout:
+  pattern: /admin/sglivechat/logout
+  defaults: { _controller: ChatBundle:Admin:logout }
   requirements: { _method: get }
 
 #sglc_admin_login:

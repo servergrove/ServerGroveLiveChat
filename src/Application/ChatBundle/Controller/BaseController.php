@@ -1,4 +1,5 @@
 <?php
+
 namespace Application\ChatBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -78,4 +79,16 @@ abstract class BaseController extends Controller
         $this->getResponse()->setRedirect($url, $status);
         return $this->getResponse();
     }
+
+    /**
+     * @return Application\ChatBundle\Document\Operator
+     */
+    protected function getOperator()
+    {
+        if (!$this->getHttpSession()->has('_operator')) {
+            return null;
+        }
+        return $this->getDocumentManager()->find('ChatBundle:Operator', $this->getHttpSession()->get('_operator'));
+    }
+
 }

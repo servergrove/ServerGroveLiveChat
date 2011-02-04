@@ -1,7 +1,6 @@
 <script type="text/javascript" src="{{asset('js/jquery.js')}}"></script>
 <script type="text/javascript">
     //<![CDATA[
-    {% include "ChatBundle:Track:base.twig.js" %}
-    SGChatTracker.drawStatusLink({{ online ? 'true' : 'false' }});
+    {% include "ChatBundle:Track:status.twig.js" %}
     //]]>
 </script>

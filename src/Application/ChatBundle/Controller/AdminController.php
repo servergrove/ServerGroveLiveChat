@@ -3,9 +3,7 @@
 namespace Application\ChatBundle\Controller;
 
 use Application\ChatBundle\Document\Operator\Department;
-
 use Doctrine\ODM\MongoDB\Mapping\Document;
-
 use Application\ChatBundle\Form\OperatorDepartmentForm;
 use Application\ChatBundle\Form\OperatorForm;
 use Symfony\Component\Security\Exception\UsernameNotFoundException;
@@ -44,6 +42,11 @@ class AdminController extends BaseController
             return $this->forward('ChatBundle:Admin:login');
         }
 
+        $operator = $this->getOperator();
+        $operator->setIsOnline(true);
+        $this->getDocumentManager()->persist($operator);
+        $this->getDocumentManager()->flush();
+
         return null;
     }
 
@@ -56,8 +59,9 @@ class AdminController extends BaseController
         $form->bind($this->get('request')->request->get('login'));
 
         if (!$form->isValid()) {
+
             return $this->redirect($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+                        'e' => __LINE__)));
         }
         try {
             /* @var $operator Application\ChatBundle\Document\Operator */
@@ -67,10 +71,13 @@ class AdminController extends BaseController
             }
 
             $this->getHttpSession()->set('_operator', $operator->getId());
+            $operator->setIsOnline(true);
+            $this->getDocumentManager()->persist($operator);
+            $this->getDocumentManager()->flush();
         } catch (UsernameNotFoundException $e) {
             $this->getHttpSession()->setFlash('_error', $e->getMessage());
             return $this->redirect($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+                        'e' => __LINE__)));
         }
 
         return $this->redirect($this->generateUrl("sglc_admin_index"));
@@ -97,10 +104,17 @@ class AdminController extends BaseController
 
     public function logoutAction()
     {
+        if ($this->isLogged()) {
+            $operator = $this->getOperator();
+            $operator->setIsOnline(false);
+            $this->getDocumentManager()->persist($operator);
+            $this->getDocumentManager()->flush();
+        }
+
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
-        return $this->redirect($this->generateUrl("sglc_admin_login"));
+        return $this->redirect($this->generateUrl("_security_login"));
     }
 
     private function getRequestedChats()
