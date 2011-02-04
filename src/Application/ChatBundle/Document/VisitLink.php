@@ -6,7 +6,10 @@ namespace Application\ChatBundle\Document;
  * Description of VisitLink
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="visit_link")
+ * @mongodb:Document(
+ *  collection="visit_link",
+ *  repositoryClass="Application\ChatBundle\Document\VisitLinkRepository"
+ * )
  */
 class VisitLink
 {
@@ -43,6 +46,21 @@ class VisitLink
     public function setUrl($url)
     {
         $this->url = $url;
+    }
+
+    /**
+     * @mongodb:ReferenceMany(targetDocument="VisitHit")
+     */
+    private $hits;
+
+    public function getHits()
+    {
+        return $this->hits;
+    }
+
+    public function addHit(VisitHit $hit)
+    {
+        $this->hits[] = $hit;
     }
 
 }
