@@ -13,7 +13,6 @@ class Visit
 {
 
     /**
-     * @var integer
      * @mongodb:Id
      */
     private $id;
@@ -65,7 +64,7 @@ class Visit
 
     public function addHit(VisitHit $hit)
     {
-        $this->getHits()->add($hit);
+        $this->hits[] = $hit;
     }
 
     /**
