@@ -27,7 +27,7 @@ class ChatControllerTest extends WebTestCase
         $client = $this->createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/livechat');
+        $crawler = $client->request('GET', '/sglivechat');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful');
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Question")')->count(), 'HTML not contains "Question"');
@@ -43,7 +43,7 @@ class ChatControllerTest extends WebTestCase
         $client = $this->createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('POST', '/livechat', array('name' => 'Ismael', 'email' => 'ismael@servergrove.com', 'question' => 'This is my comment'));
+        $crawler = $client->request('POST', '/sglivechat', array('name' => 'Ismael', 'email' => 'ismael@servergrove.com', 'question' => 'This is my comment'));
 
         $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
         unset($client, $crawler);
@@ -55,7 +55,7 @@ class ChatControllerTest extends WebTestCase
         $client = $this->createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/livechat/load');
+        $crawler = $client->request('GET', '/sglivechat/load');
 
         $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
     }
