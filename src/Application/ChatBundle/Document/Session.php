@@ -7,7 +7,7 @@ namespace Application\ChatBundle\Document;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- * collection="chat_sessions",
+ * collection="chat_session",
  * repositoryClass="Application\ChatBundle\Document\SessionRepository"
  * )
  * @mongodb:HasLifecycleCallbacks
