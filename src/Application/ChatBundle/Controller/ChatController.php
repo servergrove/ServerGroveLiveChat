@@ -50,6 +50,12 @@ class ChatController extends PublicController
     {
         $visitor = $this->getVisitorByKey();
 
+        if ($this->getOperator()) {
+            $this->getResponse()->setContent('No chat found.');
+
+            return $this->getResponse();
+        }
+
         if ($this->getRequest()->getMethod() == 'POST') {
             $visitor->setEmail($this->getRequest()->get('email'));
             $visitor->setName($this->getRequest()->get('name'));
