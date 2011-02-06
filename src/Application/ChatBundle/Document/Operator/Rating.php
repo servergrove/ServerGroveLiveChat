@@ -7,7 +7,7 @@ namespace Application\ChatBundle\Document\Operator;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- *  collection="operator_rating",
+ *  collection="operator_ratings",
  *  repositoryClass="Application\ChatBundle\Document\Operator\RatingRepository"
  * )
  */

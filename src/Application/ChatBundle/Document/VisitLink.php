@@ -7,7 +7,7 @@ namespace Application\ChatBundle\Document;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- *  collection="visit_link",
+ *  collection="visits_links",
  *  repositoryClass="Application\ChatBundle\Document\VisitLinkRepository"
  * )
  */
