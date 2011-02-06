@@ -39,17 +39,21 @@ class VisitorRepository extends DocumentRepository
      */
     public function getByKey($key)
     {
-        $visit = null;
+        $visitor = null;
         if (!is_null($key)) {
-            $visit = $this->findOneBy(array('key' => $key));
+            $visitor = $this->findOneBy(array('key' => $key));
         }
+        return $visitor;
 
+        /* @todo: Ismael, what is this code for below?
         $visitor = null;
         if (!is_null($key)) {
             $visitor = $this->getDocumentManager()->getRepository(self::REPOSITORY_NAME)->findOneBy(array('key' => $key));
         }
 
         return $visitor;
+         *
+         */
     }
 
 }

@@ -65,7 +65,10 @@ class ChatController extends PublicController
             $chatSession = new ChatSession();
             $chatSession->setRemoteAddr($visitor->getRemoteAddr());
             $chatSession->setVisitor($visitor);
-            $chatSession->setVisit($this->getVisitByKey($visitor));
+
+            $vist = $this->getVisitByKey($visitor);
+
+            $chatSession->setVisit($visit);
             $chatSession->setStatusId(ChatSession::STATUS_WAITING);
             $chatSession->setQuestion($this->getRequest()->get('question'));
             $this->getDocumentManager()->persist($chatSession);

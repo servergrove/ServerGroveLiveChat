@@ -11,7 +11,7 @@ use Application\ChatBundle\Document\Operator\Department;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
- * collection="operators",
+ * collection="operator",
  * repositoryClass="Application\ChatBundle\Document\OperatorRepository"
  * )
  * @mongodb:InheritanceType("SINGLE_COLLECTION")
