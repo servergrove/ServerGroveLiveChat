@@ -35,7 +35,11 @@ abstract class PublicController extends BaseController
             $this->getVisitorRepository()->persist($visitor);
         }
 
-        if ($visitor && !$this->getRequest()->cookies->has('vtrid')) {
+        if (!$visitor) {
+            throw new \Exception("Failed to get visitor");
+        }
+
+        if (!$this->getRequest()->cookies->has('vtrid') || $key != $visitor->getKey()) {
             $this->getResponse()->headers->setCookie(new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
         }
 
@@ -58,7 +62,11 @@ abstract class PublicController extends BaseController
         $key = $this->getRequest()->cookies->get('vsid');
         $visit = $this->getVisitRepository()->getByKey($key, $visitor);
 
-        if ($visit && !$this->getRequest()->cookies->has('vsid')) {
+        if (!$visit) {
+            throw new \Exception("Failed to get visit");
+        }
+
+        if (!$this->getRequest()->cookies->has('vsid') || $key != $visit->getKey()) {
             $this->getResponse()->headers->setCookie(new Cookie('vsid', $visit->getKey(), time() + 86400, '/'));
         }
 
