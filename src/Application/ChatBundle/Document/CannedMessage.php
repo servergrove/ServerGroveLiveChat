@@ -24,6 +24,7 @@ class CannedMessage
     /**
      * @var string
      * @mongodb:String
+     * @mongodb:UniqueIndex(order="asc")
      */
     private $title;
     /**

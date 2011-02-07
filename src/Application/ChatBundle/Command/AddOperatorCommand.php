@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Application\ChatBundle\Document\Operator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use MongoCursorException;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
@@ -32,14 +33,18 @@ class AddOperatorCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $operator = $this->createOperator();
+        try {
+            $operator = $this->createOperator();
 
-        $operator->setName($input->getArgument('name'));
-        $operator->setEmail($input->getArgument('email'));
-        $operator->setPasswd($input->getArgument('password'));
+            $operator->setName($input->getArgument('name'));
+            $operator->setEmail($input->getArgument('email'));
+            $operator->setPasswd($input->getArgument('password'));
 
-        $this->getDocumentManager()->persist($operator);
-        $this->getDocumentManager()->flush();
+            $this->getDocumentManager()->persist($operator);
+            $this->getDocumentManager()->flush(array('safe' => true));
+        } catch (MongoCursorException $e) {
+            $output->write($e->getMessage(), true);
+        }
     }
 
     public function createOperator()
