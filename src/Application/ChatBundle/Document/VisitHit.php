@@ -6,7 +6,7 @@ namespace Application\ChatBundle\Document;
  * Description of VisitHit
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="visits_hits")
+ * @mongodb:Document(collection="visit_hit")
  * @mongodb:HasLifecycleCallbacks
  */
 class VisitHit

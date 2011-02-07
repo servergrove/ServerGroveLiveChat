@@ -8,7 +8,7 @@ use Application\ChatBundle\Document\Operator;
  * Description of Department
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="operator_departments")
+ * @mongodb:Document(collection="operator_department")
  */
 class Department
 {

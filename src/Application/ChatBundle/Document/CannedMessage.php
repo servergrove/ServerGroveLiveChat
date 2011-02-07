@@ -6,7 +6,7 @@ namespace Application\ChatBundle\Document;
  * Description of CannedMessage
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="canned_messages")
+ * @mongodb:Document(collection="canned_message")
  */
 class CannedMessage
 {
