@@ -105,14 +105,14 @@
         updateMessages: function() {
             jQuery.ajax({
                 type: "GET",
-                url: "{{ path('sglc_chat_messages', {'id': chat.getId()})}}",
+                url: "{{ path('sglc_chat_messages', {'_format': 'html', 'id': chat.getId()})}}",
                 cache: false,
                 success: function(result){
+                    jQuery('#messages').append(result);
                     Chat.get()._updateInterval = window.setTimeout(function(){
-                        jQuery('#messages').html(result);
                         Chat.get().scrollMessagesContainer();
                         Chat.get().updateMessages();
-                    }, 500);
+                    }, 1000);
                 }
             });
         }, scrollMessagesContainer: function() {

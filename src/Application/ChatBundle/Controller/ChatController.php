@@ -143,7 +143,7 @@ class ChatController extends PublicController
 
         $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), '');
 
-        $this->getHttpSession()->set('lastMessageId', '');
+        $this->getHttpSession()->set('lastMessage', 0);
 
         return $this->renderTemplate('ChatBundle:Chat:load.twig.html', array(
             'chat' => $chatSession,
@@ -180,11 +180,13 @@ class ChatController extends PublicController
             'texto' => $this->getRequest()->get('msg')));
     }
 
-    public function messagesAction()
+    public function messagesAction($_format)
     {
         if (!$this->getRequest()->isXmlHttpRequest()) {
             //throw new NotFoundHttpException();
         }
+
+        $all = (bool) $this->getRequest()->get('all');
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
             $this->getResponse()->setContent('No chat session found. <a href="' . $this->generateUrl('sglc_chat_homepage') . '">Please start a new chat</a>.<br />');
@@ -196,10 +198,34 @@ class ChatController extends PublicController
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
-        $this->getHttpSession()->set('lastMessageId', $messages[count($messages) - 1]->getId());
+        if ($this->getHttpSession()->has('lastMessage')) {
+            $last = $this->getHttpSession()->get('lastMessage');
+        } else {
+            $last = 0;
+        }
+        $this->getHttpSession()->set('lastMessage', count($messages));
 
-        return $this->renderTemplate('ChatBundle:Chat:messages.twig.html', array(
-            'messages' => $messages));
+        error_log('last: '.$last);
+        if ($last) {
+            $messages = array_slice($messages->toArray(), $last);
+        }
+
+        if ($_format == 'json') {
+            $json = array();
+            foreach ($messages as $m) {
+                $json[] = array(
+                    'content' => $m->getContent(),
+                    'name' => $m->getOperatorId() ? 'Operator' : 'Guest',
+                    'dt' => $m->getCreatedAt(),
+                );
+            }
+
+            $this->getResponse()->setContent(\json_encode($json));
+        }
+
+        return $this->renderTemplate('ChatBundle:Chat:messages.twig.' . $_format, array(
+            'messages' => $messages
+        ));
     }
 
     /**

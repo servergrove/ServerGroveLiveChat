@@ -26,8 +26,8 @@ sglc_chat_send:
   requirements: { _method: post }
 
 sglc_chat_messages:
-  pattern: /sglivechat/messages
-  defaults: { _controller: ChatBundle:Chat:messages }
+  pattern: /sglivechat/messages.{_format}
+  defaults: { _controller: ChatBundle:Chat:messages, _format: html }
   requirements: { _method: get }
   
 sglc_chat_status:
