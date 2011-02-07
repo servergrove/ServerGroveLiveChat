@@ -70,6 +70,9 @@ if (typeof(SGChatTracker) == 'undefined') {
             return (dt.getTimezoneOffset() / 60) * (-1);
         },
         drawStatusLink: function(online){
+            if (typeof(online)=='undefined') {
+                online = SGChatTrackerStatus;
+            }
             if (online) {
                 document.write("<a href=\"javascript:void(0)\" onclick=\"window.open('{{url('sglc_chat_homepage')}}', 'newchat' , 'width=680,height=520,toolbar=no,location=no,resizable=1');\"><img border=0 src=\"https://secure.servergrove.com/sglivechat/images/livechat.png\" alt=\"Livechat is Online\" /></a>");
             } else {
@@ -135,6 +138,8 @@ if (typeof(SGChatTracker) == 'undefined') {
             }
         }
     };
+
+    var SGChatTrackerStatus = false;
 }
 
 /*

@@ -6,7 +6,7 @@ namespace Application\ChatBundle\Document;
  * Description of VisitHit
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="visit_hit")
+ * @mongodb:EmbeddedDocument
  * @mongodb:HasLifecycleCallbacks
  */
 class VisitHit
@@ -26,11 +26,6 @@ class VisitHit
      * @mongodb:String
      */
     private $referer;
-
-    /**
-     * @mongodb:ReferenceOne(targetDocument="Visit")
-     */
-    private $visit;
 
     /**
      * @mongodb:ReferenceOne(targetDocument="VisitLink")
@@ -91,25 +86,9 @@ class VisitHit
     public function setVisitLink(VisitLink $visitLink)
     {
         $this->visitLink = $visitLink;
-        $this->getVisitLink()->addHit($this);
     }
 
-    /**
-     * @return the $visit
-     */
-    public function getVisit()
-    {
-        return $this->visit;
-    }
-
-    /**
-     * @param field_type $visit
-     */
-    public function setVisit(Visit $visit)
-    {
-        $this->visit = $visit;
-        $this->getVisit()->addHit($this);
-    }
+  
 
     /**
      * @return the $id

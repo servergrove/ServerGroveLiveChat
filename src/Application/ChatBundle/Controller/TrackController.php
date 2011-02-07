@@ -43,7 +43,7 @@ class TrackController extends PublicController
 
         if ('POST' == $this->getRequest()->getMethod()) {
             $hit = new VisitHit();
-            $hit->setVisit($visit);
+            $visit->addHit($hit);
 
             $visitLink = $this->getDocumentManager()->getRepository('ChatBundle:VisitLink')->findByUrl($this->getRequest()->headers->get('Referer'));
             $hit->setVisitLink($visitLink);
@@ -85,8 +85,8 @@ class TrackController extends PublicController
     public function statusAction($_format)
     {
         $online = $this->getDocumentManager()->getRepository('ChatBundle:Operator')->getOnlineOperatorsCount() > 0;
-
-        return $this->renderTemplate('ChatBundle:Track:status.twig.' . $this->getRequest()->query->get('format'), array(
+        \error_log($online);
+        return $this->renderTemplate('ChatBundle:Track:status.twig.' . $_format, array(
             'online' => $online));
     }
 

@@ -53,7 +53,7 @@ class Visit
     private $localTime;
 
     /**
-     * @mongodb:ReferenceMany(targetDocument="VisitHit")
+     * @mongodb:EmbedMany(targetDocument="VisitHit")
      */
     private $hits;
 

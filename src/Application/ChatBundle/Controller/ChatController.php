@@ -60,7 +60,7 @@ class ChatController extends PublicController
             $chatSession->setRemoteAddr($visitor->getRemoteAddr());
             $chatSession->setVisitor($visitor);
 
-            $vist = $this->getVisitByKey($visitor);
+            $visit = $this->getVisitByKey($visitor);
 
             $chatSession->setVisit($visit);
             $chatSession->setStatusId(ChatSession::STATUS_WAITING);
