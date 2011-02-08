@@ -22,7 +22,7 @@
         <h3>If you prefer, you can <a href="https://secure.servergrove.com/clients/submitticket.php">submit a support ticket</a>.</h3>
     </div>
 </div>
-<div id="chat" style="display: none;">
+<div id="chat" style="display: none; width: 700px;">
     <div class="left">
         <div id="messages" style="overflow: auto;height: 400px;">
         </div>
@@ -70,7 +70,6 @@
         },
         loadEvents: function() {
             var cmdSend = this.cmdSend;
-            var cmdClear = this.cmdClear;
             var txtMessage = this.txtMessage;
             jQuery(this.txtMessage).keyup(function(event) {
                 cmdSend.disabled = jQuery(this).val().trim().length == 0;
@@ -82,10 +81,12 @@
             });
 
             jQuery(this.cmdClear).click(function() {
+                cmdSend.disbled = true;
                 jQuery(txtMessage).val('').focus();
             });
 
             jQuery(this.cmdSend).click(function() {
+                this.disabled = true;
                 Chat.get().sendMessage(jQuery(txtMessage).val());
                 jQuery(txtMessage).val('').focus();
             });
@@ -111,10 +112,15 @@
         updateMessages: function() {
             jQuery.ajax({
                 type: "GET",
-                url: "{{ path('sglc_chat_messages', {'_format': 'html', 'id': chat.getId()})}}",
+                url: "{{ path('sglc_chat_messages', {'_format': 'json', 'id': chat.getId()})}}",
+                dataType: 'json',
                 cache: false,
-                success: function(result){
-                    jQuery('#messages').append(result);
+                success: function(json){
+                    try {
+                        jQuery.each(json, function(i, item) {
+                            Chat.get().appendMessage(item);
+                        });
+                    } catch (e) {}
                     Chat.get().loadTimer();
                 }, error: function(XMLHttpRequest) {
                     if (XMLHttpRequest.status != 404) {
@@ -122,7 +128,33 @@
                     }
                 }
             });
-        }, scrollMessagesContainer: function() {
+        },
+        appendMessage: function(item) {
+            var _table = document.createElement('table');
+            var _row = document.createElement('tr');
+            var _cell1 = document.createElement('td');
+            var _cell2 = document.createElement('td');
+
+            jQuery(_table).attr({cellpadding: 3, cellspacing: 0, border: 0, width: "100%"});
+            jQuery(_row).attr({valign: 'top'});
+            if (item.isOperator) {
+                jQuery(_row).css({'background-color': '#F8F8F8'});
+            }
+
+            jQuery(document.createElement('div'))
+            .addClass('name').addClass(item.isOperator ? 'operator' : 'client')
+            .html(item.name+': ').appendTo(_cell1)
+            .parent().attr('width', '70px').appendTo(_row);
+
+            jQuery(_cell2).html(item.content)
+            .appendTo(_row)
+            
+            .parent()
+            .appendTo(_table);
+
+            jQuery(_table).appendTo('#messages');
+        }
+        , scrollMessagesContainer: function() {
             var container = jQuery('#messages');
             container.scrollTop = container.scrollHeight;
         },

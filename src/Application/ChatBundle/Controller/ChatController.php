@@ -212,7 +212,7 @@ class ChatController extends PublicController
         }
         $this->getHttpSession()->set('lastMessage', count($messages));
 
-        error_log('last: '.$last);
+        error_log('last: ' . $last);
         if ($last) {
             $messages = array_slice($messages->toArray(), $last);
         }
@@ -224,10 +224,12 @@ class ChatController extends PublicController
                     'content' => $m->getContent(),
                     'name' => $m->getOperatorId() ? 'Operator' : 'Guest',
                     'dt' => $m->getCreatedAt(),
+                    'isOperator' => $m->getOperatorId() ? true : false
                 );
             }
 
             $this->getResponse()->setContent(\json_encode($json));
+            return $this->getResponse();
         }
 
         return $this->renderTemplate('ChatBundle:Chat:messages.twig.' . $_format, array(
