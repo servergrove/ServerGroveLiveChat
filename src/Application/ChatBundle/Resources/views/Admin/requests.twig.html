@@ -15,10 +15,60 @@
     var refreshRequestedChats = function() {
         jQuery.ajax({
             type : "GET",
-            url : "{{ path('sglc_admin_console_requested_chats')}}",
+            url : "{{ path('sglc_admin_console_requested_chats', {'_format': 'json'})}}",
             cache : false,
-            success : function(response) {
-                jQuery('#requestChats').replaceWith(response);
+            dataType: 'json',
+            success : function(json) {
+                jQuery('#requestChats table tbody').html('');
+                jQuery.each(json, function(i, item) {
+                    var row = document.createElement('tr');
+                    jQuery(row)
+                    .append('<td>'+item.id+' - ' + item.status.name + '</td>')
+                    .append('<td>'+item.visitor.id+' - '+item.visitor.name+'</td>')
+                    .append('<td>'+item.visitor.email+'</td>')
+                    .append('<td>'+item.question+'</td>')
+                    .append('<td>'+item.time+'</td>')
+                    .append('<td>'+item.duration+'</td>')
+                    .append('<td>'+item.operator+'</td>')
+                    ;
+                    var actionsCell = document.createElement('td');
+                    if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
+                        var _link1 = document.createElement('a');
+                        jQuery(_link1).click(function(){
+                            window.open("{{path('sglc_chat_accept', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
+                            return false;
+                        }).html('Accept').attr('href', '#');
+                        jQuery(actionsCell).append(_link1);
+                    }
+
+                    if (typeof(item.operator.id) != 'undefined' && item.status.id == '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_IN_PROGRESS")}}') {
+                        var _link2 = document.createElement('a');
+                        jQuery(_link2).click(function(){
+                            window.open("{{path('sglc_chat_load', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
+                            return false;
+                        }).html('Reload').attr('href', '#');
+                        jQuery(actionsCell).append(_link2);
+                    }
+
+                    if (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
+                        var _link3 = document.createElement('a');
+                        jQuery(_link3).click(function(){
+                            return confirm('Are you sure?');
+                        }).html('Close').attr('href', "{{path('sglc_admin_console_close', {'id': '__chatId__'})}}".replace('__chatId__', item.id));
+
+
+                        if (typeof(_link1) != 'undefined' || typeof(_link2) != 'undefined') {
+                            jQuery(actionsCell).append('&nbsp;|&nbsp;');
+                        }
+                        jQuery(actionsCell).append(_link3);
+                    }
+
+                    jQuery(row).append(actionsCell);
+
+                    jQuery('#requestChats table tbody').append(row);
+
+                });
+                jQuery('#requestChats table tbody tr:even').addClass('td1');
                 loadTimeout();
             },
             error : function(XMLHttpRequest) {

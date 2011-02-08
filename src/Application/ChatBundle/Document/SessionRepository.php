@@ -18,6 +18,31 @@ class SessionRepository extends DocumentRepository
         return $this->createQueryBuilder()->field('updatedAt')->range(new MongoDate(time() - 300), new MongoDate(time()))->getQuery()->execute();
     }
 
+    public function getRequestedChatsArray()
+    {
+        return array_map(
+                function (Session $chat) {
+                    $operator = array();
+                    if ($chat->getOperator()) {
+                        $operator['id'] = $chat->getOperator()->getId();
+                        $operator['name'] = $chat->getOperator()->getName();
+                    }
+                    return array(
+                        'id' => $chat->getId(),
+                        'visitor' => array(
+                            'id' => $chat->getVisitor()->getId(),
+                            'name' => $chat->getVisitor()->getName(),
+                            'email' => $chat->getVisitor()->getEmail()),
+                        'question' => $chat->getQuestion(),
+                        'time' => $chat->getCreatedAt()->format('Y-m-d H:i:s'),
+                        'duration' => $chat->getUpdatedAt()->format('U') - $chat->getCreatedAt()->format('U'),
+                        'operator' => $operator,
+                        'status' => array(
+                            'id' => $chat->getStatusId(),
+                            'name' => $chat->getStatus()));
+                }, $this->getRequestedChats()->toArray());
+    }
+
     public function closeSessions()
     {
         $this->createQueryBuilder()->field('statusId')->set(Session::STATUS_CANCELED)->field('statusId')->notIn(array(

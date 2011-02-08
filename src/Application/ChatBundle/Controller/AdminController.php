@@ -13,6 +13,7 @@ use Symfony\Component\Form\TextField;
 use Application\ChatBundle\Document\Operator;
 use Symfony\Component\Form\Form;
 use Application\ChatBundle\Controller\BaseController;
+use Application\ChatBundle\Document\Session as ChatSession;
 
 /**
  * Description of AdminController
@@ -122,6 +123,11 @@ class AdminController extends BaseController
         return $this->getDocumentManager()->getRepository('ChatBundle:Session')->getRequestedChats();
     }
 
+    private function getRequestedChatsArray()
+    {
+        return $this->getDocumentManager()->getRepository('ChatBundle:Session')->getRequestedChatsArray();
+    }
+
     public function sessionsAction()
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -134,22 +140,25 @@ class AdminController extends BaseController
             'chats' => $this->getRequestedChats()));
     }
 
-    public function requestedChatsAction()
+    public function requestedChatsAction($_format)
     {
-        if (!$this->getRequest()->isXmlHttpRequest()) {
-            return $this->redirect($this->generateUrl('sglc_admin_console_sessions'));
-        }
-
         if (!is_null($response = $this->checkLogin())) {
             $this->getResponse()->setStatusCode(401);
             $this->getResponse()->setContent('');
             return $this->getResponse();
         }
 
-        $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();
+        $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();       
 
-        return $this->renderTemplate('ChatBundle:Admin:requestedChats.twig.html', array(
-            'chats' => $this->getRequestedChats()));
+        if ($_format == 'json') {
+            $this->getResponse()->headers->set('Content-type', 'application/json');
+            $chats = $this->getRequestedChatsArray();
+        } else {
+            $chats = $this->getRequestedChats();
+        }
+
+        return $this->renderTemplate('ChatBundle:Admin:requestedChats.twig.' . $_format, array(
+            'chats' => $chats));
     }
 
     /**
