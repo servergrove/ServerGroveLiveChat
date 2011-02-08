@@ -101,6 +101,12 @@
                 }
             });
         },
+        loadTimer: function() {
+            Chat.get()._updateInterval = window.setTimeout(function(){
+                Chat.get().scrollMessagesContainer();
+                Chat.get().updateMessages();
+            }, 1000);
+        },
         _updateInterval: null,
         updateMessages: function() {
             jQuery.ajax({
@@ -109,10 +115,11 @@
                 cache: false,
                 success: function(result){
                     jQuery('#messages').append(result);
-                    Chat.get()._updateInterval = window.setTimeout(function(){
-                        Chat.get().scrollMessagesContainer();
-                        Chat.get().updateMessages();
-                    }, 1000);
+                    Chat.get().loadTimer();
+                }, error: function(XMLHttpRequest) {
+                    if (XMLHttpRequest.status != 404) {
+                        Chat.get().loadTimer();
+                    }
                 }
             });
         }, scrollMessagesContainer: function() {

@@ -195,6 +195,7 @@ class ChatController extends PublicController
         $all = (bool) $this->getRequest()->get('all');
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
+            $this->getResponse()->setStatusCode(404, 'Chat session not found');
             $this->getResponse()->setContent('No chat session found. <a href="' . $this->generateUrl('sglc_chat_homepage') . '">Please start a new chat</a>.<br />');
             return $this->getResponse();
         }
