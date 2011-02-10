@@ -117,6 +117,10 @@ sglc_admin_console_requested_chats:
   pattern: /admin/sglivechat/console/requested-chats.{_format}
   defaults: { _controller: ChatBundle:Admin:requestedChats, _format: html }
 
+sglc_admin_console_current_visits:
+  pattern: /admin/sglivechat/console/current-visits.{_format}
+  defaults: { _controller: ChatBundle:Admin:currentVisits, _format: html }
+
 sglc_admin_console_close:
   pattern: /admin/sglivechat/console/close/{id}
   defaults: { _controller: ChatBundle:Admin:closeChat }

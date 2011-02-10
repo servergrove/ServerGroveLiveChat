@@ -14,6 +14,7 @@ use Application\ChatBundle\Document\Operator;
 use Symfony\Component\Form\Form;
 use Application\ChatBundle\Controller\BaseController;
 use Application\ChatBundle\Document\Session as ChatSession;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Description of AdminController
@@ -148,17 +149,40 @@ class AdminController extends BaseController
             return $this->getResponse();
         }
 
-        $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();       
+        $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();
 
         if ($_format == 'json') {
             $this->getResponse()->headers->set('Content-type', 'application/json');
-            $chats = $this->getRequestedChatsArray();
-        } else {
-            $chats = $this->getRequestedChats();
+            $this->getResponse()->setContent(json_encode($this->getRequestedChatsArray()));
+
+            return $this->getResponse();
         }
+
+        $chats = $this->getRequestedChats();
 
         return $this->renderTemplate('ChatBundle:Admin:requestedChats.twig.' . $_format, array(
             'chats' => $chats));
+    }
+
+    public function currentVisitsAction($_format)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            $this->getResponse()->setStatusCode(401);
+            $this->getResponse()->setContent('');
+            return $this->getResponse();
+        }
+
+        if ($_format == 'json') {
+            $visits = $this->getDocumentManager()->getRepository('ChatBundle:Visit')->getLastVisitsArray();
+            $this->getResponse()->setContent(json_encode($visits));
+
+            return $this->getResponse();
+        }
+
+        throw new NotFoundHttpException('Not supported format', $previous);
+
+        return $this->renderTemplate('ChatBundle:Admin:currentVisits.twig.' . $_format, array(
+            'visits' => $visits));
     }
 
     /**
