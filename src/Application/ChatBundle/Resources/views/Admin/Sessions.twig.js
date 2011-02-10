@@ -1,20 +1,22 @@
 {% include "ChatBundle::DateToolkit.twig.js" %}
 var SessionToolkit = {
     Visit: {
+        _timeOut: null,
         loadTimeout : function() {
-            window.setTimeout(function() {
+            SessionToolkit.Visit._timeOut = window.setTimeout(function() {
+                window.clearTimeout(SessionToolkit.Visit._timeOut);
                 SessionToolkit.Visit.refreshCurrentVisits();
             }, 10000);
         },
         refreshCurrentVisits:function() {
             jQuery('#currentVisits table tbody').html('');
-            SessionToolkit.Visit.loadTimeout();
             jQuery.ajax({
                 type : "GET",
                 url : "{{ path('sglc_admin_console_current_visits', {'_format': 'json'})}}",
                 cache : false,
                 dataType: 'json',
                 success : function(json) {
+                    SessionToolkit.Visit.loadTimeout();
                     jQuery('#currentVisits table tbody').html('');
                     jQuery.each(json, function(i, item) {
                         SessionToolkit.Visit.Item.draw(item);
@@ -90,10 +92,12 @@ var SessionToolkit = {
         }
     },
     Request: {
+        _timeOut: null,
         loadTimeout : function() {
-            window.setTimeout(function() {
+            SessionToolkit.Request._timeOut = window.setTimeout(function() {
+                window.clearTimeout(SessionToolkit.Request._timeOut);
                 SessionToolkit.Request.refreshRequestedChats();
-            }, 5000);
+            }, 10000);
         },
         refreshRequestedChats : function() {
             jQuery.ajax({
