@@ -3,6 +3,7 @@
 namespace Application\ChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
+use MongoDate;
 
 /**
  * Description of VisitRepository
@@ -22,6 +23,7 @@ class VisitRepository extends DocumentRepository
         $visit->setKey(md5(time() . $visitor->getAgent() . $visitor->getId()));
         #$visit->setLocalTime($localTime);
 
+
         return $visit;
     }
 
@@ -32,7 +34,8 @@ class VisitRepository extends DocumentRepository
     {
         $visit = null;
         if (!is_null($key)) {
-            $visit = $this->findOneBy(array('key' => $key));
+            $visit = $this->findOneBy(array(
+                'key' => $key));
         }
 
         if (!$visit) {
@@ -42,6 +45,49 @@ class VisitRepository extends DocumentRepository
         }
 
         return $visit;
+    }
+
+    public function getLastVisits()
+    {
+        return $this->createQueryBuilder()->field('updatedAt')->range(new MongoDate(time() - 200), new MongoDate(time()))->field('hits')->exists(true)->getQuery()->execute();
+    }
+
+    public function getLastVisitsArray()
+    {
+        $array = array();
+        $visits = $this->getLastVisits();
+        /* @var $visit Visit */
+        foreach ($visits as $visit) {
+            $hits = $visit->getHits();
+            $array[] = array(
+                'id' => $visit->getId(),
+                'visitor' => array(
+                    'id' => $visit->getVisitor()->getId(),
+                    'visits' => count($visit->getVisitor()->getVisits()),
+                    'languages' => $visit->getVisitor()->getLanguages(),
+                    'agent' => $visit->getVisitor()->getAgent(),
+                    'currentPage' => $visit->getHits()->last()->getVisitLink()->getUrl(),
+                    'referer' => $hits->last()->getReferer()),
+                'hits' => array_map(
+                function (VisitHit $hit)
+                {
+                    return array(
+                        'id' => $hit->getId(),
+                        'createdAt' => $hit->getCreatedAt()->format('Y-m-d H:i:s'),
+                        'duration' => 0,
+                        'link' => $hit->getVisitLink()->getUrl(),
+                        'referer' => $hit->getReferer());
+                }, $hits->toArray(true)),
+                'localtime' => date('r', $visit->getLocalTime()->__toString()),
+                'hostname' => /* gethostbyaddr($visit->getRemoteAddr()) */'Unknown',
+                'remoteAddr' => $visit->getRemoteAddr(),
+                'country' => 'unknown',
+                'createdAt' => $visit->getCreatedAt()->format('Y-m-d H:i:s'),
+                'lastHit' => 'lasthit',
+                'duration' => time() - $visit->getCreatedAt()->format('U'));
+        }
+
+        return $array;
     }
 
 }
