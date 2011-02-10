@@ -8,6 +8,7 @@ namespace Application\ChatBundle\Document;
  * collection="visit",
  * repositoryClass="Application\ChatBundle\Document\VisitRepository"
  * )
+ * @mongodb:HasLifecycleCallbacks
  */
 class Visit
 {
@@ -93,7 +94,7 @@ class Visit
     }
 
     /**
-     * @return field_type $visitor
+     * @return Visitor $visitor
      */
     public function getVisitor()
     {
@@ -147,6 +148,7 @@ class Visit
     public function setVisitor(Visitor $visitor)
     {
         $this->visitor = $visitor;
+        $visitor->addVisit($this);
     }
 
     /**
