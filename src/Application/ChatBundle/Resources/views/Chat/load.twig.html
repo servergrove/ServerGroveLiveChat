@@ -123,7 +123,13 @@
                     } catch (e) {}
                     Chat.get().loadTimer();
                 }, error: function(XMLHttpRequest) {
-                    if (XMLHttpRequest.status != 404) {
+                    if (XMLHttpRequest.status == 404) {
+                        Chat.get().appendMessage({
+                            content: 'No chat session found. <a href="{{path("sglc_chat_homepage")}}">Please start a new chat</a>',
+                            name: 'Admin',
+                            idOperator: true
+                        });
+                    } else {
                         Chat.get().loadTimer();
                     }
                 }
