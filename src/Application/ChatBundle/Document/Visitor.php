@@ -18,48 +18,45 @@ class Visitor
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $agent;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $name;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $email;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $key;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $remoteAddr;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $languages;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $createdAt;
+    /**
+     * @mongodb:ReferenceMany(targetDocument="Visit")
+     */
+    private $visits = array();
 
     /**
      * @return the $agent
@@ -179,6 +176,16 @@ class Visitor
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getVisits()
+    {
+        return $this->visits;
+    }
+
+    public function addVisit(Visit $visit)
+    {
+        $this->visits[] = $visit;
     }
 
 }
