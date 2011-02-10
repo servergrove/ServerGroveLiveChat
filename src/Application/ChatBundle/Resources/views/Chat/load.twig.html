@@ -43,6 +43,17 @@
     </div>
     <div class="vspacer"></div>
     <img src="{{asset('images/secure_chat.gif')}}" width="79" height="18" alt="Email" class="secure_chat" alt="This chat is encrypted for your safety" />
+    {% if operator %}
+    <div style="clear:both; text-align:center;">
+        Canned messages:
+        <select id="canned" style="width: 200px;">
+            <option value="---">---</option>
+            {% for message in canned %}
+            <option value="{{message}}">{{message}}</option>
+            {% endfor %}
+        </select> <input type="button" value="Copy" id="appendCanned" disabled="disabled" />
+    </div>
+    {% endif %}
 </div>
 <script type="text/javascript">
     var Chat = function() {
@@ -61,15 +72,21 @@
     Chat.prototype = {
         cmdClear: null,
         cmdSend: null,
+        cmdAppendCanned: null,
+        cboCanned: null,
         txtMessage: null,
         initialize: function() {
             this.cmdSend = document.getElementById("btnSend");
             this.cmdClear = document.getElementById("btnClear");
+            this.cboCanned = document.getElementById("canned");
+            this.cmdAppendCanned = document.getElementById("appendCanned");
             this.txtMessage = document.getElementById("msg");
             this.loadEvents();
         },
         loadEvents: function() {
             var cmdSend = this.cmdSend;
+            var cboCanned = this.cboCanned;
+            var cmdAppendCanned = this.cmdAppendCanned;
             var txtMessage = this.txtMessage;
             jQuery(this.txtMessage).keyup(function(event) {
                 cmdSend.disabled = jQuery(this).val().trim().length == 0;
@@ -89,6 +106,14 @@
                 this.disabled = true;
                 Chat.get().sendMessage(jQuery(txtMessage).val());
                 jQuery(txtMessage).val('').focus();
+            });
+            
+            jQuery(this.cboCanned).change(function(){
+                cmdAppendCanned.disabled = this.value == '---';
+            });
+
+            jQuery(this.cmdAppendCanned).click(function() {
+                jQuery(txtMessage).val(jQuery(cboCanned).val()).focus();
             });
         }, sendMessage: function(text) {
             jQuery.ajax({
