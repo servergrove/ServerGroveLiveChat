@@ -196,7 +196,6 @@ class ChatController extends PublicController
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
             $this->getResponse()->setStatusCode(404, 'Chat session not found');
-            $this->getResponse()->setContent('No chat session found. <a href="' . $this->generateUrl('sglc_chat_homepage') . '">Please start a new chat</a>.<br />');
             return $this->getResponse();
         }
 
@@ -304,7 +303,7 @@ class ChatController extends PublicController
         if ($chatSession->getOperator() && $chatSession->getStatusId() == ChatSession::STATUS_IN_PROGRESS && $this->getHttpSession()->get('chatStatus' . $chatSession->getId()) != 'started') {
             $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), 'started');
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
-            $this->getResponse()->setContent('Chat.get().start()');
+            $this->getResponse()->setContent('Chat.get().start();');
 
             return $this->getResponse();
         }
@@ -321,7 +320,7 @@ class ChatController extends PublicController
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
-        $this->getResponse()->headers->set('Content-type', 'application/json; charset=utf-8');
+        $this->getResponse()->headers->set('Content-type', 'application/javascript; charset=utf-8');
 
         return $this->getResponse();
     }
