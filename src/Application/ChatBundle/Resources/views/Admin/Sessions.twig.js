@@ -1,5 +1,46 @@
 {% include "ChatBundle::DateToolkit.twig.js" %}
+
 var SessionToolkit = {
+    Global: {
+        _timeOut: null,
+        loadTimeout : function() {
+            SessionToolkit.Visit._timeOut = window.setTimeout(function() {
+                window.clearTimeout(SessionToolkit.Visit._timeOut);
+                SessionToolkit.Global.refresh();
+            }, 10000);
+        },
+        refresh: function() {
+            jQuery.ajax({
+                type : "GET",
+                url : "{{ path('sglc_admin_console_sessions_service')}}",
+                cache : false,
+                dataType: 'json',
+                success : function(json) {
+                    SessionToolkit.Visit.Item.drawAll(json.visits);
+                    SessionToolkit.Request.Item.drawAll(json.requests);
+                    SessionToolkit.Global.Data.display(json.count);
+                    SessionToolkit.Global.loadTimeout();
+                },
+                error : function(XMLHttpRequest) {
+                    if (XMLHttpRequest.status == 401) {
+                        location.href = '{{ path("_security_login")}}';
+                    } else {
+                        SessionToolkit.Global.loadTimeout();
+                    }
+                }
+            });
+        },
+        Data: {
+            display: function(json) {
+                jQuery('#visitsCount').html(json.visits);
+                jQuery('#requestChats h2').html('Requested Chats: ' + json.requests);
+                jQuery('#operatorsOnlineCount').html(json.online_operators);
+
+                var d = new Date();
+                jQuery('#lastUpdate').html(d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds());
+            }
+        }
+    },
     Visit: {
         _timeOut: null,
         loadTimeout : function() {
@@ -17,14 +58,24 @@ var SessionToolkit = {
                 dataType: 'json',
                 success : function(json) {
                     SessionToolkit.Visit.loadTimeout();
-                    jQuery('#currentVisits table tbody').html('');
-                    jQuery.each(json, function(i, item) {
-                        SessionToolkit.Visit.Item.draw(item);
-                    });
+                    SessionToolkit.Visit.Item.drawAll(json);
+                },
+                error : function(XMLHttpRequest) {
+                    if (XMLHttpRequest.status == 401) {
+                        location.href = '{{ path("_security_login")}}';
+                    } else {
+                        SessionToolkit.Visit.loadTimeout();
+                    }
                 }
             });
         },
         Item: {
+            drawAll: function(json) {
+                jQuery('#currentVisits table tbody').html('');
+                jQuery.each(json, function(i, item) {
+                    SessionToolkit.Visit.Item.draw(item);
+                });
+            },
             draw:function(item){
                 var row = document.createElement('tr');
                 jQuery(document.createElement('td')).html(item.visitor.id + '('+item.visitor.visits+')').appendTo(row);
@@ -65,10 +116,7 @@ var SessionToolkit = {
 
                 // hits table created
                 .append(jQuery(document.createElement('table')).attr({ 
-                    width: '100%',
-                    cellpadding:0,
-                    cellspacing:0,
-                    border: 0
+                    width: '100%'
                 }).css({
                     'background-color': '#EEE',
                     'color': '#000'
@@ -106,71 +154,79 @@ var SessionToolkit = {
                 cache : false,
                 dataType: 'json',
                 success : function(json) {
-                    jQuery('#requestChats table tbody').html('');
-                    jQuery.each(json, function(i, item) {
-                        var row = document.createElement('tr');
-                        jQuery(row)
-                        .append('<td>'+item.id+' - ' + item.status.name + '</td>')
-                        .append('<td>'+item.visitor.id+' - '+item.visitor.name+'</td>')
-                        .append('<td>'+item.visitor.email+'</td>')
-                        .append('<td>'+item.question+'</td>')
-                        .append('<td>'+item.time+'</td>')
-                        .append('<td>'+item.duration+'</td>')
-                        .append('<td>'+item.operator.name+'</td>')
-                        ;
-                        var actionsCell = document.createElement('td');
-                        if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
-                            var _link1 = document.createElement('a');
-                            jQuery(_link1).click(function(){
-                                window.open("{{path('sglc_chat_accept', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
-                                return false;
-                            }).html('Accept').attr('href', '#');
-                            jQuery(actionsCell).append(_link1);
-                        }
-
-                        if (typeof(item.operator.id) != 'undefined' && item.status.id == '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_IN_PROGRESS")}}') {
-                            var _link2 = document.createElement('a');
-                            jQuery(_link2).click(function(){
-                                window.open("{{path('sglc_chat_load', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
-                                return false;
-                            }).html('Reload').attr('href', '#');
-                            jQuery(actionsCell).append(_link2);
-                        }
-
-                        if (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
-                            var _link3 = document.createElement('a');
-                            jQuery(_link3).click(function(){
-                                return confirm('Are you sure?');
-                            }).html('Close').attr('href', "{{path('sglc_admin_console_close', {'id': '__chatId__'})}}".replace('__chatId__', item.id));
-
-
-                            if (typeof(_link1) != 'undefined' || typeof(_link2) != 'undefined') {
-                                jQuery(actionsCell).append('&nbsp;|&nbsp;');
-                            }
-                            jQuery(actionsCell).append(_link3);
-                        }
-
-                        jQuery(row).append(actionsCell);
-
-                        jQuery('#requestChats table tbody').append(row);
-
-                    });
-                    jQuery('#requestChats table tbody tr:even').addClass('td1');
+                    SessionToolkit.Request.Item.drawAll(json);
                     SessionToolkit.Request.loadTimeout();
                 },
                 error : function(XMLHttpRequest) {
                     if (XMLHttpRequest.status == 401) {
                         location.href = '{{ path("_security_login")}}';
                     } else {
-                        loadTimeout();
+                        SessionToolkit.Request.loadTimeout();
                     }
                 }
             });
+        },
+        Item: {
+            drawAll: function(json) {
+                jQuery('#requestChats table tbody').html('');
+                jQuery.each(json, function(i, item) {
+                    SessionToolkit.Request.Item.draw(item);
+                });
+                jQuery('#requestChats table tbody tr:even').addClass('td1');
+            },
+            draw: function(item) {
+                var row = document.createElement('tr');
+                jQuery(row)
+                .append('<td>'+item.id+' - ' + item.status.name + '</td>')
+                .append('<td>'+item.visitor.id+' - '+item.visitor.name+'</td>')
+                .append('<td>'+item.visitor.email+'</td>')
+                .append('<td>'+item.question+'</td>')
+                .append('<td>'+item.time+'</td>')
+                .append('<td>'+item.duration+'</td>')
+                .append('<td>'+item.operator.name+'</td>')
+                ;
+                var actionsCell = document.createElement('td');
+                if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
+                    var _link1 = document.createElement('a');
+                    jQuery(_link1).click(function(){
+                        window.open("{{path('sglc_chat_accept', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
+                        return false;
+                    }).html('Accept').attr('href', '#');
+                    jQuery(actionsCell).append(_link1);
+                }
+
+                if (typeof(item.operator.id) != 'undefined' && item.status.id == '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_IN_PROGRESS")}}') {
+                    var _link2 = document.createElement('a');
+                    jQuery(_link2).click(function(){
+                        window.open("{{path('sglc_chat_load', {'id': '__chatId__'})}}".replace('__chatId__', item.id),'livechat'+item.id,'width=700,height=575,toolbar=no,location=no');
+                        return false;
+                    }).html('Reload').attr('href', '#');
+                    jQuery(actionsCell).append(_link2);
+                }
+
+                if (item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("Application\\ChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
+                    var _link3 = document.createElement('a');
+                    jQuery(_link3).click(function(){
+                        return confirm('Are you sure?');
+                    }).html('Close').attr('href', "{{path('sglc_admin_console_close', {'id': '__chatId__'})}}".replace('__chatId__', item.id));
+
+
+                    if (typeof(_link1) != 'undefined' || typeof(_link2) != 'undefined') {
+                        jQuery(actionsCell).append('&nbsp;|&nbsp;');
+                    }
+                    jQuery(actionsCell).append(_link3);
+                }
+
+                jQuery(row).append(actionsCell);
+
+                jQuery('#requestChats table tbody').append(row);
+            }
         }
     }
 };
 jQuery('#currentVisits').ready(function(){
-    SessionToolkit.Visit.refreshCurrentVisits();
+    SessionToolkit.Global.refresh();
 });
-SessionToolkit.Request.loadTimeout();
-SessionToolkit.Visit.loadTimeout();
+jQuery(document).ready(function() {
+    SessionToolkit.Global.loadTimeout();
+});

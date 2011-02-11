@@ -6,11 +6,7 @@
 {% block content %}
 {% include "ChatBundle:Admin:header.twig.html" %}
 {% if chats %}
-<script type="text/javascript">
-    //<![CDATA[
-    {% include "ChatBundle:Admin:Sessions.twig.js" %}
-    //]]>
-</script>
+{% render "ChatBundle:Admin:sessionsApi" with {'_format' : 'html'} %}
 {% include "ChatBundle:Admin:requestedChats.twig.html" with {'chats': chats} only %}
 <br>
 <br>

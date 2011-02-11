@@ -141,6 +141,35 @@ class AdminController extends BaseController
             'chats' => $this->getRequestedChats()));
     }
 
+    public function sessionsApiAction($_format)
+    {
+        return $this->renderTemplate('ChatBundle:Admin:Sessions.twig.' . $_format);
+    }
+
+    public function sessionsServiceAction()
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            $this->getResponse()->setStatusCode(401);
+            $this->getResponse()->setContent('');
+            return $this->getResponse();
+        }
+
+        $this->getDocumentManager()->getRepository('ChatBundle:Session')->closeSessions();
+
+        $this->getResponse()->headers->set('Content-type', 'application/json');
+
+        $json = array();
+        $json['requests'] = $this->getRequestedChatsArray();
+        $json['count']['requests'] = count($json['requests']);
+        $json['visits'] = $this->getDocumentManager()->getRepository('ChatBundle:Visit')->getLastVisitsArray();
+        $json['count']['visits'] = count($json['visits']);
+        $json['count']['online_operators'] = $this->getDocumentManager()->getRepository('ChatBundle:Operator')->getOnlineOperatorsCount();
+
+        $this->getResponse()->setContent(json_encode($json));
+
+        return $this->getResponse();
+    }
+
     public function requestedChatsAction($_format)
     {
         if (!is_null($response = $this->checkLogin())) {
