@@ -5,28 +5,32 @@ sglc_chat_homepage:
     defaults: { _controller: ChatBundle:Chat:index }
 
 sglc_chat_load:
-  pattern: /sglivechat/load
+  pattern: /sglivechat/{id}/load
   defaults: { _controller: ChatBundle:Chat:load }
 
 sglc_chat_accept:
-  pattern: /sglivechat/accept/{id}
+  pattern: /sglivechat/{id}/accept
   defaults: { _controller: ChatBundle:Chat:accept }
 
 sglc_chat_reject:
-  pattern: /sglivechat/reject/{id}
+  pattern: /sglivechat/{id}/reject/
   defaults: { _controller: ChatBundle:Chat:reject }
+  
+sglc_chat_user_action:
+  pattern: /sglivechat/{id}/user/action/{action}
+  defaults: { _controller: ChatBundle:Chat:userAction }
 
 sglc_chat_done:
-  pattern: /sglivechat/done
+  pattern: /sglivechat/{id}/done
   defaults: { _controller: ChatBundle:Chat:done }
 
 sglc_chat_send:
-  pattern: /sglivechat/send
+  pattern: /sglivechat/{id}/send
   defaults: { _controller: ChatBundle:Chat:send }
   requirements: { _method: post }
 
 sglc_chat_messages:
-  pattern: /sglivechat/messages.{_format}
+  pattern: /sglivechat/{id}/messages.{_format}
   defaults: { _controller: ChatBundle:Chat:messages, _format: html }
   requirements: { _method: get }
   

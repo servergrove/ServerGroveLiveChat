@@ -1,17 +1,13 @@
 {% extends "ChatBundle::layout.twig.html" %}
 {% block head_buttons %}
 <div id="buttons">
-    <a href="{{ path('sglc_chat_done')}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a>
-    <a href="{{ path('sglc_chat_done')}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
-</div>
-{%endblock%}
+    <a href="{{ path('sglc_chat_done', {'id': chat.getId()})}}" onclick="return confirm('This will close the chat session. Are you sure?');" title="Email transcripts"><img src="{{asset('images/icon_email.jpg')}}" width="41" height="37" alt="Email" class="header_buttons" /></a><a href="{{ path('sglc_chat_done', {'id': chat.getId()})}}" onclick="return confirm('Are you sure you want to close the chat session?');" title="Close"><img src="{{asset('images/icon_close.jpg')}}" width="87" height="37" alt="Online Support ServerGrove" class="header_buttons" /></a>
+</div>{%endblock%}
 {% block content %}
 <div class="left">
     <div id="connecting" style=" margin-left: 50px;">
-        <h3 style="background-color: #fff; border: 1px #777 solid; text-align: center; padding: 10px;">
-            {% if operator %}
-            Waiting for visitor's response. Please wait... <a href="<?php echo url_for( 'chat/rejectInvite?id='.$chat->getId() )?>">Cancel request</a>
-            {%else%}
+        <h3 style="background-color: #fff; border: 1px #777 solid; text-align: center; padding: 10px;">{% if isOperator %} 
+            Waiting for visitor's response. Please wait... <a href="<?php echo url_for( 'chat/rejectInvite?id='.$chat->getId() )?>">Cancel request</a> {%else%}
             Please wait while we find an agent to assist you...
             {% endif %}
             <p>
@@ -25,197 +21,40 @@
 <div id="chat" style="display: none; width: 700px;">
     <div class="left">
         <div id="messages" style="overflow: auto;height: 400px;">
+            <div id="user-messages">
+            </div>
+            <div id="action" style="font-size: 0.8em; font-style: italic;">&nbsp;
+            </div>
         </div>
     </div>
     <div class="right">
         <img src="{{asset('images/banner.gif')}}" width="114" height="223" alt="How can we help?" />
     </div>
-    <div class="hspacer">&nbsp;
+    <div class="hspacer">
+        &nbsp;
     </div>
     <div class="left">
         <textarea id="msg"></textarea>
     </div>
     <div class="right">
-        <input id="btnSend" type="image" src="{{asset('images/btn_send.gif')}}" name="send" disabled="disabled" />
-        {% if operator %}
-        <input id="btnClear" type="button" value="Clear"/>
-        {% endif %}
+        <input id="btnSend" type="image" src="{{asset('images/btn_send.gif')}}" name="send" disabled="disabled" />{% if isOperator %}<input id="btnClear" type="button" value="Clear"/>{% endif %}
     </div>
-    <div class="vspacer"></div>
-    <img src="{{asset('images/secure_chat.gif')}}" width="79" height="18" alt="Email" class="secure_chat" alt="This chat is encrypted for your safety" />
-    {% if operator %}
+    <div class="vspacer">
+    </div>
+    <img src="{{asset('images/secure_chat.gif')}}" width="79" height="18" alt="Email" class="secure_chat" alt="This chat is encrypted for your safety" />{% if isOperator %}
     <div style="clear:both; text-align:center;">
         Canned messages:
         <select id="canned" style="width: 200px;">
             <option value="---">---</option>
-            {% for message in canned %}
-            <option value="{{message}}">{{message}}</option>
+            {% for message in canned %}<option value="{{message}}">{{message}}</option>
             {% endfor %}
-        </select> <input type="button" value="Copy" id="appendCanned" disabled="disabled" />
-    </div>
-    {% endif %}
+        </select>
+        <input type="button" value="Copy" id="appendCanned" disabled="disabled" />
+    </div>{% endif %}
 </div>
 <script type="text/javascript">
-    var Chat = function() {
-        this.initialize();
-    }
-
-    Chat._instance = null;
-    Chat.create = function() {
-        Chat._instance = new Chat();
-    }
-
-    Chat.get = function() {
-        return Chat._instance;
-    }
-
-    Chat.prototype = {
-        cmdClear: null,
-        cmdSend: null,
-        cmdAppendCanned: null,
-        cboCanned: null,
-        txtMessage: null,
-        initialize: function() {
-            this.cmdSend = document.getElementById("btnSend");
-            this.cmdClear = document.getElementById("btnClear");
-            this.cboCanned = document.getElementById("canned");
-            this.cmdAppendCanned = document.getElementById("appendCanned");
-            this.txtMessage = document.getElementById("msg");
-            this.loadEvents();
-        },
-        loadEvents: function() {
-            var cmdSend = this.cmdSend;
-            var cboCanned = this.cboCanned;
-            var cmdAppendCanned = this.cmdAppendCanned;
-            var txtMessage = this.txtMessage;
-            jQuery(this.txtMessage).keyup(function(event) {
-                cmdSend.disabled = jQuery(this).val().trim().length == 0;
-                if (!cmdSend.disabled && event.keyCode == 13) {
-                    jQuery(cmdSend).click();
-                }
-            }).change(function(){
-                cmdSend.disabled = jQuery(this).val().trim().length == 0;
-            });
-
-            jQuery(this.cmdClear).click(function() {
-                cmdSend.disbled = true;
-                jQuery(txtMessage).val('').focus();
-            });
-
-            jQuery(this.cmdSend).click(function() {
-                this.disabled = true;
-                Chat.get().sendMessage(jQuery(txtMessage).val());
-                jQuery(txtMessage).val('').focus();
-            });
-            
-            jQuery(this.cboCanned).change(function(){
-                cmdAppendCanned.disabled = this.value == '---';
-            });
-
-            jQuery(this.cmdAppendCanned).click(function() {
-                jQuery(txtMessage).val(jQuery(cboCanned).val()).focus();
-            });
-        }, sendMessage: function(text) {
-            jQuery.ajax({
-                type: "POST",
-                url: "{{ path('sglc_chat_send', {'id': chat.getId()})}}",
-                data: {
-                    msg: text.trim()
-                },
-                cache: false,
-                success: function(msg){
-                }
-            });
-        },
-        loadTimer: function() {
-            Chat.get()._updateInterval = window.setTimeout(function(){
-                Chat.get().scrollMessagesContainer();
-                Chat.get().updateMessages();
-            }, 1000);
-        },
-        _updateInterval: null,
-        updateMessages: function() {
-            jQuery.ajax({
-                type: "GET",
-                url: "{{ path('sglc_chat_messages', {'_format': 'json', 'id': chat.getId()})}}",
-                dataType: 'json',
-                cache: false,
-                success: function(json){
-                    try {
-                        jQuery.each(json, function(i, item) {
-                            Chat.get().appendMessage(item);
-                        });
-                    } catch (e) {}
-                    Chat.get().loadTimer();
-                }, error: function(XMLHttpRequest) {
-                    if (XMLHttpRequest.status == 404) {
-                        Chat.get().appendMessage({
-                            content: 'No chat session found. <a href="{{path("sglc_chat_homepage")}}">Please start a new chat</a>',
-                            name: 'Admin',
-                            idOperator: true
-                        });
-                    } else {
-                        Chat.get().loadTimer();
-                    }
-                }
-            });
-        },
-        appendMessage: function(item) {
-            var _table = document.createElement('table');
-            var _row = document.createElement('tr');
-            var _cell1 = document.createElement('td');
-            var _cell2 = document.createElement('td');
-
-            jQuery(_table).attr({cellpadding: 3, cellspacing: 0, border: 0, width: "100%"});
-            jQuery(_row).attr({valign: 'top'});
-            if (item.isOperator) {
-                jQuery(_row).css({'background-color': '#F8F8F8'});
-            }
-
-            jQuery(document.createElement('div'))
-            .addClass('name').addClass(item.isOperator ? 'operator' : 'client')
-            .html(item.name+': ').appendTo(_cell1)
-            .parent().attr('width', '70px').appendTo(_row);
-
-            jQuery(_cell2).html(item.content)
-            .appendTo(_row)
-            
-            .parent()
-            .appendTo(_table);
-
-            jQuery(_table).appendTo('#messages');
-        }
-        , scrollMessagesContainer: function() {
-            var container = jQuery('#messages');
-            container.scrollTop = container.scrollHeight;
-        },
-        _checkStatusEnabled : true,
-        checkStatus:function() {
-            jQuery.ajax({
-                type: "GET",
-                url: "{{ path('sglc_chat_status', {'id': chat.getId()})}}",
-                dataType: 'script',
-                cache: false,
-                success: function(){
-                    if (Chat.get()._checkStatusEnabled) {
-                        window.setTimeout(function(){
-                            Chat.get().checkStatus();
-                        }, 1000);
-                    }
-                }
-            });
-        }, start: function() {
-            jQuery('#connecting').hide();
-            jQuery('#chat').show();
-            Chat.get()._checkStatusEnabled = false;
-            Chat.get().updateMessages();
-        }
-    };
-
-
-    jQuery(document).ready(function(){
-        Chat.create();
-        Chat.get().checkStatus();
-    });
+                //<![CDATA[
+            	{% include "ChatBundle:Chat:ChatApi.twig.js" %}
+            	//]]>
 </script>
 {% endblock %}
