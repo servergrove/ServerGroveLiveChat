@@ -14,16 +14,23 @@ namespace Application\ChatBundle\Document;
  */
 class Session
 {
+
     const STATUS_WAITING = 1;
+
     const STATUS_IN_PROGRESS = 2;
+
     const STATUS_CLOSED = 3;
+
     const STATUS_CANCELED = 4;
+
     const STATUS_INVITE = 5;
 
-    private static $statuses = array(1 => 'Waiting', 2 => 'In Progress', 3 => 'Closed',
+    private static $statuses = array(
+        1 => 'Waiting',
+        2 => 'In Progress',
+        3 => 'Closed',
         4 => 'Canceled',
-        5 => 'Invite',
-    );
+        5 => 'Invite');
 
     public function getStatus()
     {
@@ -35,56 +42,67 @@ class Session
      * @mongodb:Id
      */
     private $id;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $sessionId;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $createdAt;
+
     /**
      * @var string
      * @mongodb:Date
      */
     private $updatedAt;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $remoteAddr;
+
     /**
      * @var Operator
      * @mongodb:ReferenceOne(targetDocument="Visitor")
      */
     private $visitor;
+
     /**
      * @var Operator
      * @mongodb:ReferenceOne(targetDocument="Operator")
      */
     private $operator;
+
     /**
      * @var Operator
      * @mongodb:ReferenceOne(targetDocument="Visit")
      */
     private $visit;
+
     /**
      * @var string
      * @mongodb:String
      */
     private $question;
+
     /**
      * @var integer
      * @mongodb:Field(type="int")
      */
     private $statusId;
+
     /**
      * @var ChatMessage[]
      * @mongodb:EmbedMany(targetDocument="Message")
      */
     private $messages = array();
+
     /**
      * @var Application\ChatBundle\Document\Operator\Rating
      * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Operator\Rating")
@@ -118,16 +136,17 @@ class Session
      */
     public function registerCreatedDate()
     {
-        $this->addChatMessage($this->getQuestion());
+        $question = $this->getQuestion();
+        if (!empty($question) && $this->getVisitor()) {
+            $this->addChatMessage($question, $this->getVisitor());
+        }
     }
 
-    public function addChatMessage($content, Operator $operator = null)
+    public function addChatMessage($content, User $sender)
     {
         $m = new Message();
         $m->setContent($content);
-        if ($operator instanceof Operator) {
-            $m->setOperator($operator);
-        }
+        $m->setSender($sender);
         $m->setSession($this);
         $this->messages[] = $m;
     }
@@ -252,6 +271,15 @@ class Session
     public function setOperator($operator)
     {
         $this->operator = $operator;
+    }
+
+    public function getOtherMember(User $user)
+    {
+        if ($user->getKind() == 'Operator') {
+            return $this->getVisitor();
+        }
+
+        return $this->getOperator();
     }
 
     /**
