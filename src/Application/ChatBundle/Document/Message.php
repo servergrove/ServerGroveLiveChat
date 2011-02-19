@@ -21,10 +21,10 @@ class Message
     private $id;
 
     /**
-     * @var Operator
-     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\Operator")
+     * @var User
+     * @mongodb:ReferenceOne(targetDocument="Application\ChatBundle\Document\User")
      */
-    private $operator;
+    private $sender;
 
     /**
      * @var Session
@@ -37,7 +37,7 @@ class Message
      * @mongodb:Date
      */
     private $createdAt;
-    
+
     /**
      * @var string
      * @mongodb:String
@@ -61,25 +61,25 @@ class Message
     }
 
     /**
-     * @return the $operator
+     * @return the $sender
      */
-    public function getOperator()
+    public function getSender()
     {
-        return $this->operator;
+        return $this->sender;
     }
 
     /**
-     * @param Integer $operator
+     * @param User $sender
      */
-    public function setOperator($operator)
+    public function setSender($sender)
     {
-        $this->operator = $operator;
+        $this->sender = $sender;
     }
 
-    public function getOperatorId()
+    public function getSenderId()
     {
-        if ($this->getOperator()) {
-            return $this->getOperator()->getId();
+        if ($this->getSender()) {
+            return $this->getSender()->getId();
         }
 
         return null;
