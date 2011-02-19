@@ -2,6 +2,8 @@
 
 namespace Application\ChatBundle;
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
@@ -11,5 +13,14 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class ChatBundle extends Bundle
 {
-    //put your code here
+
+    public function registerExtensions(ContainerBuilder $container)
+    {
+        // will register the HelloBundle extension(s) found in DependencyInjection/ directory
+        parent::registerExtensions($container);
+
+        // load some defaults
+        $container->loadFromExtension('chat', 'config', array(/* your default config for the hello.config namespace */));
+    }
+
 }
