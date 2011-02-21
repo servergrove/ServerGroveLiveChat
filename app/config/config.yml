@@ -46,3 +46,6 @@ swiftmailer.config:
 #    host:       smtp.gmail.com
 #    username:   xxxxxxxx
 #    password:   xxxxxxxx
+
+chat.config:
+  cache_engine: mongo

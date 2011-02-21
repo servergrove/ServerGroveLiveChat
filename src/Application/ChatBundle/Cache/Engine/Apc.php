@@ -11,6 +11,12 @@ use Application\ChatBundle\Cache\Cacheable;
  */
 class Apc extends Base
 {
+    public function  __construct()
+    {
+        if (!\function_exists('apc_store')) {
+            throw new \Exception("APC extension not installed.");
+        }
+    }
 
     public function set($key, $var, $ttl = self::DEFAULT_TTL)
     {

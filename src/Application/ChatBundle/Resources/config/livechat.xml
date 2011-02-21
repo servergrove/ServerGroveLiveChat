@@ -4,12 +4,21 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
     <parameters>
+        <parameter key="livechat.cache_engine">apc</parameter>
         <parameter key="livechat.cache.manager.class">Application\ChatBundle\Cache\Manager</parameter>
+        <parameter key="livechat.cache.engine.apc.class">Application\ChatBundle\Cache\Engine\Apc</parameter>
+        <parameter key="livechat.cache.engine.mongo.class">Application\ChatBundle\Cache\Engine\Mongo</parameter>
     </parameters>
     
     <services>
         <!-- User Repository Service -->
         <service id="livechat.cache.manager" shared="false" class="%livechat.cache.manager.class%">
+          <argument type="service" id="livechat.cache.default_engine" />
+        </service>
+        <service id="livechat.cache.default_engine" alias="livechat.cache.engine.mongo" public="false"></service>
+        <service id="livechat.cache.engine.apc" class="%livechat.cache.engine.apc.class%"></service>
+        <service id="livechat.cache.engine.mongo" class="%livechat.cache.engine.mongo.class%">
+          <argument type="service" id="doctrine.odm.mongodb.default_document_manager" />
         </service>
     </services>
     

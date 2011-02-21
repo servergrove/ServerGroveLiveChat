@@ -78,7 +78,7 @@ class VisitRepository extends DocumentRepository
                         'link' => $hit->getVisitLink()->getUrl(),
                         'referer' => $hit->getReferer());
                 }, $hits->toArray(true)),
-                'localtime' => date('r', $visit->getLocalTime()->__toString()),
+                'localtime' => date('r', (string) $visit->getLocalTime()),
                 'hostname' => /* gethostbyaddr($visit->getRemoteAddr()) */'Unknown',
                 'remoteAddr' => $visit->getRemoteAddr(),
                 'country' => 'unknown',
