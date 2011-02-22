@@ -1,0 +1,27 @@
+<div id="requestChats">
+    <script type="text/javascript">
+        jQuery(document).ready(function(){
+            jQuery('#requestChats table tbody tr:even').addClass('td1');
+        });
+    </script>
+    <h2>Requested Chats: {{chats.count()}}</h2>
+    <table width="100%">
+        <thead>
+            <tr class="header">
+                <td>Chat ID</td>
+                <td>Visitor</td>
+                <td>Email</td>
+                <td>Question</td>
+                <td>Time</td>
+                <td>Duration</td>
+                <td>Operator</td>
+                <td>Action</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chat in chats %}
+            {% include "SGLiveChatBundle:Admin:requestItem.html.twig" with {'chat': chat} only %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

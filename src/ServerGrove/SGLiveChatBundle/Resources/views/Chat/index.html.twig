@@ -1,0 +1,35 @@
+{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% block content %}
+<div style="padding-left: 30px;padding-right: 30px;">
+    <h3>
+        Please enter your name, email address and question so we can assist you. We will connect an available agent.
+        <br><br>
+        If you prefer, you can also <a href="https://secure.servergrove.com/clients/submitticket.php">submit a ticket</a> or search our <a href="http://secure.servergrove.com/clients/knowledgebase.php" target="_blank">knowledge base</a>.
+    </h3>
+    <form action="{{path('sglc_chat_homepage')}}" method="post">
+        <div class="inputname">
+            Name
+        </div>
+        <div class="inputbox">
+            <input style="width: 400px;" type="text" name="name" value="{{visitor.getName()}}" />
+        </div>
+        <p></p>
+        <div class="inputname">
+            Email
+        </div>
+        <div class="inputbox">
+            <input style="width: 400px;" type="text" name="email" value="{{visitor.getEmail()}}" />
+        </div>
+        <p></p>
+        <div class="inputname">
+            Question
+        </div>
+        <div class="inputbox">
+            <textarea style="width: 400px; height: 170px;" name="question"></textarea>
+        </div>
+        <p></p>
+        <input type="submit" value="Start Chat" />
+    </form>
+	<h3 class="error">{{errorMsg}}</h3>
+</div>
+{% endblock %}

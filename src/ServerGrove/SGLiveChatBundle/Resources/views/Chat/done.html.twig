@@ -1,0 +1,59 @@
+{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% block content %}
+<div style="margin-left: 20px;margin-right: 20px;">
+    <form method="POST" action="#">
+        <h3>Thanks for using our Live Chat. 
+            <br>
+            <br>
+            Please rate the level of satisfaction with this session. If you have any comments, please include them in the Comments box. 
+            <br>
+            <br>
+            We appreciate all feedback as it help us provide a better experience for our Customers. 
+        </h3>
+        <div class="inputname">
+            Rating
+        </div>
+        <div class="inputbox">
+            <select id="rating" name="rating">
+                <option value="5">5 Star</option>
+                <option value="4">4 Star</option>
+                <option value="3">3 Star</option>
+                <option value="2">2 Star</option>
+                <option value="1">1 Star</option>
+            </select>
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+            Comments
+        </div>
+        <div class="inputbox">
+            <textarea id="comments" name="comments" cols="70" rows="6"></textarea>
+        </div>
+        <p>
+        </p>
+        {% if enableSendTranscripts %}
+        <div class="inputname">
+            Transcripts
+        </div>
+        <div class="inputbox">
+            <input type="checkbox" id="transcripts" name="transcripts" value="1" /><label for="transcripts">Yes, send me the transcripts of this session.</label>
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+            Email
+        </div>
+        <div class="inputbox">
+            <input style="width: 300px" type="text" id="email" name="email" value="{{email}}"/>
+        </div>
+        <p>
+        </p>
+        {% endif %}
+        <input type="submit" value="Submit"/>
+    </form>
+</div><h3 class="error" style="text-align: center;">
+    <div id="returnMessage">
+    </div>
+</h3>
+{% endblock %}

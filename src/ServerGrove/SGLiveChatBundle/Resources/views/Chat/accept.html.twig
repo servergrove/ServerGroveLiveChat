@@ -1,0 +1,24 @@
+{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% block content %}
+<form method="POST" action="{{path('sglc_chat_accept', {'id': chat.getId()})}}">
+    <span class="inputname">Name</span>
+    <span class="inputbox">{{visitor.getName()}}</span>
+    <p></p>
+    <span class="inputname">Email</span>
+    <span class="inputbox">{{visitor.getEmail()}}</span>
+    <p></p>
+    <span class="inputname">Messages</span>
+
+    {% for message in messages %}
+	{% set sender = message.getSender() %}
+    <p style="padding: 3px 5px; margin: 0;"><span class="name"><strong>{{sender.getKind()}}:</strong></span> <span class="messageContent">{{message.getContent()}}</span></p>
+    {% endfor %}
+
+    <p>
+        {% if chat.getOperator() and chat.getOperator().getId() %}
+        Chat is being worked by {{operator.getName()}}
+        {% endif %}
+    </p>
+    <input type="submit" value="Accept Chat" />
+</form>
+{% endblock %}

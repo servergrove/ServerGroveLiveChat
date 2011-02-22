@@ -1,0 +1,37 @@
+{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% block content %}
+<form action="{{ path('_security_check') }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <h3>Please enter your e-mail and password to access the admin panel</h3>
+        <div>
+            {% if errorMsg %}
+            {{errorMsg}}
+            {% endif %}
+            {{ form_errors(form) }}
+        </div>
+        <div class="inputname">
+            e-mail
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.email) }}
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+            Password
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.passwd) }}
+        </div>
+        <p>
+            {{ form_hidden(form) }}
+        </p>
+        <input type="submit" value="Login" />
+    </div>
+</form>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text').focus();
+    });
+</script>
+{% endblock %}

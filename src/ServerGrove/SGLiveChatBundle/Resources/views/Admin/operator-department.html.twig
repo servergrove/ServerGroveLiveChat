@@ -1,0 +1,33 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% set route = department.getId() ? 'sglc_admin_operator_department_edit' : 'sglc_admin_operator_department' %}
+{% set vars = department.getId() ? {'id': department.getId()} : {} %}
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text').focus();
+    });
+</script>
+<form action="{{ path(route, vars) }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <div>
+            {{ form_errors(form) }}
+        </div>
+        <div class="inputname">
+            name
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.name) }}
+        </div>
+        <p>
+            {{ form_field(form.isActive) }}<label for="{{form.getName()}}_isActive">Active</label>
+        </p>
+        <p>
+            {{ form_hidden(form) }}
+        </p>
+        <input type="submit" value="Submit" />
+    </div>
+</form>
+
+{% endblock %}

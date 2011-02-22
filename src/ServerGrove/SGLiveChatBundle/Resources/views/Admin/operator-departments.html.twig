@@ -1,0 +1,61 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="10%"><col><col><col width="115px"><col width="75px"><col width="100px">
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Is Active
+            </th>
+            <th>
+                &nbsp;
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="4">
+                <a href="{{path('sglc_admin_operator_department')}}">New</a>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if departments %}
+        {% for department in departments %}
+        <tr>
+            <td>
+                {{department.getId()}}
+            </td>
+            <td>
+                {{department.getName()}}
+            </td>
+            <td>
+                {% if department.isActive() %}
+                Yes
+                {% else %}
+                No
+                {% endif %}
+            </td>
+            <td>
+                <a href="">{% if department.isActive() %}
+                    Deactivate
+                    {% else %}
+                    Activate
+                    {% endif %}</a>
+                &nbsp;<a href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

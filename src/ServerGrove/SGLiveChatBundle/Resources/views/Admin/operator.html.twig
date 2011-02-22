@@ -1,0 +1,49 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% set route = operator.getId() ? 'sglc_admin_operator_edit' : 'sglc_admin_operator' %}
+{% set vars = operator.getId() ? {'id': operator.getId()} : {} %}
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text').focus();
+    });
+</script>
+<form action="{{ path(route, vars) }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <div>
+            {{ form_errors(form) }}
+        </div>
+        <div class="inputname">
+            name
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.name) }}
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+            e-mail
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.email.first) }} &nbsp; {{ form_field(form.email.second) }}
+        </div>
+        <p>
+        </p>
+        <div class="inputname">
+            Password
+        </div>
+        <div class="inputbox">
+            {{ form_field(form.passwd.first, {'autocomplete': 'off'}) }} &nbsp; {{ form_field(form.passwd.second, {'autocomplete': 'off'}) }}
+        </div>
+        <p>
+            {{ form_field(form.isActive) }}
+            <label for="{{form.getName()}}_isActive">
+                Active
+            </label>
+        </p>
+        <p>
+            {{ form_hidden(form) }}
+        </p>
+        <input type="submit" value="Submit" />
+    </div>
+</form> {% endblock %}

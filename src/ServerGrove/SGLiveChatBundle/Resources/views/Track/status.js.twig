@@ -1,0 +1,5 @@
+{% include "SGLiveChatBundle:Track:base.js.twig" %}
+{% include "SGLiveChatBundle:Track:update-timer.js.twig" %}
+
+SGChatTrackerStatus = {{ online ? 'true' : 'false' }};
+SGChatTracker.drawStatusLink();

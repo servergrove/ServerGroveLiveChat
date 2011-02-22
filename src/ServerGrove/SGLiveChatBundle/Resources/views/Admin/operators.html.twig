@@ -1,0 +1,73 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="10%"><col><col><col width="115px"><col width="75px"><col width="100px">
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                e-mail
+            </th>
+            <th>
+                Created At
+            </th>
+            <th>
+                Is Active
+            </th>
+            <th>
+                &nbsp;
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="6">
+                <a href="{{path('sglc_admin_operator')}}">New</a>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if operators %}
+        {% for operator in operators %}
+        <tr>
+            <td>
+                {{operator.getId()}}
+            </td>
+            <td>
+                {{operator.getName()}}
+            </td>
+            <td>
+                {{operator.getEmail()}}
+            </td>
+            <td>
+                {{operator.getCreatedAt().format('Y-m-d H:i:s')}}
+            </td>
+            <td>
+                {% if operator.isActive() %}
+                Yes
+                {% else %}
+                No
+                {% endif %}
+            </td>
+            <td>
+                <a href="">{% if operator.isActive() %}
+                    Deactivate
+                    {% else %}
+                    Activate
+                    {% endif %}</a>
+                &nbsp;<a href="{{path('sglc_admin_operator_edit', {'id': operator.getId()})}}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

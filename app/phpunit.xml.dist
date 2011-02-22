@@ -9,11 +9,11 @@
          processIsolation="true"
          stopOnFailure="false"
          syntaxCheck="false"
-         bootstrap="../src/autoload.php"
+         bootstrap="bootstrap.php"
 >
   <testsuites>
       <testsuite name="Project Test Suite">
-          <directory>../src/Application/ChatBundle/Tests</directory>
+          <directory>../src/*/*Bundle/Tests</directory>
       </testsuite>
   </testsuites>
 
@@ -25,10 +25,10 @@
 
   <filter>
       <whitelist>
-          <directory>../src/Application</directory>
+          <directory>../src</directory>
           <exclude>
-              <directory>../src/Application/*/Resources</directory>
-              <directory>../src/Application/*/Tests</directory>
+              <directory>../src/*/*Bundle/Resources</directory>
+              <directory>../src/*/*Bundle/Tests</directory>
           </exclude>
       </whitelist>
   </filter>

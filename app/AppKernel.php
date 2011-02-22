@@ -1,16 +1,10 @@
 <?php
 
-require_once __DIR__.'/../src/autoload.php';
-
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\DependencyInjection\Loader\LoaderInterface;
 
 class AppKernel extends Kernel
 {
-    public function registerRootDir()
-    {
-        return __DIR__;
-    }
 
     public function registerBundles()
     {
@@ -26,8 +20,7 @@ class AppKernel extends Kernel
             new Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle(),
 
             // register your bundles
-            new Application\ChatBundle\ChatBundle(),
-        );
+            new ServerGrove\SGLiveChatBundle\SGLiveChatBundle());
 
         if ($this->isDebug()) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
@@ -36,19 +29,15 @@ class AppKernel extends Kernel
         return $bundles;
     }
 
-    public function registerBundleDirs()
+    public function registerRootDir()
     {
-        return array(
-            'Application'     => __DIR__.'/../src/Application',
-            'Bundle'          => __DIR__.'/../src/Bundle',
-            'Symfony\\Bundle' => __DIR__.'/../src/vendor/symfony/src/Symfony/Bundle',
-        );
+        return __DIR__;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         // use YAML for configuration
         // comment to use another configuration format
-        $loader->load(__DIR__.'/config/config_'.$this->getEnvironment().'.yml');
+        $loader->load(__DIR__ . '/config/config_' . $this->getEnvironment() . '.yml');
     }
 }
