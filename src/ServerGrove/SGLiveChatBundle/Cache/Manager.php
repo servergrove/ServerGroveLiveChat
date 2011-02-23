@@ -17,9 +17,9 @@ class Manager implements Cacheable
      */
     private $engine;
 
-    public function __construct()
+    public function __construct(Engine\Base $engine)
     {
-        $this->engine = new Apc();
+        $this->engine = $engine;
     }
 
     public function set($key, $var, $ttl = self::DEFAULT_TTL)

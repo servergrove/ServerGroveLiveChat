@@ -2,8 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Cache\Engine;
 
-use ServerGrove\SGLiveChatBundle\Cache\Cacheable;
-
 /**
  * Description of Apc
  *
@@ -11,6 +9,13 @@ use ServerGrove\SGLiveChatBundle\Cache\Cacheable;
  */
 class Apc extends Base
 {
+
+    public function __construct()
+    {
+        if (!function_exists('apc_store')) {
+            throw new \Exception("APC extension not installed.");
+        }
+    }
 
     public function set($key, $var, $ttl = self::DEFAULT_TTL)
     {

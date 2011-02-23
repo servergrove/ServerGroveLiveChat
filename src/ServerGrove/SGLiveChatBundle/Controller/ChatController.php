@@ -167,8 +167,7 @@ class ChatController extends PublicController
             if (($cannedMessages = $this->getCannedMessages()) !== false) {
                 /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
-                    $arrCannedMessages[] = $cannedMessage->renderContent(
-                    array(
+                    $arrCannedMessages[] = $cannedMessage->renderContent(array(
                         'operator' => $operator,
                         'currtime' => date('H:i:s'),
                         'currdate' => date('m-d-Y')));
@@ -380,18 +379,18 @@ class ChatController extends PublicController
 
     private function userIsTyping(User $user, ChatSession $chatSession)
     {
-        $this->getCacheManager()->set('chat.' . strtolower($user->getKind()) . '.typing', true, 3);
+        $this->getCacheManager()->set('chat.' . $chatSession->getId() . '.' . strtolower($user->getKind()) . '.typing', true, 3);
     }
 
     private function userIsNotTyping(User $user, ChatSession $chatSession)
     {
-        $this->getCacheManager()->remove('chat.' . strtolower($user->getKind()) . '.typing');
+        $this->getCacheManager()->remove('chat.' . $chatSession->getId() . '.' . strtolower($user->getKind()) . '.typing');
     }
 
-    private function theOtherMemberIsTyping($chatSession)
+    private function theOtherMemberIsTyping(ChatSession $chatSession)
     {
         $user = $this->getUserForSession($chatSession);
-        return $this->getCacheManager()->has('chat.' . strtolower($chatSession->getOtherMember($user)->getKind()) . '.typing');
+        return $this->getCacheManager()->has('chat.' . $chatSession->getId() . '.' . strtolower($chatSession->getOtherMember($user)->getKind()) . '.typing');
     }
 
     /**

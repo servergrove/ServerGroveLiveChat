@@ -50,3 +50,6 @@ swiftmailer.config: ~
 #    host:       smtp.gmail.com
 #    username:   xxxxxxxx
 #    password:   xxxxxxxx
+
+sglivechat.config:
+  cache_engine: mongo
