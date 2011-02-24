@@ -52,7 +52,7 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
 
     public function closeOldLogins()
     {
-        $this->createQueryBuilder()->field('isOnline')->set(false)->field('isOnline')->equals(true)->field('updatedAt')->lt(new MongoDate(time() - 300))->update()->getQuery()->execute();
+        $this->createQueryBuilder()->field('isOnline')->set(false)->field('isOnline')->equals(true)->field('updatedAt')->lt(new MongoDate(time() - 3600))->update()->getQuery()->execute();
     }
 
     public function supportsClass($class)
