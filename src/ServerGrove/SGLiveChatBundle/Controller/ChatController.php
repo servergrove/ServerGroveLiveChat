@@ -103,7 +103,7 @@ class ChatController extends PublicController
             $this->cacheUserForSession($visitor, $chatSession);
 
             return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                'id' => $chatSession->getId())));
+                        'id' => $chatSession->getId())));
         }
 
         return $this->renderTemplate('SGLiveChatBundle:Chat:index.html.twig', array(
@@ -139,16 +139,16 @@ class ChatController extends PublicController
                 $this->cacheUserForSession($operator, $chatSession);
 
                 return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                    'id' => $chatSession->getId())));
+                            'id' => $chatSession->getId())));
             }
         }
 
         return $this->renderTemplate('SGLiveChatBundle:Chat:accept.html.twig',
-        array(
-            'chat' => $chatSession,
-            'visitor' => $chatSession->getVisitor(),
-            'messages' => $chatSession->getMessages(),
-            'operator' => $operator));
+                array(
+                    'chat' => $chatSession,
+                    'visitor' => $chatSession->getVisitor(),
+                    'messages' => $chatSession->getMessages(),
+                    'operator' => $operator));
     }
 
     /**
@@ -168,9 +168,9 @@ class ChatController extends PublicController
                 /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
                     $arrCannedMessages[] = $cannedMessage->renderContent(array(
-                        'operator' => $operator,
-                        'currtime' => date('H:i:s'),
-                        'currdate' => date('m-d-Y')));
+                                'operator' => $operator,
+                                'currtime' => date('H:i:s'),
+                                'currdate' => date('m-d-Y')));
                 }
             }
         }
@@ -181,11 +181,11 @@ class ChatController extends PublicController
 
         $user = $this->getUserForSession($chatSession);
         return $this->renderTemplate('SGLiveChatBundle:Chat:load.html.twig',
-        array(
-            'chat' => $chatSession,
-            'canned' => $arrCannedMessages,
-            'user' => $user,
-            'isOperator' => $user->getKind() == 'Operator'));
+                array(
+                    'chat' => $chatSession,
+                    'canned' => $arrCannedMessages,
+                    'user' => $user,
+                    'isOperator' => $user->getKind() == 'Operator'));
     }
 
     /**
@@ -285,7 +285,7 @@ class ChatController extends PublicController
 
         if ($this->getRequest()->getMethod() != "POST") {
             $chatSession->close();
-
+            $this->getDocumentManager()->flush();
             return $this->renderTemplate('SGLiveChatBundle:Chat:done.html.twig', array(
                 'enableSendTranscripts' => $this->has('mailer'),
                 'email' => $visitor->getEmail()));
@@ -312,7 +312,7 @@ class ChatController extends PublicController
 
             $mailer = $this->get('mailer');
             $message = Swift_Message::newInstance()->setSubject('Transcripts for: ' . $chatSession->getQuestion())->setFrom(array(
-                'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
+                        'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
             $mailer->send($message);
         }
 
