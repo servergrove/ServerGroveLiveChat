@@ -71,7 +71,7 @@ var SessionToolkit = {
         },
         Item: {
             drawAll: function(json) {
-                jQuery('#currentVisits table tbody').html('');
+                jQuery('#currentVisits table:first tbody:first').html('');
                 jQuery.each(json, function(i, item) {
                     SessionToolkit.Visit.Item.draw(item);
                 });
@@ -87,7 +87,7 @@ var SessionToolkit = {
                 jQuery(document.createElement('td')).html(item.visitor.agent).appendTo(row);
                 jQuery(document.createElement('td')).append(jQuery(document.createElement('a')).attr({href: item.visitor.currentPage}).html(item.visitor.currentPage)).appendTo(row);
                 jQuery(document.createElement('td')).append(jQuery(document.createElement('a')).attr({href: item.visitor.currentPage}).html(item.visitor.referer)).appendTo(row);
-                jQuery('#currentVisits table tbody').append(row);
+                jQuery('#currentVisits table:first tbody:first').append(row);
                 SessionToolkit.Visit.Item.drawHits(item);
             },
             drawHits: function (item) {
@@ -134,7 +134,7 @@ var SessionToolkit = {
                     .appendTo(jQuery(row).find('#visit_' + item.id + ' table'));
                 });
 
-                jQuery('#currentVisits table tbody').append(row);
+                jQuery('#currentVisits table:first tbody:first').append(row);
                 jQuery('#visit_' + item.id).toggle();
             }
         }
