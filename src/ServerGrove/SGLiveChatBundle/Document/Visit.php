@@ -48,8 +48,8 @@ class Visit
     private $updatedAt;
 
     /**
-     * @var string
-     * @mongodb:Timestamp
+     * @var int
+     * @mongodb:Number
      */
     private $localTime;
 
@@ -134,7 +134,7 @@ class Visit
     }
 
     /**
-     * @return string $localTime
+     * @return int $localTime
      */
     public function getLocalTime()
     {
@@ -188,7 +188,7 @@ class Visit
     }
 
     /**
-     * @param string $localTime
+     * @param int $localTime
      * @return void
      */
     public function setLocalTime($localTime)
