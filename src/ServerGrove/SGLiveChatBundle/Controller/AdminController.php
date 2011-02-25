@@ -112,6 +112,8 @@ class AdminController extends BaseController
             $operator->setIsOnline(false);
             $this->getDocumentManager()->persist($operator);
             $this->getDocumentManager()->flush();
+
+            $this->getHttpSession()->remove('_operator');
         }
 
         if (!is_null($response = $this->checkLogin())) {
