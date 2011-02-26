@@ -6,7 +6,7 @@ use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
 use Doctrine\ODM\MongoDB\Mapping\Document;
 use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentForm;
 use ServerGrove\SGLiveChatBundle\Form\OperatorForm;
-use Symfony\Component\Security\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\SecurityContext;
 use Symfony\Component\Form\PasswordField;
 use Symfony\Component\Form\TextField;
@@ -27,7 +27,7 @@ class AdminController extends BaseController
     private function createLoginForm($operator = null)
     {
         $form = new Form('login', array(
-                    'validator' => $this->get('validator')));
+            'validator' => $this->get('validator')));
         $form->add(new TextField('email'));
         $form->add(new PasswordField('passwd'));
 
@@ -64,7 +64,7 @@ class AdminController extends BaseController
         if (!$form->isValid()) {
 
             return $this->redirect($this->generateUrl("_security_login", array(
-                        'e' => __LINE__)));
+                'e' => __LINE__)));
         }
         try {
             /* @var $operator ServerGrove\SGLiveChatBundle\Document\Operator */
@@ -80,7 +80,7 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getHttpSession()->setFlash('_error', $e->getMessage());
             return $this->redirect($this->generateUrl("_security_login", array(
-                        'e' => __LINE__)));
+                'e' => __LINE__)));
         }
 
         return $this->redirect($this->generateUrl("sglc_admin_index"));
@@ -209,7 +209,7 @@ class AdminController extends BaseController
             return $this->getResponse();
         }
 
-        throw new NotFoundHttpException('Not supported format', $previous);
+        throw new NotFoundHttpException('Not supported format');
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array(
             'visits' => $visits));
@@ -225,7 +225,7 @@ class AdminController extends BaseController
 
     public function closeChatAction($id)
     {
-        if ($chat = $this->getChatSession($id)) {
+        if (($chat = $this->getChatSession($id)) !== false) {
             $chat->close();
             $this->getDocumentManager()->persist($chat);
             $this->getDocumentManager()->flush();

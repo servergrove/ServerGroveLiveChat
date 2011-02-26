@@ -2,7 +2,7 @@
 
 namespace ServerGrove\SGLiveChatBundle\Cache\Engine;
 
-use Application\ChatBundle\Document\CacheEntry;
+use ServerGrove\SGLiveChatBundle\Document\CacheEntry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
