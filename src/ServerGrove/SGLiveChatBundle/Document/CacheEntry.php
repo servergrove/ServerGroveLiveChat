@@ -8,7 +8,7 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * @author Pablo Godel<pablo@servergrove.com>
  * @mongodb:Document(
  * collection="cache",
- * repositoryClass="ServerGrove\\SGLiveChatBundle\Document\CacheRepository"
+ * repositoryClass="ServerGrove\SGLiveChatBundle\Document\CacheRepository"
  * )
  */
 class CacheEntry
