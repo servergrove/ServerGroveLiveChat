@@ -33,6 +33,11 @@ class Apc extends Base
 
     public function has($key)
     {
+        if (!function_exists('\apc_exists')) {
+            $success = false;
+            apc_fetch($key, $success);
+            return $success;
+        }
         return apc_exists($key);
     }
 
