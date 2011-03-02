@@ -13,9 +13,17 @@ class Manager implements Cacheable
 {
 
     /**
-     * @var ServerGrove\SGLiveChatBundle\Cache\Engine\Apc
+     * @var ServerGrove\SGLiveChatBundle\Cache\Engine\Base
      */
     private $engine;
+
+    /**
+     * @return \ServerGrove\SGLiveChatBundle\Cache\Engine\Base
+     */
+    public function getEngine()
+    {
+        return $this->engine;
+    }
 
     public function __construct(Engine\Base $engine)
     {
@@ -37,7 +45,8 @@ class Manager implements Cacheable
         return $this->engine->has($key);
     }
 
-    public function remove($key) {
+    public function remove($key)
+    {
         return $this->engine->remove($key);
     }
 }
