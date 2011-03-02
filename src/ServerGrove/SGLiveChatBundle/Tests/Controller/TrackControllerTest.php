@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Tests\Controller;
 
+use Symfony\Component\BrowserKit\Client;
+
 use Symfony\Component\BrowserKit\Response;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -19,32 +21,53 @@ class TrackControllerTest extends WebTestCase
     }
 
     /**
-     * Tests TrackController->indexAction()
+     * Tests TrackController->updateAction()
      */
-    public function testIndex()
+    public function testUpdateActionGet()
     {
         $client = $this->createClient();
-        $crawler = $client->request('GET', '/js/sglivechat-tracker');
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertGreaterThan(0, $crawler->filter('html:contains("callUpdater")')->count());
-        $this->assertGreaterThan(0, $crawler->filter('html:contains("drawStatusLink")')->count());
-        $this->assertGreaterThan(0, $crawler->filter('html:contains("var SGChatTracker =")')->count());
+        $this->createSession($client);
+
+        $crawler = $client->request('GET', '/js/sglivechat-tracker/update');
+        $this->assertEquals('1', $client->getResponse()->getContent());
     }
 
     /**
      * Tests TrackController->updateAction()
      */
-    public function testUpdateAction()
+    public function testUpdateActionPost()
     {
-        $this->markTestIncomplete("updateAction test not implemented");
+        $client = $this->createClient();
+        $this->createSession($client);
+
+        $crawler = $client->request('POST', '/js/sglivechat-tracker/update');
+        $this->assertEquals('1', $client->getResponse()->getContent());
     }
 
     /**
      * Tests TrackController->statusAction()
      */
+    public function testIndexAction()
+    {
+        $client = $this->createClient();
+        $crawler = $client->request('GET', '/js/sglivechat-tracker');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("drawStatusLink")')->count(), '"drawStatusLink" not found un content');
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("callUpdater")')->count(), '"callUpdater" not found un content');
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("var SGChatTracker =")')->count(), '"var SGChatTracker =" not found un content');
+    }
+
+    /**
+     * Tests TrackController->indexAction()
+     */
     public function testStatusAction()
     {
-        $this->markTestIncomplete("statusAction test not implemented");
+        $client = $this->createClient();
+        $crawler = $this->createSession($client);
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("drawStatusLink")')->count(), '"drawStatusLink" not found un content');
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("callUpdater")')->count(), '"callUpdater" not found un content');
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("var SGChatTracker =")')->count(), '"var SGChatTracker =" not found un content');
     }
 
     /**
@@ -52,8 +75,16 @@ class TrackControllerTest extends WebTestCase
      */
     public function testResetAction()
     {
-        $this->markTestIncomplete("resetAction test not implemented");
+        $client = $this->createClient();
+        $crawler = $client->request('GET', '/js/sglivechat-tracker/reset');
+
+        $this->assertNull($client->getRequest()->cookies->get('vtrid'));
+        $this->assertNull($client->getRequest()->cookies->get('vsid'));
     }
 
+    private function createSession(Client $client)
+    {
+        return $client->request('GET', '/js/sglivechat-tracker/status.html');
+    }
 }
 
