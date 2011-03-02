@@ -1,0 +1,48 @@
+app.config:
+    charset:       UTF-8
+    error_handler: null
+    csrf_protection:
+        enabled: true
+        secret: xxxxxxxxxx
+    router:        { resource: "%kernel.root_dir%/config/routing.yml" }
+    validation:    { enabled: true, annotations: true }
+#    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
+    session:
+        default_locale: en
+        lifetime:       0 # Until browser is closed
+        auto_start:     true
+
+doctrine_odm.mongodb:
+  server: mongodb://localhost:27017
+  default_database: livechat_%kernel.environment%
+  options:
+    connect: true
+  metadata_cache_driver: array # array, apc, xcache, memcache
+  auto_generate_hydrator_classes: true
+  auto_generate_proxy_classes: true
+  mappings:
+    SGLiveChatBundle: ~
+    
+## Doctrine Configuration
+#doctrine:
+#   dbal:
+#       dbname:   xxxxxxxx
+#       user:     xxxxxxxx
+#       password: ~
+#       logging:  %kernel.debug%
+#   orm:
+#       auto_generate_proxy_classes: %kernel.debug%
+#       mappings:
+#           HelloBundle: ~
+
+## Swiftmailer Configuration
+swiftmailer.config: ~
+#    transport:  smtp
+#    encryption: ssl
+#    auth_mode:  login
+#    host:       smtp.gmail.com
+#    username:   xxxxxxxx
+#    password:   xxxxxxxx
+
+sglivechat.config:
+  cache_engine: mongo
