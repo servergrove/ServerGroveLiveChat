@@ -29,7 +29,7 @@ class TestKernel extends Kernel
 
     public function registerRootDir()
     {
-        return __DIR__;
+        return sys_get_temp_dir();
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
