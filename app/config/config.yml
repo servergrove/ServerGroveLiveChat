@@ -28,8 +28,6 @@ doctrine_odm.mongodb:
   mappings:
     SGLiveChatBundle: ~
     
-sglivechat.config: ~
-
 ## Doctrine Configuration
 #doctrine:
 #   dbal:
