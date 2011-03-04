@@ -35,7 +35,7 @@ class ChatController extends PublicController
      */
     public function getChatSessionForCurrentUser()
     {
-        return $this->getChatSession($this->getHttpSession()->has('_operator') ? $this->getRequest()->get('id') : $this->getHttpSession()->get('chatsession'));
+        return $this->getChatSession($this->getSessionStorage()->has('_operator') ? $this->getRequest()->get('id') : $this->getSessionStorage()->get('chatsession'));
     }
 
     /**
@@ -48,8 +48,8 @@ class ChatController extends PublicController
 
     private function cacheUserForSession(User $user, Session $chatSession)
     {
-        $this->getHttpSession()->set('userId-' . $chatSession->getId(), $user->getId());
-        $this->getHttpSession()->set('userKind-' . $chatSession->getId(), $user->getKind());
+        $this->getSessionStorage()->set('userId-' . $chatSession->getId(), $user->getId());
+        $this->getSessionStorage()->set('userKind-' . $chatSession->getId(), $user->getKind());
     }
 
     /**
@@ -58,12 +58,12 @@ class ChatController extends PublicController
      */
     private function getUserForSession(Session $chatSession)
     {
-        if (!$this->getHttpSession()->has('userId-' . $chatSession->getId()) || !$this->getHttpSession()->has('userKind-' . $chatSession->getId())) {
+        if (!$this->getSessionStorage()->has('userId-' . $chatSession->getId()) || !$this->getSessionStorage()->has('userKind-' . $chatSession->getId())) {
             throw new Exception('No user stored');
         }
 
-        $userId = $this->getHttpSession()->get('userId-' . $chatSession->getId());
-        $userKind = $this->getHttpSession()->get('userKind-' . $chatSession->getId());
+        $userId = $this->getSessionStorage()->get('userId-' . $chatSession->getId());
+        $userKind = $this->getSessionStorage()->get('userKind-' . $chatSession->getId());
         return $this->getDocumentManager()->find('SGLiveChatBundle:' . ($userKind == 'Guest' ? 'Visitor' : 'Operator'), $userId);
     }
 
@@ -99,7 +99,7 @@ class ChatController extends PublicController
 
             $this->getDocumentManager()->flush();
 
-            $this->getHttpSession()->set('chatsession', $chatSession->getId());
+            $this->getSessionStorage()->set('chatsession', $chatSession->getId());
             $this->cacheUserForSession($visitor, $chatSession);
 
             return $this->redirect($this->generateUrl('sglc_chat_load', array(
@@ -108,7 +108,7 @@ class ChatController extends PublicController
 
         return $this->renderTemplate('SGLiveChatBundle:Chat:index.html.twig', array(
             'visitor' => $visitor,
-            'errorMsg' => $this->getHttpSession()->getFlash('errorMsg', null)));
+            'errorMsg' => $this->getSessionStorage()->getFlash('errorMsg', null)));
     }
 
     public function inviteAction($sessId)
@@ -116,7 +116,7 @@ class ChatController extends PublicController
         $operator = $this->getOperator();
 
         if (!$operator) {
-            $this->getHttpSession()->setFlash('errorMsg', 'Unauthorized access.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'Unauthorized access.');
 
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
@@ -152,13 +152,13 @@ class ChatController extends PublicController
     public function acceptInviteAction($id)
     {
         if (!($chatSession = $this->getChatSession($id))) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
 
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
         if ($chatSession->getStatusId() != Session::STATUS_INVITE) {
-            $this->getHttpSession()->setFlash('errorMsg', 'Invitation has expired or canceled. You can start a new chat now.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'Invitation has expired or canceled. You can start a new chat now.');
 
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
@@ -172,7 +172,7 @@ class ChatController extends PublicController
     public function rejectInviteAction($id)
     {
         if (!($chatSession = $this->getChatSession($id))) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
 
             return $this->getResponse();
         }
@@ -187,13 +187,13 @@ class ChatController extends PublicController
         $operator = $this->getOperator();
 
         if (!$operator) {
-            $this->getHttpSession()->setFlash('errorMsg', 'Unauthorized access.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'Unauthorized access.');
 
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
         if (!($chatSession = $this->getChatSession($id))) {
-            $this->getHttpSession()->setFlash('errorMsg', 'Chat not found');
+            $this->getSessionStorage()->setFlash('errorMsg', 'Chat not found');
 
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
@@ -228,7 +228,7 @@ class ChatController extends PublicController
     {
         $operator = $this->getOperator();
         if (!($chatSession = $this->getChatSessionForCurrentUser())) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
@@ -245,9 +245,9 @@ class ChatController extends PublicController
             }
         }
 
-        $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), '');
+        $this->getSessionStorage()->set('chatStatus' . $chatSession->getId(), '');
 
-        $this->getHttpSession()->set('lastMessage', 0);
+        $this->getSessionStorage()->set('lastMessage', 0);
 
         $user = $this->getUserForSession($chatSession);
         return $this->renderTemplate('SGLiveChatBundle:Chat:load.html.twig', array(
@@ -272,7 +272,7 @@ class ChatController extends PublicController
         }
 
         if (!$chatSession = $this->getChatSession($id)) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
@@ -306,12 +306,12 @@ class ChatController extends PublicController
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
-        if ($this->getHttpSession()->has('lastMessage')) {
-            $last = $this->getHttpSession()->get('lastMessage');
+        if ($this->getSessionStorage()->has('lastMessage')) {
+            $last = $this->getSessionStorage()->get('lastMessage');
         } else {
             $last = 0;
         }
-        $this->getHttpSession()->set('lastMessage', count($messages));
+        $this->getSessionStorage()->set('lastMessage', count($messages));
 
         if ($last) {
             $messages = array_slice($messages->toArray(), $last);
@@ -346,7 +346,7 @@ class ChatController extends PublicController
     public function doneAction()
     {
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
@@ -397,15 +397,15 @@ class ChatController extends PublicController
         }
 
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
-            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
             $this->getResponse()->setContent(sprintf('location.href = %s;', var_export($this->generateUrl('sglc_chat_homepage'), true)));
 
             return $this->getResponse();
         }
 
-        if ($chatSession->getOperator() && $chatSession->getStatusId() == Session::STATUS_IN_PROGRESS && $this->getHttpSession()->get('chatStatus' . $chatSession->getId()) != 'started') {
-            $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), 'started');
+        if ($chatSession->getOperator() && $chatSession->getStatusId() == Session::STATUS_IN_PROGRESS && $this->getSessionStorage()->get('chatStatus' . $chatSession->getId()) != 'started') {
+            $this->getSessionStorage()->set('chatStatus' . $chatSession->getId(), 'started');
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
             $this->getResponse()->setContent('Chat.get().start();');
 
@@ -413,7 +413,7 @@ class ChatController extends PublicController
         }
 
         if ($chatSession->getStatusId() == Session::STATUS_CLOSED || $chatSession->getStatusId() == Session::STATUS_CANCELED) {
-            $this->getHttpSession()->setFlash('errorMsg', 'Chat has been ' . $chatSession->getStatus());
+            $this->getSessionStorage()->setFlash('errorMsg', 'Chat has been ' . $chatSession->getStatus());
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
 
             $this->getResponse()->setContent(sprintf('location.href = %s;', var_export($this->generateUrl('sglc_chat_homepage'), true)));

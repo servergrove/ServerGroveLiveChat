@@ -61,8 +61,8 @@ class TrackController extends PublicController
             /* @var $chat \ServerGrove\SGLiveChatBundle\Document\Session */
             $chat = current($chats);
 
-            if (!$this->getHttpSession()->get('chat_invite', null)) {
-                $this->getHttpSession()->set('chat_invite', $chat->getId());
+            if (!$this->getSessionStorage()->get('chat_invite', null)) {
+                $this->getSessionStorage()->set('chat_invite', $chat->getId());
             }
 
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
@@ -70,8 +70,8 @@ class TrackController extends PublicController
             return $this->renderTemplate('SGLiveChatBundle:Track:create-invite-box.js.twig', array(
                 'chat' => $chat));
         } else {
-            if ($this->getHttpSession()->get('chat_invite')) {
-                $this->getHttpSession()->set('chat_invite', null);
+            if ($this->getSessionStorage()->get('chat_invite')) {
+                $this->getSessionStorage()->set('chat_invite', null);
 
                 $this->getResponse()->headers->set('Content-type', 'text/javascript');
 

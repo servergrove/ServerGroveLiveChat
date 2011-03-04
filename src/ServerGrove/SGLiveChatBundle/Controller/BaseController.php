@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Session as HttpSession;
+use Symfony\Component\HttpFoundation\Session as SessionStorage;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
@@ -44,7 +44,7 @@ abstract class BaseController extends Controller
     /**
      * @return Symfony\Component\HttpFoundation\Session
      */
-    public function getHttpSession()
+    public function getSessionStorage()
     {
         if (is_null($this->session)) {
             $this->session = $this->getRequest()->getSession();
@@ -85,10 +85,10 @@ abstract class BaseController extends Controller
      */
     protected function getOperator()
     {
-        if (!$this->getHttpSession()->has('_operator')) {
+        if (!$this->getSessionStorage()->has('_operator')) {
             return null;
         }
-        return $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $this->getHttpSession()->get('_operator'));
+        return $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $this->getSessionStorage()->get('_operator'));
     }
 
     /**

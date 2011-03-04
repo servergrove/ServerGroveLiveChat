@@ -36,7 +36,7 @@ class AdminController extends BaseController
 
     private function isLogged()
     {
-        return $this->getHttpSession()->get('_operator');
+        return $this->getSessionStorage()->get('_operator');
     }
 
     private function checkLogin()
@@ -73,12 +73,12 @@ class AdminController extends BaseController
                 throw new UsernameNotFoundException('Invalid password');
             }
 
-            $this->getHttpSession()->set('_operator', $operator->getId());
+            $this->getSessionStorage()->set('_operator', $operator->getId());
             $operator->setIsOnline(true);
             $this->getDocumentManager()->persist($operator);
             $this->getDocumentManager()->flush();
         } catch (UsernameNotFoundException $e) {
-            $this->getHttpSession()->setFlash('_error', $e->getMessage());
+            $this->getSessionStorage()->setFlash('_error', $e->getMessage());
             return $this->redirect($this->generateUrl("_security_login", array(
                 'e' => __LINE__)));
         }
@@ -97,7 +97,7 @@ class AdminController extends BaseController
 
     public function loginAction()
     {
-        $errorMsg = $this->getHttpSession()->getFlash('_error');
+        $errorMsg = $this->getSessionStorage()->getFlash('_error');
         $form = $this->createLoginForm();
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:login.html.twig', array(
@@ -113,7 +113,7 @@ class AdminController extends BaseController
             $this->getDocumentManager()->persist($operator);
             $this->getDocumentManager()->flush();
 
-            $this->getHttpSession()->remove('_operator');
+            $this->getSessionStorage()->remove('_operator');
         }
 
         if (!is_null($response = $this->checkLogin())) {
@@ -243,7 +243,7 @@ class AdminController extends BaseController
         }
 
         $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll();
-        $msg = $this->getHttpSession()->getFlash('msg', '');
+        $msg = $this->getSessionStorage()->getFlash('msg', '');
         return $this->renderTemplate('SGLiveChatBundle:Admin:operators.html.twig', array(
             'operators' => $operators,
             'msg' => $msg));
@@ -274,7 +274,7 @@ class AdminController extends BaseController
                     $department->setIsActive(isset($params['isActive']) && $params['isActive']);
                     $this->getDocumentManager()->persist($department);
                     $this->getDocumentManager()->flush();
-                    $this->getHttpSession()->setFlash('msg', 'The department has been successfully updated');
+                    $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
 
                     return $this->redirect($this->generateUrl('sglc_admin_operator_departments'));
                 }
@@ -294,7 +294,7 @@ class AdminController extends BaseController
         $this->checkLogin();
 
         $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll();
-        $msg = $this->getHttpSession()->getFlash('msg', '');
+        $msg = $this->getSessionStorage()->getFlash('msg', '');
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator-departments.html.twig', array(
             'departments' => $departments,
@@ -331,7 +331,7 @@ class AdminController extends BaseController
                     $operator->setIsActive(isset($params['isActive']) && $params['isActive']);
                     $this->getDocumentManager()->persist($operator);
                     $this->getDocumentManager()->flush();
-                    $this->getHttpSession()->setFlash('msg', 'The operator has been successfully updated');
+                    $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
 
                     return $this->redirect($this->generateUrl('sglc_admin_operators'));
                 }
