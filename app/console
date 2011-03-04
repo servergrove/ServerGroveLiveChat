@@ -6,7 +6,7 @@ require_once __DIR__.'/AppKernel.php';
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
-$kernel = new AppKernel('prod', false);
+$kernel = new AppKernel('prod', true);
 
 $application = new Application($kernel);
 $application->run();
