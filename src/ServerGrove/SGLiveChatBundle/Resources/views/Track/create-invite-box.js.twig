@@ -1,26 +1,38 @@
-if ( jQuery('chatDiv' ) ) {
+if ( jQuery('#chatDiv' ) ) {
+	jQuery('#chatDiv' ).html('');
+	
     var img = new Image();
-    img.src = '/sglivechat/images/sg_logo.jpg';
+    img.src = "{{asset('images/sg_logo.jpg')}}";
 
     var div = document.createElement('div');
-    jQuery(div).attr({'style' : 'clear: both; padding: 10px;'});
-    jQuery(div).html('Chat Invitiation: may I help you with anything?');
-
-    var acceptLink = document.createElement('a');
-    jQuery(acceptLink).html('Yes');
-    jQuery(acceptLink).click(function(){
-        acceptChat('{{chat.getId()}}');
-        return false;
-    });
-    jQuery(div).append(acceptLink);
-    jQuery(div).append('&nbsp;&nbsp;&nbsp;');
-
-    var rejectLink = document.createElement('a');
-    jQuery(rejectLink).html('No');
-    jQuery(rejectLink).click(function(){
-        rejectChat('{{chat.getId()}}');
-        return false;
-    });
-    jQuery(div).append(rejectLink);
-    openInvite();
+	
+	jQuery('#chatDiv').html('').append(
+		jQuery(new Image()).attr({src: "{{asset('images/sg_logo.jpg')}}"})
+	).append(
+		jQuery(document.createElement('div')).attr({
+			style: 'clear: both; padding: 10px;'
+		}).html('Chat Invitiation: may I help you with anything?').append(
+			jQuery(document.createElement('a')).attr({
+				href: '#'
+			}).html('Yes').click(function(){
+				window.open('{{path("sglc_chat_invite_accept", {"id": "__chatId__"})}}'.replace('__chatId__', '{{chat.getId()}}'), 'livechat{{chat.getId()}}', 'width=700,height=600,toolbar=no,location=no');
+		        return false;
+		    })
+		).append('&nbsp;&nbsp;&nbsp;').append(
+			jQuery(document.createElement('a')).attr({
+				href: '#'
+			}).html('No').click(function(){
+				jQuery.ajax({
+	                type: 'GET',
+	                url: "{{ path('sglc_chat_invite_reject', {'id': chat.getId()})}}",
+	                cache: false
+	            });
+				jQuery('#chatDiv').hide();
+		        return false;
+		    })
+		)
+	).show().setStyle({ 
+		top: 8 + document.viewport.getScrollOffsets().top + 'px'
+	});
+	
 }

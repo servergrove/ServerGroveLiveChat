@@ -163,7 +163,14 @@ class ChatController extends PublicController
             return $this->redirect($this->generateUrl('sglc_chat_homepage'));
         }
 
+        $operator = $this->getOperator();
+        $this->cacheUserForSession($operator ? $operator : $chatSession->getVisitor(), $chatSession);
+
+        $this->getSessionStorage()->set('chatsession', $chatSession->getId());
+
         $chatSession->start();
+        $this->getDocumentManager()->persist($chatSession);
+        $this->getDocumentManager()->flush();
 
         return $this->redirect($this->generateUrl('sglc_chat_load', array(
             'id' => $chatSession->getId())));
@@ -178,6 +185,8 @@ class ChatController extends PublicController
         }
 
         $chatSession->cancel();
+        $this->getDocumentManager()->persist($chatSession);
+        $this->getDocumentManager()->flush();
 
         return $this->getResponse();
     }
@@ -224,7 +233,7 @@ class ChatController extends PublicController
     /**
      * @return Symfony\Component\HttpFoundation\Response
      */
-    public function loadAction()
+    public function loadAction($id)
     {
         $operator = $this->getOperator();
         if (!($chatSession = $this->getChatSessionForCurrentUser())) {

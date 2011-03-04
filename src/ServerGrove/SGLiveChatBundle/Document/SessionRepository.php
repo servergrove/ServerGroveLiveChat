@@ -62,10 +62,10 @@ class SessionRepository extends DocumentRepository
             Session::STATUS_CLOSED))->getQuery()->getSingleResult();
     }
 
-    public function getOpenInvites()
+    public function getOpenInvitesForVisitor(Visitor $visitor)
     {
-        return $this->find(array(
-            'statusId' => Session::STATUS_INVITE));
+        // @todo Fix reference
+        return $this->createQueryBuilder()/*->references($visitor)*/->field('statusId')->equals(Session::STATUS_INVITE)->getQuery()->execute();
     }
 
 }

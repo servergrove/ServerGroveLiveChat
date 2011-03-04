@@ -55,11 +55,12 @@ class TrackController extends PublicController
             return $this->getResponse();
         }
 
-        $chats = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getOpenInvites();
+        $chats = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getOpenInvitesForVisitor($visitor);
 
-        if (count($chats) > 0) {
+        if ($chats->count() > 0) {
             /* @var $chat \ServerGrove\SGLiveChatBundle\Document\Session */
-            $chat = current($chats);
+            $chat = $chats->getSingleResult();
+                        
 
             if (!$this->getSessionStorage()->get('chat_invite', null)) {
                 $this->getSessionStorage()->set('chat_invite', $chat->getId());
