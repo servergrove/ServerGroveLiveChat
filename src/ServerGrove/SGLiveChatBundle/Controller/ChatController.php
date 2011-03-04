@@ -10,7 +10,7 @@ use Swift_Message;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Rating;
 use ServerGrove\SGLiveChatBundle\Document\Visit;
 use ServerGrove\SGLiveChatBundle\Document\Visitor;
-use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
+use ServerGrove\SGLiveChatBundle\Document\Session;
 use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
 use Exception;
 
@@ -46,17 +46,17 @@ class ChatController extends PublicController
         return $this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findAll();
     }
 
-    private function cacheUserForSession(User $user, ChatSession $chatSession)
+    private function cacheUserForSession(User $user, Session $chatSession)
     {
         $this->getHttpSession()->set('userId-' . $chatSession->getId(), $user->getId());
         $this->getHttpSession()->set('userKind-' . $chatSession->getId(), $user->getKind());
     }
 
     /**
-     * @param ChatSession $chatSession
+     * @param Session $chatSession
      * @return User
      */
-    private function getUserForSession(ChatSession $chatSession)
+    private function getUserForSession(Session $chatSession)
     {
         if (!$this->getHttpSession()->has('userId-' . $chatSession->getId()) || !$this->getHttpSession()->has('userKind-' . $chatSession->getId())) {
             throw new Exception('No user stored');
@@ -86,14 +86,14 @@ class ChatController extends PublicController
             $this->getDocumentManager()->persist($visitor);
 
             /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
-            $chatSession = new ChatSession();
+            $chatSession = new Session();
             $chatSession->setRemoteAddr($visitor->getRemoteAddr());
             $chatSession->setVisitor($visitor);
 
             $visit = $this->getVisitByKey($visitor);
 
             $chatSession->setVisit($visit);
-            $chatSession->setStatusId(ChatSession::STATUS_WAITING);
+            $chatSession->setStatusId(Session::STATUS_WAITING);
             $chatSession->setQuestion($this->getRequest()->get('question'));
             $this->getDocumentManager()->persist($chatSession);
 
@@ -103,12 +103,83 @@ class ChatController extends PublicController
             $this->cacheUserForSession($visitor, $chatSession);
 
             return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                        'id' => $chatSession->getId())));
+                'id' => $chatSession->getId())));
         }
 
         return $this->renderTemplate('SGLiveChatBundle:Chat:index.html.twig', array(
             'visitor' => $visitor,
             'errorMsg' => $this->getHttpSession()->getFlash('errorMsg', null)));
+    }
+
+    public function inviteAction($sessId)
+    {
+        $operator = $this->getOperator();
+
+        if (!$operator) {
+            $this->getHttpSession()->setFlash('errorMsg', 'Unauthorized access.');
+
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        }
+
+        if (!($visit = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->find($sessId))) {
+            $this->getResponse()->setContent('Visit not found');
+
+            return $this->getReponse();
+        }
+
+        $visitor = $visit->getVisitor();
+
+        /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
+        $chatSession = new Session();
+        $chatSession->setRemoteAddr($visitor->getRemoteAddr());
+
+        $chatSession->setVisitor($visitor);
+        $chatSession->setVisit($visit);
+        $chatSession->setOperator($operator);
+
+        $chatSession->setStatusId(Session::STATUS_INVITE);
+
+        # @todo Add canned message as first chat message
+        $this->getDocumentManager()->persist($chatSession);
+        $this->getDocumentManager()->flush();
+
+        $this->cacheUserForSession($operator, $chatSession);
+
+        return $this->redirect($this->generateUrl('sglc_chat_load', array(
+            'id' => $chatSession->getId())));
+    }
+
+    public function acceptInviteAction($id)
+    {
+        if (!($chatSession = $this->getChatSession($id))) {
+            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        }
+
+        if ($chatSession->getStatusId() != Session::STATUS_INVITE) {
+            $this->getHttpSession()->setFlash('errorMsg', 'Invitation has expired or canceled. You can start a new chat now.');
+
+            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        }
+
+        $chatSession->start();
+
+        return $this->redirect($this->generateUrl('sglc_chat_load', array(
+            'id' => $chatSession->getId())));
+    }
+
+    public function rejectInviteAction($id)
+    {
+        if (!($chatSession = $this->getChatSession($id))) {
+            $this->getHttpSession()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+
+            return $this->getResponse();
+        }
+
+        $chatSession->cancel();
+
+        return $this->getResponse();
     }
 
     public function acceptAction($id)
@@ -139,16 +210,15 @@ class ChatController extends PublicController
                 $this->cacheUserForSession($operator, $chatSession);
 
                 return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                            'id' => $chatSession->getId())));
+                    'id' => $chatSession->getId())));
             }
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Chat:accept.html.twig',
-                array(
-                    'chat' => $chatSession,
-                    'visitor' => $chatSession->getVisitor(),
-                    'messages' => $chatSession->getMessages(),
-                    'operator' => $operator));
+        return $this->renderTemplate('SGLiveChatBundle:Chat:accept.html.twig', array(
+            'chat' => $chatSession,
+            'visitor' => $chatSession->getVisitor(),
+            'messages' => $chatSession->getMessages(),
+            'operator' => $operator));
     }
 
     /**
@@ -168,9 +238,9 @@ class ChatController extends PublicController
                 /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
                     $arrCannedMessages[] = $cannedMessage->renderContent(array(
-                                'operator' => $operator,
-                                'currtime' => date('H:i:s'),
-                                'currdate' => date('m-d-Y')));
+                        'operator' => $operator,
+                        'currtime' => date('H:i:s'),
+                        'currdate' => date('m-d-Y')));
                 }
             }
         }
@@ -180,12 +250,11 @@ class ChatController extends PublicController
         $this->getHttpSession()->set('lastMessage', 0);
 
         $user = $this->getUserForSession($chatSession);
-        return $this->renderTemplate('SGLiveChatBundle:Chat:load.html.twig',
-                array(
-                    'chat' => $chatSession,
-                    'canned' => $arrCannedMessages,
-                    'user' => $user,
-                    'isOperator' => $user->getKind() == 'Operator'));
+        return $this->renderTemplate('SGLiveChatBundle:Chat:load.html.twig', array(
+            'chat' => $chatSession,
+            'canned' => $arrCannedMessages,
+            'user' => $user,
+            'isOperator' => $user->getKind() == 'Operator'));
     }
 
     /**
@@ -312,7 +381,7 @@ class ChatController extends PublicController
 
             $mailer = $this->get('mailer');
             $message = Swift_Message::newInstance()->setSubject('Transcripts for: ' . $chatSession->getQuestion())->setFrom(array(
-                        'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
+                'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
             $mailer->send($message);
         }
 
@@ -335,7 +404,7 @@ class ChatController extends PublicController
             return $this->getResponse();
         }
 
-        if ($chatSession->getOperator() && $chatSession->getStatusId() == ChatSession::STATUS_IN_PROGRESS && $this->getHttpSession()->get('chatStatus' . $chatSession->getId()) != 'started') {
+        if ($chatSession->getOperator() && $chatSession->getStatusId() == Session::STATUS_IN_PROGRESS && $this->getHttpSession()->get('chatStatus' . $chatSession->getId()) != 'started') {
             $this->getHttpSession()->set('chatStatus' . $chatSession->getId(), 'started');
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
             $this->getResponse()->setContent('Chat.get().start();');
@@ -343,7 +412,7 @@ class ChatController extends PublicController
             return $this->getResponse();
         }
 
-        if ($chatSession->getStatusId() == ChatSession::STATUS_CLOSED || $chatSession->getStatusId() == ChatSession::STATUS_CANCELED) {
+        if ($chatSession->getStatusId() == Session::STATUS_CLOSED || $chatSession->getStatusId() == Session::STATUS_CANCELED) {
             $this->getHttpSession()->setFlash('errorMsg', 'Chat has been ' . $chatSession->getStatus());
             $this->getResponse()->headers->set('Content-type', 'text/javascript');
 
@@ -377,17 +446,17 @@ class ChatController extends PublicController
         return $this->getResponse();
     }
 
-    private function userIsTyping(User $user, ChatSession $chatSession)
+    private function userIsTyping(User $user, Session $chatSession)
     {
         $this->getCacheManager()->set('chat.' . $chatSession->getId() . '.' . strtolower($user->getKind()) . '.typing', true, 3);
     }
 
-    private function userIsNotTyping(User $user, ChatSession $chatSession)
+    private function userIsNotTyping(User $user, Session $chatSession)
     {
         $this->getCacheManager()->remove('chat.' . $chatSession->getId() . '.' . strtolower($user->getKind()) . '.typing');
     }
 
-    private function theOtherMemberIsTyping(ChatSession $chatSession)
+    private function theOtherMemberIsTyping(Session $chatSession)
     {
         $user = $this->getUserForSession($chatSession);
         return $this->getCacheManager()->has('chat.' . $chatSession->getId() . '.' . strtolower($chatSession->getOtherMember($user)->getKind()) . '.typing');
