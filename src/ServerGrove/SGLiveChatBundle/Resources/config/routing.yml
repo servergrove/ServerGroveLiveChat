@@ -8,6 +8,18 @@ sglc_chat_homepage:
     pattern:  /sglivechat
     defaults: { _controller: SGLiveChatBundle:Chat:index }
 
+sglc_chat_invite:
+  pattern: /sglivechat/{sessId}/invite
+  defaults: { _controller: SGLiveChatBundle:Chat:invite }
+
+sglc_chat_invite_accept:
+  pattern: /sglivechat/{id}/invite/accept
+  defaults: { _controller: SGLiveChatBundle:Chat:acceptInvite }
+
+sglc_chat_invite_reject:
+  pattern: /sglivechat/{id}/invite/reject
+  defaults: { _controller: SGLiveChatBundle:Chat:rejectInvite }
+
 sglc_chat_load:
   pattern: /sglivechat/{id}/load
   defaults: { _controller: SGLiveChatBundle:Chat:load }
