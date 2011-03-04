@@ -19,7 +19,7 @@ twig.config:
 
 doctrine_odm.mongodb:
   server: mongodb://localhost:27017
-  default_database: livechat_%kernel.environment%
+  default_database: livechat
   options:
     connect: true
   metadata_cache_driver: array # array, apc, xcache, memcache

@@ -27,7 +27,7 @@ class AdminController extends BaseController
     private function createLoginForm($operator = null)
     {
         $form = new Form('login', array(
-            'validator' => $this->get('validator')));
+                    'validator' => $this->get('validator')));
         $form->add(new TextField('email'));
         $form->add(new PasswordField('passwd'));
 
@@ -46,6 +46,9 @@ class AdminController extends BaseController
         }
 
         $operator = $this->getOperator();
+        if (!$operator) {
+            return $this->forward('SGLiveChatBundle:Admin:logout');
+        }
         $operator->setIsOnline(true);
         $this->getDocumentManager()->persist($operator);
         $this->getDocumentManager()->flush();
@@ -64,7 +67,7 @@ class AdminController extends BaseController
         if (!$form->isValid()) {
 
             return $this->redirect($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+                        'e' => __LINE__)));
         }
         try {
             /* @var $operator ServerGrove\SGLiveChatBundle\Document\Operator */
@@ -80,7 +83,7 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
             return $this->redirect($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+                        'e' => __LINE__)));
         }
 
         return $this->redirect($this->generateUrl("sglc_admin_index"));
@@ -109,12 +112,14 @@ class AdminController extends BaseController
     {
         if ($this->isLogged()) {
             $operator = $this->getOperator();
-            $operator->setIsOnline(false);
-            $this->getDocumentManager()->persist($operator);
-            $this->getDocumentManager()->flush();
-
-            $this->getSessionStorage()->remove('_operator');
+            if ($operator) {
+                $operator->setIsOnline(false);
+                $this->getDocumentManager()->persist($operator);
+                $this->getDocumentManager()->flush();
+            }
         }
+
+        $this->getSessionStorage()->remove('_operator');
 
         if (!is_null($response = $this->checkLogin())) {
             return $response;
