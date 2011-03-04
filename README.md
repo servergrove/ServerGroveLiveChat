@@ -46,19 +46,19 @@ By default it will use APC, but you can also use mongo. You can configure it lik
 
 6. Add a livechat administrator
 
-    ./app/console sglivechat:admin:add-administrator "Your Name" email@example.com password1234
+        ./app/console sglivechat:admin:add-administrator "Your Name" email@example.com password1234
 
 7. Launch launch administration interface and login with the administration information entered in step 6
 
-    http://livechat.example.com/admin/sglivechat
+        http://livechat.example.com/admin/sglivechat
 
 8. Add the livechat button and status indicator to your website:
 
     In `<head>`:
-    `<script src="http://livechat.example.com/js/jquery.js"></script>`
+        `<script src="http://livechat.example.com/js/jquery.js"></script>`
 
     In the location where you want the livechat button to appear:
-    `<script src="http://livechat.example.com/js/sglivechat-tracker/status.js"></script>`
+        `<script src="http://livechat.example.com/js/sglivechat-tracker/status.js"></script>`
 
 9. You can also test the livechat functionality by loading:
 
