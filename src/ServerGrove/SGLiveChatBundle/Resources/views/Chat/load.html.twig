@@ -7,7 +7,7 @@
 <div class="left">
     <div id="connecting" style=" margin-left: 50px;">
         <h3 style="background-color: #fff; border: 1px #777 solid; text-align: center; padding: 10px;">{% if isOperator %} 
-            Waiting for visitor's response. Please wait... <a href="<?php echo url_for( 'chat/rejectInvite?id='.$chat->getId() )?>">Cancel request</a> {%else%}
+            Waiting for visitor's response. Please wait... <a href="{{path('sglc_chat_invite_reject', {'id': chat.getId()})}}">Cancel request</a> {%else%}
             Please wait while we find an agent to assist you...
             {% endif %}
             <p>
