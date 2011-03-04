@@ -91,4 +91,12 @@ abstract class BaseController extends Controller
         return $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $this->getHttpSession()->get('_operator'));
     }
 
+    /**
+     * @return Symfony\Bundle\ZendBundle\Logger\Logger
+     */
+    protected function getLogger()
+    {
+        return $this->container->get('logger');
+    }
+
 }
