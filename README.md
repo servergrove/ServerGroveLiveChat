@@ -31,18 +31,18 @@ Installation
 
 3. Make sure web server can write to app/cache and app/logs, ie.:
 
-    chmod -R 777 app/cache app/logs
+        chmod -R 777 app/cache app/logs
 
 4. Configure MongoDB connection, by default it will connect with localhost, you can change it by editing app/config/config.yml
 
-    doctrine_odm.mongodb:
-      server: mongodb://localhost:27017
+        doctrine_odm.mongodb:
+          server: mongodb://localhost:27017
 
 
 5. Configure the livechat caching engine. The application uses a caching engine to store chat status information. By default it will use APC, but you can also use mongo. You can configure it like this in app/config/config.yml:
 
-    sglivechat.config:
-      cache_engine: mongo
+        sglivechat.config:
+          cache_engine: mongo
 
 
 6. Add a livechat administrator
