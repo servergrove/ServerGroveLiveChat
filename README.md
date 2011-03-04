@@ -38,11 +38,12 @@ Installation
     doctrine_odm.mongodb:
       server: mongodb://localhost:27017
 
-5. Configure the livechat caching engine. The application uses a caching engine to store chat status information.
-By default it will use APC, but you can also use mongo. You can configure it like this in app/config/config.yml:
+
+5. Configure the livechat caching engine. The application uses a caching engine to store chat status information. By default it will use APC, but you can also use mongo. You can configure it like this in app/config/config.yml:
 
     sglivechat.config:
       cache_engine: mongo
+
 
 6. Add a livechat administrator
 
