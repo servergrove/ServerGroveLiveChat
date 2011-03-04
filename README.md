@@ -56,10 +56,10 @@ Installation
 8. Add the livechat button and status indicator to your website:
 
     In `<head>`:
-        `<script src="http://livechat.example.com/js/jquery.js"></script>`
+        <script src="http://livechat.example.com/js/jquery.js"></script>
 
     In the location where you want the livechat button to appear:
-        `<script src="http://livechat.example.com/js/sglivechat-tracker/status.js"></script>`
+        <script src="http://livechat.example.com/js/sglivechat-tracker/status.js"></script>
 
 9. You can also test the livechat functionality by loading:
 
