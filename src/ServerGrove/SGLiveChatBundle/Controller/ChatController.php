@@ -2,16 +2,19 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
-use ServerGrove\SGLiveChatBundle\Document\User;
+use ServerGrove\SGLiveChatBundle\Chat\ChatRequest;
 use ServerGrove\SGLiveChatBundle\Document\Operator;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Swift_Message;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Rating;
+use ServerGrove\SGLiveChatBundle\Document\User;
 use ServerGrove\SGLiveChatBundle\Document\Visit;
 use ServerGrove\SGLiveChatBundle\Document\Visitor;
 use ServerGrove\SGLiveChatBundle\Document\Session;
 use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
+use ServerGrove\SGLiveChatBundle\Form\ChatRequestForm;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Swift_Message;
 use Exception;
 
 /**
@@ -80,35 +83,45 @@ class ChatController extends PublicController
             return $this->getResponse();
         }
 
+
+        $chatRequest = new ChatRequest();
+        $form = ChatRequestForm::create($this->get('form.context'), 'chat');
+
         if ($this->getRequest()->getMethod() == 'POST') {
-            $visitor->setEmail($this->getRequest()->get('email'));
-            $visitor->setName($this->getRequest()->get('name'));
-            $this->getDocumentManager()->persist($visitor);
 
-            /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
-            $chatSession = new Session();
-            $chatSession->setRemoteAddr($visitor->getRemoteAddr());
-            $chatSession->setVisitor($visitor);
+            $form->bind($this->getRequest(), $chatRequest);
 
-            $visit = $this->getVisitByKey($visitor);
+            if ($form->isValid()) {
+                $visitor->setEmail($chatRequest->getEmail());
+                $visitor->setName($chatRequest->getName());
+                $this->getDocumentManager()->persist($visitor);
 
-            $chatSession->setVisit($visit);
-            $chatSession->setStatusId(Session::STATUS_WAITING);
-            $chatSession->setQuestion($this->getRequest()->get('question'));
-            $this->getDocumentManager()->persist($chatSession);
+                /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
+                $chatSession = new Session();
+                $chatSession->setRemoteAddr($visitor->getRemoteAddr());
+                $chatSession->setVisitor($visitor);
 
-            $this->getDocumentManager()->flush();
+                $visit = $this->getVisitByKey($visitor);
 
-            $this->getSessionStorage()->set('chatsession', $chatSession->getId());
-            $this->cacheUserForSession($visitor, $chatSession);
+                $chatSession->setVisit($visit);
+                $chatSession->setStatusId(Session::STATUS_WAITING);
+                $chatSession->setQuestion($chatRequest->getQuestion());
+                $this->getDocumentManager()->persist($chatSession);
 
-            return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                'id' => $chatSession->getId())));
+                $this->getDocumentManager()->flush();
+
+                $this->getSessionStorage()->set('chatsession', $chatSession->getId());
+                $this->cacheUserForSession($visitor, $chatSession);
+
+                return $this->redirect($this->generateUrl('sglc_chat_load', array('id' => $chatSession->getId())));
+            }
         }
 
         return $this->renderTemplate('SGLiveChatBundle:Chat:index.html.twig', array(
             'visitor' => $visitor,
-            'errorMsg' => $this->getSessionStorage()->getFlash('errorMsg', null)));
+            'errorMsg' => $this->getSessionStorage()->getFlash('errorMsg', null),
+            'form' => $form
+        ));
     }
 
     public function inviteAction($sessId)
@@ -146,7 +159,7 @@ class ChatController extends PublicController
         $this->cacheUserForSession($operator, $chatSession);
 
         return $this->redirect($this->generateUrl('sglc_chat_load', array(
-            'id' => $chatSession->getId())));
+                    'id' => $chatSession->getId())));
     }
 
     public function acceptInviteAction($id)
@@ -173,7 +186,7 @@ class ChatController extends PublicController
         $this->getDocumentManager()->flush();
 
         return $this->redirect($this->generateUrl('sglc_chat_load', array(
-            'id' => $chatSession->getId())));
+                    'id' => $chatSession->getId())));
     }
 
     public function rejectInviteAction($id)
@@ -219,7 +232,7 @@ class ChatController extends PublicController
                 $this->cacheUserForSession($operator, $chatSession);
 
                 return $this->redirect($this->generateUrl('sglc_chat_load', array(
-                    'id' => $chatSession->getId())));
+                            'id' => $chatSession->getId())));
             }
         }
 
@@ -247,9 +260,9 @@ class ChatController extends PublicController
                 /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
                     $arrCannedMessages[] = $cannedMessage->renderContent(array(
-                        'operator' => $operator,
-                        'currtime' => date('H:i:s'),
-                        'currdate' => date('m-d-Y')));
+                                'operator' => $operator,
+                                'currtime' => date('H:i:s'),
+                                'currdate' => date('m-d-Y')));
                 }
             }
         }
@@ -390,7 +403,7 @@ class ChatController extends PublicController
 
             $mailer = $this->get('mailer');
             $message = Swift_Message::newInstance()->setSubject('Transcripts for: ' . $chatSession->getQuestion())->setFrom(array(
-                'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
+                        'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
             $mailer->send($message);
         }
 
