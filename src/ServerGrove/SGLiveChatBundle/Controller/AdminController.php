@@ -2,19 +2,22 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
-use Symfony\Component\Form\Exception\FormException;
+use ServerGrove\SGLiveChatBundle\Admin\OperatorLogin;
+use ServerGrove\SGLiveChatBundle\Controller\BaseController;
+use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
+use ServerGrove\SGLiveChatBundle\Document\Operator;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
-use Doctrine\ODM\MongoDB\Mapping\Document;
 use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentForm;
 use ServerGrove\SGLiveChatBundle\Form\OperatorForm;
+use ServerGrove\SGLiveChatBundle\Form\OperatorLoginForm;
+
+use Symfony\Component\Form\Exception\FormException;
+use Doctrine\ODM\MongoDB\Mapping\Document;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Security\SecurityContext;
 use Symfony\Component\Form\PasswordField;
 use Symfony\Component\Form\TextField;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
 use Symfony\Component\Form\Form;
-use ServerGrove\SGLiveChatBundle\Controller\BaseController;
-use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -26,16 +29,12 @@ class AdminController extends BaseController
 {
 
     /**
-     * @param ServerGrove\SGLiveChatBundle\Document\Operator $operator
+     * @param ServerGrove\SGLiveChatBundle\Admin\OperatorLogin $login
      * @return Symfony\Component\Form\Form
      */
-    private function createLoginForm(Operator $operator = null)
+    private function createLoginForm(OperatorLogin $login)
     {
-        $form = new Form('login', array('validator' => $this->get('validator')));
-        $form->add(new TextField('email'));
-        $form->add(new PasswordField('passwd'));
-
-        return $form;
+        return OperatorLoginForm::create($this->get('form.context'), 'login');
     }
 
     private function isLogged()
@@ -65,19 +64,18 @@ class AdminController extends BaseController
      */
     public function checkLoginAction()
     {
+        $operatorLogin = new OperatorLogin();
         /* @var $form Form */
-        $form = $this->createLoginForm(new Operator());
-        $form->bind($this->getRequest());
+        $form = $this->createLoginForm($operatorLogin);
+        $form->bind($this->getRequest(), $operatorLogin);
 
         try {
             if (!$form->isValid()) {
                 throw new FormException('Invalid data');
             }
 
-            $email = $form->get('email')->getDisplayedData();
-
-            $requestValues = $this->getRequest()->request->get($form->getName());
-            $passwd = $requestValues['passwd'];
+            $email = $operatorLogin->getEmail();
+            $passwd = $operatorLogin->getPasswd();
 
             /* @var $operator ServerGrove\SGLiveChatBundle\Document\Operator */
             $operator = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->loadUserByUsername($email);
@@ -118,11 +116,12 @@ class AdminController extends BaseController
         if (!empty($errorMsg)) {
             $this->getResponse()->setStatusCode(401);
         }
-        $form = $this->createLoginForm();
+        $form = $this->createLoginForm(new OperatorLogin());
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:login.html.twig', array(
             'form' => $form,
-            'errorMsg' => $errorMsg));
+            'errorMsg' => $errorMsg)
+        );
     }
 
     public function logoutAction()
