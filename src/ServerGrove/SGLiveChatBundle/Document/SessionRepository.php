@@ -64,8 +64,11 @@ class SessionRepository extends DocumentRepository
 
     public function getOpenInvitesForVisitor(Visitor $visitor)
     {
-        // @todo Fix reference
-        return $this->createQueryBuilder()/*->references($visitor)*/->field('statusId')->equals(Session::STATUS_INVITE)->getQuery()->execute();
+        return $this->createQueryBuilder()
+                ->field('visitor')->references($visitor)
+                ->field('statusId')->equals(Session::STATUS_INVITE)
+                ->getQuery()
+                ->execute();
     }
 
 }
