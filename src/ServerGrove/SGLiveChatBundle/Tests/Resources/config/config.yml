@@ -1,20 +1,33 @@
-app.config:
+imports:
+    - { resource: parameters.ini }
+
+framework:
     charset:       UTF-8
     error_handler: null
     csrf_protection:
         enabled: true
-        secret: xxxxxxxxxx
+        secret: %csrf_secret%
     router:        { resource: "%kernel.root_dir%/config/routing.yml" }
     validation:    { enabled: true, annotations: true }
-#    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
+    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
     session:
-        default_locale: en
-        lifetime:       0 # Until browser is closed
+        default_locale: %locale%
+        lifetime:       0
         auto_start:     true
 
-doctrine_odm.mongodb:
+twig:
+    debug:            %kernel.debug%
+    strict_variables: %kernel.debug%
+
+# Assetic Configuration
+assetic:
+    debug:          %kernel.debug%
+    use_controller: false
+
+# Doctrine Configuration
+doctrine_mongo_db:
   server: mongodb://localhost:27017
-  default_database: livechat_%kernel.environment%
+  default_database: livechat
   options:
     connect: true
   metadata_cache_driver: array # array, apc, xcache, memcache
@@ -22,27 +35,9 @@ doctrine_odm.mongodb:
   auto_generate_proxy_classes: true
   mappings:
     SGLiveChatBundle: ~
-    
-## Doctrine Configuration
-#doctrine:
-#   dbal:
-#       dbname:   xxxxxxxx
-#       user:     xxxxxxxx
-#       password: ~
-#       logging:  %kernel.debug%
-#   orm:
-#       auto_generate_proxy_classes: %kernel.debug%
-#       mappings:
-#           HelloBundle: ~
 
-## Swiftmailer Configuration
-swiftmailer.config: ~
-#    transport:  smtp
-#    encryption: ssl
-#    auth_mode:  login
-#    host:       smtp.gmail.com
-#    username:   xxxxxxxx
-#    password:   xxxxxxxx
+# Swiftmailer Configuration
+swiftmailer: ~
 
-sglivechat.config:
+sg_live_chat:
   cache_engine: mongo

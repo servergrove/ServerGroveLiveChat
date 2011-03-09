@@ -1,6 +1,6 @@
 homepage:
   pattern:  /
-  defaults: { _controller: SGLiveSGLiveChatBundle:Default:index }
+  defaults: { _controller: SGLiveChatBundle:Default:index }
 
 # -- Live Chat -----------------------------------------------------------------
 

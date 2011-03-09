@@ -2,10 +2,11 @@
 
 namespace ServerGrove\SGLiveChatBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Config\FileLocator;
 
 /**
  * Description of SGLiveChatExtension
@@ -15,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class SGLiveChatExtension extends Extension
 {
 
-    public function configLoad(array $config, ContainerBuilder $container)
+    public function load(array $config, ContainerBuilder $container)
     {
         $this->loadDefaults($config, $container);
     }
@@ -28,11 +29,12 @@ class SGLiveChatExtension extends Extension
      */
     protected function loadDefaults(array $config, ContainerBuilder $container)
     {
-        $loader = new XmlFileLoader($container, __DIR__ . '/../Resources/config');
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('livechat.xml');
 
         // Allow these application configuration options to override the defaults
-        $options = array('cache_engine');
+        $options = array(
+            'cache_engine');
         foreach ($options as $key) {
             if (isset($config[$key])) {
                 $container->setParameter('livechat.' . $key, $config[$key]);
@@ -50,14 +52,9 @@ class SGLiveChatExtension extends Extension
 
     }
 
-    public function getAlias()
-    {
-        return 'sglivechat';
-    }
-
     public function getNamespace()
     {
-        return 'http://www.symfony-project.org/schema/dic/symfony';
+        return 'http://symfony.com/schema/dic/symfony';
     }
 
     public function getXsdValidationBasePath()

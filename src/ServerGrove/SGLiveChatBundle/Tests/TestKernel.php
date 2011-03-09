@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Tests;
 
+use Symfony\Bundle\TwigBundle\TwigBundle;
+
 use ServerGrove\SGLiveChatBundle\SGLiveChatBundle;
 use Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle;
 use Symfony\Bundle\DoctrineBundle\DoctrineBundle;
@@ -9,7 +11,8 @@ use Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle;
 use Symfony\Bundle\ZendBundle\ZendBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\DependencyInjection\Loader\LoaderInterface;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Bundle\AsseticBundle\AsseticBundle;
 
 class TestKernel extends Kernel
 {
@@ -19,6 +22,8 @@ class TestKernel extends Kernel
         $bundles = array(
             new FrameworkBundle(),
             new ZendBundle(),
+            new TwigBundle(),
+            new AsseticBundle(),
             new SwiftmailerBundle(),
             new DoctrineBundle(),
             new DoctrineMongoDBBundle(),

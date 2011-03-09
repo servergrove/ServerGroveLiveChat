@@ -1,5 +1,9 @@
 {% extends "::base.html.twig" %}
 
+{% block stylesheets %}<link type="text/css" href="{{asset('css/main-lc.css')}}" rel="stylesheet" media="all" />{% endblock %}
+
+{% block javascripts %}<script type="text/javascript" src="{{asset('js/jquery.js')}}"></script> {% endblock %}
+
 {% block body %}
 <div id="chatWin_header">
     <img src="{{asset('images/sg_logo.jpg')}}" width="182" height="37" alt="Online Support ServerGrove" class="logo" />

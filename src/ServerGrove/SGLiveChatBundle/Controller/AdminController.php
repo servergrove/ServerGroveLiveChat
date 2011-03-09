@@ -19,6 +19,7 @@ use Symfony\Component\Form\PasswordField;
 use Symfony\Component\Form\TextField;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Description of AdminController
@@ -91,14 +92,14 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return $this->redirect($this->generateUrl("_security_login", array('e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
         } catch (FormException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return $this->redirect($this->generateUrl("_security_login", array('e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
         }
 
-        return $this->redirect($this->generateUrl("sglc_admin_index"));
+        return new RedirectResponse($this->generateUrl("sglc_admin_index"));
     }
 
     public function indexAction()
@@ -107,7 +108,7 @@ class AdminController extends BaseController
             return $response;
         }
 
-        return $this->redirect($this->generateUrl('sglc_admin_console_sessions'));
+        return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
     }
 
     public function loginAction()
@@ -140,7 +141,7 @@ class AdminController extends BaseController
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
-        return $this->redirect($this->generateUrl("_security_login"));
+        return new RedirectResponse($this->generateUrl("_security_login"));
     }
 
     private function getRequestedChats()
@@ -254,7 +255,7 @@ class AdminController extends BaseController
             $this->getDocumentManager()->flush();
         }
 
-        return $this->redirect($this->generateUrl('sglc_admin_console_sessions'));
+        return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
     }
 
     public function operatorsAction()
@@ -297,7 +298,7 @@ class AdminController extends BaseController
                     $this->getDocumentManager()->flush();
                     $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
 
-                    return $this->redirect($this->generateUrl('sglc_admin_operator_departments'));
+                    return new RedirectResponse($this->generateUrl('sglc_admin_operator_departments'));
                 }
                 //}
                 break;
@@ -354,7 +355,7 @@ class AdminController extends BaseController
                     $this->getDocumentManager()->flush();
                     $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
 
-                    return $this->redirect($this->generateUrl('sglc_admin_operators'));
+                    return new RedirectResponse($this->generateUrl('sglc_admin_operators'));
                 }
                 //}
                 break;

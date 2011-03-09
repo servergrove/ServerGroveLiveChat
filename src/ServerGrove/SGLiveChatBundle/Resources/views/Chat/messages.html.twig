@@ -2,7 +2,7 @@
 <table border="0" cellpadding="3" cellspacing="0" width="100%">
     {% for message in messages %}
     {% set sender = message.getSender() %}
-    {% if sender.getKind() eq "Operator" %}
+    {% if sender.getKind() is Operator %}
     <tr valign="top" style="background-color: #F8F8F8;">
     {% else %}
     <tr valign="top">

@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,15 +71,6 @@ abstract class BaseController extends Controller
     public function renderTemplate($view, array $parameters = array())
     {
         return $this->render($view, $parameters, $this->getResponse());
-    }
-
-    /**
-     * @return Symfony\Component\HttpFoundation\Response
-     */
-    public function redirect($url, $status = 302)
-    {
-        $this->getResponse()->setRedirect($url, $status);
-        return $this->getResponse();
     }
 
     /**

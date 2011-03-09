@@ -2,6 +2,7 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
+
 use ServerGrove\SGLiveChatBundle\Chat\ChatRequest;
 use ServerGrove\SGLiveChatBundle\Document\Operator;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Rating;
@@ -14,6 +15,7 @@ use ServerGrove\SGLiveChatBundle\Form\ChatRequestForm;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Swift_Message;
 use Exception;
 
@@ -113,7 +115,7 @@ class ChatController extends PublicController
                 $this->getSessionStorage()->set('chatsession', $chatSession->getId());
                 $this->cacheUserForSession($visitor, $chatSession);
 
-                return $this->redirect($this->generateUrl('sglc_chat_load', array('id' => $chatSession->getId())));
+                return new RedirectResponse($this->generateUrl('sglc_chat_load', array('id' => $chatSession->getId())));
             }
         }
 
@@ -131,7 +133,7 @@ class ChatController extends PublicController
         if (!$operator) {
             $this->getSessionStorage()->setFlash('errorMsg', 'Unauthorized access.');
 
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         if (!($visit = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->find($sessId))) {
@@ -158,7 +160,7 @@ class ChatController extends PublicController
 
         $this->cacheUserForSession($operator, $chatSession);
 
-        return $this->redirect($this->generateUrl('sglc_chat_load', array(
+        return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
                     'id' => $chatSession->getId())));
     }
 
@@ -167,13 +169,13 @@ class ChatController extends PublicController
         if (!($chatSession = $this->getChatSession($id))) {
             $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
 
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         if ($chatSession->getStatusId() != Session::STATUS_INVITE) {
             $this->getSessionStorage()->setFlash('errorMsg', 'Invitation has expired or canceled. You can start a new chat now.');
 
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         $operator = $this->getOperator();
@@ -185,7 +187,7 @@ class ChatController extends PublicController
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
-        return $this->redirect($this->generateUrl('sglc_chat_load', array(
+        return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
                     'id' => $chatSession->getId())));
     }
 
@@ -211,13 +213,13 @@ class ChatController extends PublicController
         if (!$operator) {
             $this->getSessionStorage()->setFlash('errorMsg', 'Unauthorized access.');
 
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         if (!($chatSession = $this->getChatSession($id))) {
             $this->getSessionStorage()->setFlash('errorMsg', 'Chat not found');
 
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         if ($this->getRequest()->getMethod() == 'POST') {
@@ -231,7 +233,7 @@ class ChatController extends PublicController
 
                 $this->cacheUserForSession($operator, $chatSession);
 
-                return $this->redirect($this->generateUrl('sglc_chat_load', array(
+                return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
                             'id' => $chatSession->getId())));
             }
         }
@@ -251,7 +253,7 @@ class ChatController extends PublicController
         $operator = $this->getOperator();
         if (!($chatSession = $this->getChatSessionForCurrentUser())) {
             $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         $arrCannedMessages = array();
@@ -295,7 +297,7 @@ class ChatController extends PublicController
 
         if (!$chatSession = $this->getChatSession($id)) {
             $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         $user = $this->getUserForSession($chatSession);
@@ -369,7 +371,7 @@ class ChatController extends PublicController
     {
         if (!$chatSession = $this->getChatSessionForCurrentUser()) {
             $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
-            return $this->redirect($this->generateUrl('sglc_chat_homepage'));
+            return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
         $visitor = $this->getVisitorByKey();
