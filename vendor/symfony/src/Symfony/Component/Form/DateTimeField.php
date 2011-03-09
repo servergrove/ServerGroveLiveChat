@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -44,7 +44,7 @@ use Symfony\Component\Form\ValueTransformer\ValueTransformerChain;
  *  * data_timezone:  The timezone of the data. Default: UTC.
  *  * user_timezone:  The timezone of the user entering a new value. Default: UTC.
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class DateTimeField extends Form
 {
@@ -75,6 +75,19 @@ class DateTimeField extends Form
         TimeField::INPUT,
     );
 
+    /**
+     * {@inheritDoc}
+     */
+    public function __construct($key, array $options = array())
+    {
+        // Override parent option
+        // \DateTime objects are never edited by reference, because
+        // we treat them like value objects
+        $this->addOption('by_reference', false);
+
+        parent::__construct($key, $options);
+    }
+
     protected function configure()
     {
         $this->addOption('date_widget', DateField::CHOICE, self::$dateWidgets);
@@ -90,8 +103,8 @@ class DateTimeField extends Form
         $this->addOption('minutes', range(0, 59));
         $this->addOption('seconds', range(0, 59));
 
-        $this->addOption('data_timezone', 'UTC');
-        $this->addOption('user_timezone', 'UTC');
+        $this->addOption('data_timezone', date_default_timezone_get());
+        $this->addOption('user_timezone', date_default_timezone_get());
         $this->addOption('date_format', DateField::MEDIUM, self::$dateFormats);
 
         $this->add(new DateField('date', array(

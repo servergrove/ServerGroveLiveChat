@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
-use Symfony\Component\Security\Core\SecurityContext;
+use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventInterface;
@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
  * AnonymousAuthenticationListener automatically addds a Token if none is
  * already present.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class AnonymousAuthenticationListener implements ListenerInterface
 {
@@ -29,7 +29,7 @@ class AnonymousAuthenticationListener implements ListenerInterface
     protected $key;
     protected $logger;
 
-    public function __construct(SecurityContext $context, $key, LoggerInterface $logger = null)
+    public function __construct(SecurityContextInterface $context, $key, LoggerInterface $logger = null)
     {
         $this->context = $context;
         $this->key     = $key;
@@ -47,7 +47,7 @@ class AnonymousAuthenticationListener implements ListenerInterface
     {
         $dispatcher->connect('core.security', array($this, 'handle'), 0);
     }
-    
+
     /**
      * {@inheritDoc}
      */

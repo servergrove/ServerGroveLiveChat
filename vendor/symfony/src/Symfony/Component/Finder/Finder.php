@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -23,7 +23,7 @@ namespace Symfony\Component\Finder;
  * $finder = new Finder();
  * $finder = $finder->files()->name('*.php')->in(__DIR__);
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Finder implements \IteratorAggregate
 {
@@ -338,13 +338,16 @@ class Finder implements \IteratorAggregate
 
     protected function searchInDirectory($dir)
     {
-        $flags = \FilesystemIterator::SKIP_DOTS;
+        $flags = \RecursiveDirectoryIterator::SKIP_DOTS;
 
         if ($this->followLinks) {
-            $flags |= \FilesystemIterator::FOLLOW_SYMLINKS;
+            $flags |= \RecursiveDirectoryIterator::FOLLOW_SYMLINKS;
         }
 
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, $flags), \RecursiveIteratorIterator::SELF_FIRST);
+        $iterator = new \RecursiveIteratorIterator(
+            new Iterator\RecursiveDirectoryIterator($dir, $flags),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
 
         if ($this->depths) {
             $iterator = new Iterator\DepthRangeFilterIterator($iterator, $this->depths);

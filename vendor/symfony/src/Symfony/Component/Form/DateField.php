@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -38,8 +38,8 @@ use Symfony\Component\Form\ValueTransformer\DateTimeToArrayTransformer;
  *  * days:           An array of days for the day select tag.
  *
  *  * format:         The date format type to use for displaying the data. Default: medium.
- *  * data_timezone:  The timezone of the data. Default: UTC.
- *  * user_timezone:  The timezone of the user entering a new value. Default: UTC.
+ *  * data_timezone:  The timezone of the data. Default: server timezone.
+ *  * user_timezone:  The timezone of the user entering a new value. Default: server timezone.
  *
  */
 class DateField extends HybridField
@@ -89,6 +89,19 @@ class DateField extends HybridField
      */
     protected $formatter;
 
+    /**
+     * {@inheritDoc}
+     */
+    public function __construct($key, array $options = array())
+    {
+        // Override parent option
+        // \DateTime objects are never edited by reference, because
+        // we treat them like value objects
+        $this->addOption('by_reference', false);
+
+        parent::__construct($key, $options);
+    }
+
     protected function configure()
     {
         $this->addOption('widget', self::CHOICE, self::$widgets);
@@ -100,8 +113,8 @@ class DateField extends HybridField
         $this->addOption('days', range(1, 31));
 
         $this->addOption('format', self::MEDIUM, self::$formats);
-        $this->addOption('data_timezone', 'UTC');
-        $this->addOption('user_timezone', 'UTC');
+        $this->addOption('data_timezone', date_default_timezone_get());
+        $this->addOption('user_timezone', date_default_timezone_get());
 
         $this->formatter = new \IntlDateFormatter(
             \Locale::getDefault(),
@@ -249,7 +262,8 @@ class DateField extends HybridField
     {
         $date = $this->getNormalizedData();
 
-        return null === $date || in_array($date->format('Y'), $this->getOption('years'));
+        return $this->isEmpty() || ($this->isGroup() && $this->get('year')->isEmpty())
+                || in_array($date->format('Y'), $this->getOption('years'));
     }
 
     /**
@@ -264,7 +278,8 @@ class DateField extends HybridField
     {
         $date = $this->getNormalizedData();
 
-        return null === $date || in_array($date->format('m'), $this->getOption('months'));
+        return $this->isEmpty() || ($this->isGroup() && $this->get('month')->isEmpty())
+                || in_array($date->format('m'), $this->getOption('months'));
     }
 
     /**
@@ -279,6 +294,31 @@ class DateField extends HybridField
     {
         $date = $this->getNormalizedData();
 
-        return null === $date || in_array($date->format('d'), $this->getOption('days'));
+        return $this->isEmpty() || ($this->isGroup() && $this->get('day')->isEmpty())
+                || in_array($date->format('d'), $this->getOption('days'));
+    }
+
+    /**
+     * Returns whether the field is neither completely filled (a selected
+     * value in each dropdown) nor completely empty
+     *
+     * @return Boolean
+     */
+    public function isPartiallyFilled()
+    {
+        if ($this->isField()) {
+            return false;
+        }
+
+        if ($this->isEmpty()) {
+            return false;
+        }
+
+        if ($this->get('year')->isEmpty() || $this->get('month')->isEmpty()
+                || $this->get('day')->isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 }

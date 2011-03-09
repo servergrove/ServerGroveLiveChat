@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -40,7 +40,7 @@ use Symfony\Component\Console\Helper\DialogHelper;
  *     $app->add(new SimpleCommand());
  *     $app->run();
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Application
 {
@@ -129,9 +129,9 @@ class Application
             // @codeCoverageIgnoreStart
             exit($statusCode);
             // @codeCoverageIgnoreEnd
-        } else {
-            return $statusCode;
         }
+
+        return $statusCode;
     }
 
     /**
@@ -201,7 +201,7 @@ class Application
     }
 
     /**
-     * Get the helper set associated with the command
+     * Get the helper set associated with the command.
      *
      * @return HelperSet The HelperSet instance associated with this command
      */
@@ -315,9 +315,9 @@ class Application
     {
         if ('UNKNOWN' !== $this->getName() && 'UNKNOWN' !== $this->getVersion()) {
             return sprintf('<info>%s</info> version <comment>%s</comment>', $this->getName(), $this->getVersion());
-        } else {
-            return '<info>Console Tool</info>';
         }
+
+        return '<info>Console Tool</info>';
     }
 
     /**
@@ -396,7 +396,7 @@ class Application
     }
 
     /**
-     * Returns true if the command exists, false otherwise
+     * Returns true if the command exists, false otherwise.
      *
      * @param string $name The command name or alias
      *
@@ -428,6 +428,8 @@ class Application
 
     /**
      * Finds a registered namespace by a name or an abbreviation.
+     *
+     * @param string $namespace A namespace or abbreviation to search for
      *
      * @return string A registered namespace
      *
@@ -715,11 +717,25 @@ class Application
         }
     }
 
+    /**
+     * Gets the name of the command based on input.
+     *
+     * @param InputInterface $input The input interface
+     * 
+     * @return string The command name
+     */
     protected function getCommandName(InputInterface $input)
     {
         return $input->getFirstArgument('command');
     }
 
+    /**
+     * Sorts commands in alphabetical order.
+     *
+     * @param array $commands An associative array of commands to sort
+     *
+     * @return array A sorted array of commands
+     */
     protected function sortCommands($commands)
     {
         $namespacedCommands = array();
@@ -741,6 +757,13 @@ class Application
         return $namespacedCommands;
     }
 
+    /**
+     * Returns abbreviated suggestions in string format.
+     *
+     * @param array $abbrevs Abbreviated suggestions to convert
+     *
+     * @return string A formatted string of abbreviated suggestions
+     */
     protected function getAbbreviationSuggestions($abbrevs)
     {
         return sprintf('%s, %s%s', $abbrevs[0], $abbrevs[1], count($abbrevs) > 2 ? sprintf(' and %d more', count($abbrevs) - 2) : '');

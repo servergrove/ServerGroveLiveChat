@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,7 +16,7 @@ use Symfony\Component\Templating\Helper\Helper;
 /**
  * CodeHelper.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class CodeHelper extends Helper
 {
@@ -78,12 +78,19 @@ class CodeHelper extends Helper
 
     public function abbrMethod($method)
     {
-        list($class, $method) = explode('::', $method);
+        if (false !== strpos($method, '::')) {
+            list($class, $method) = explode('::', $method);
 
-        $parts = explode('\\', $class);
-        $short = array_pop($parts);
+            $parts  = explode('\\', $class);
+            $short  = array_pop($parts);
+            $result = sprintf("<abbr title=\"%s\">%s</abbr>::%s()", $class, $short, $method);
+        } else if ('Closure' === $method) {
+            $result = sprintf("<abbr title=\"%s\">%s</abbr>", $method, $method);
+        } else {
+            $result = sprintf("<abbr title=\"%s\">%s</abbr>()", $method, $method);
+        }
 
-        return sprintf("<abbr title=\"%s\">%s</abbr>::%s", $class, $short, $method);
+        return $result;
     }
 
     /**

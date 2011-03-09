@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -26,16 +26,31 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
     protected $container;
     protected $exceptions;
 
+    /** 
+     * Constructor.
+     *
+     * @param array $exceptions An array of exceptions
+     */
     public function __construct(array $exceptions = array('kernel', 'service_container', 'templating.loader.wrapped', 'pdo_connection'))
     {
         $this->exceptions = $exceptions;
     }
 
+    /**
+     * Add an exception.
+     *
+     * @param string $id Exception identifier
+     */
     public function addException($id)
     {
         $this->exceptions[] = $id;
     }
 
+    /**
+     * Process the ContainerBuilder to resolve invalid references.
+     *
+     * @param ContainerBuilder $container 
+     */
     public function process(ContainerBuilder $container)
     {
         $this->container = $container;
@@ -60,6 +75,12 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
         }
     }
 
+    /**
+     * Processes arguments to determine invalid references.
+     *
+     * @param array $arguments An array of Reference objects
+     * @param boolean $inMethodCall 
+     */
     protected function processArguments(array $arguments, $inMethodCall = false)
     {
         foreach ($arguments as $k => $argument) {

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,26 +14,32 @@ namespace Symfony\Bundle\FrameworkBundle\CacheWarmer;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmer;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Finder\Finder;
+use Symfony\Bundle\FrameworkBundle\Templating\TemplateNameParser;
 
 /**
  * Computes the association between template names and their paths on the disk.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class TemplatePathsCacheWarmer extends CacheWarmer
 {
+    const TEMPLATES_PATH_IN_BUNDLE = '/Resources/views';
+
     protected $kernel;
     protected $rootDir;
+    protected $parser;
 
     /**
      * Constructor.
      *
-     * @param KernelInterface $kernel  A KernelInterface instance
-     * @param string          $rootDir The directory where global templates can be stored
+     * @param KernelInterface      $kernel  A KernelInterface instance
+     * @param TemplateNameParser   $parser  A TemplateNameParser instance
+     * @param string               $rootDir The directory where global templates can be stored
      */
-    public function __construct(KernelInterface $kernel, $rootDir)
+    public function __construct(KernelInterface $kernel, TemplateNameParser $parser, $rootDir)
     {
         $this->kernel = $kernel;
+        $this->parser = $parser;
         $this->rootDir = $rootDir;
     }
 
@@ -43,8 +49,14 @@ class TemplatePathsCacheWarmer extends CacheWarmer
      * @param string $cacheDir The cache directory
      */
     public function warmUp($cacheDir)
-    {
-        $templates = $this->computeTemplatePaths();
+    {       
+        $templates = array();
+
+        foreach ($this->kernel->getBundles() as $name => $bundle) {
+            $templates += $this->findTemplatesIn($bundle->getPath().self::TEMPLATES_PATH_IN_BUNDLE, $name);
+        }
+
+        $templates += $this->findTemplatesIn($this->rootDir);
 
         $this->writeCacheFile($cacheDir.'/templates.php', sprintf('<?php return %s;', var_export($templates, true)));
     }
@@ -59,55 +71,31 @@ class TemplatePathsCacheWarmer extends CacheWarmer
         return false;
     }
 
-    protected function computeTemplatePaths()
+    /**
+     * Find templates in the given directory
+     *
+     * @param string $dir       The folder where to look for templates
+     * @param string $bundle    The name of the bundle (null when out of a bundle)
+     *
+     * @return array An array of template paths
+     */
+    protected function findTemplatesIn($dir, $bundle = null)
     {
-        $prefix = '/Resources/views';
         $templates = array();
-        foreach ($this->kernel->getBundles() as $name => $bundle) {
-            if (!is_dir($dir = $bundle->getNormalizedPath().$prefix)) {
-                continue;
-            }
 
+        if (is_dir($dir)) {
             $finder = new Finder();
             foreach ($finder->files()->followLinks()->in($dir) as $file) {
-                if (false !== $template = $this->parseTemplateName($file, $prefix.'/', $bundle->getName())) {
-                    $resource = '@'.$template['bundle'].'/Resources/views/'.$template['controller'].'/'.$template['name'].'.'.$template['format'].'.'.$template['engine'];
-
-                    $templates[md5(serialize($template))] = $this->kernel->locateResource($resource, $this->rootDir);
+                $template = $this->parser->parseFromFilename($file->getRelativePathname());
+                if (false !== $template) {
+                    if (null !== $bundle) {
+                      $template->set('bundle', $bundle);
+                    }
+                    $templates[$template->getSignature()] = $file->getRealPath();
                 }
             }
         }
 
-        if (is_dir($this->rootDir)) {
-            $finder = new Finder();
-            foreach ($finder->files()->followLinks()->in($this->rootDir) as $file) {
-                if (false !== $template = $this->parseTemplateName($file, strtr($this->rootDir, '\\', '/').'/')) {
-                    $templates[md5(serialize($template))] = (string) $file;
-                }
-            }
-        }
-
-        return  $templates;
-    }
-
-    protected function parseTemplateName($file, $prefix, $bundle = '')
-    {
-        $path = strtr($file->getPathname(), '\\', '/');
-
-        list(, $tmp) = explode($prefix, $path, 2);
-        $parts = explode('/', strtr($tmp, '\\', '/'));
-
-        $elements = explode('.', array_pop($parts));
-        if (3 !== count($elements)) {
-            return false;
-        }
-
-        return array(
-            'bundle'     => $bundle,
-            'controller' => implode('/', $parts),
-            'name'       => $elements[0],
-            'format'     => $elements[1],
-            'engine'     => $elements[2],
-        );
+        return $templates;
     }
 }

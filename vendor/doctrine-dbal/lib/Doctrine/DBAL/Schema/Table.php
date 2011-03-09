@@ -496,7 +496,7 @@ class Table extends AbstractAsset
      */
     public function hasColumn($columnName)
     {
-        $columnName = strtolower($columnName);
+        $columnName = $this->trimQuotes(strtolower($columnName));
         return isset($this->_columns[$columnName]);
     }
 
@@ -508,7 +508,7 @@ class Table extends AbstractAsset
      */
     public function getColumn($columnName)
     {
-        $columnName = strtolower($columnName);
+        $columnName = strtolower($this->trimQuotes($columnName));
         if (!$this->hasColumn($columnName)) {
             throw SchemaException::columnDoesNotExist($columnName, $this->_name);
         }
@@ -522,16 +522,6 @@ class Table extends AbstractAsset
     public function getPrimaryKey()
     {
         return $this->getIndex($this->_primaryKeyName);
-    }
-
-    /**
-     * Check if this table has a primary key.
-     *
-     * @return bool
-     */
-    public function hasPrimaryKey()
-    {
-        return ($this->_primaryKeyName && $this->hasIndex($this->_primaryKeyName));
     }
 
     /**

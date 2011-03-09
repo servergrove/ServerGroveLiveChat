@@ -154,10 +154,13 @@
            <dependencies>
                <php minimum_version="5.3.2" />
                <pear minimum_version="1.6.0" recommended_version="1.6.1" />
-               <package name="DoctrineCommon" channel="pear.doctrine-project.org" minimum_version="2.0.0BETA4" />
+               <package name="DoctrineCommon" channel="pear.doctrine-project.org" minimum_version="${dependencies.common}" />
+               <!-- Doctrine Symfony Console PEAR package is generated in ORM build.xml process -->
+               <package name="DoctrineSymfonyConsole" channel="pear.doctrine-project.org" minimum_version="${dependencies.sfconsole}" />
            </dependencies>
            <dirroles key="bin">script</dirroles>
            <ignore>Doctrine/Common/</ignore>
+           <ignore>Doctrine/Symfony/</ignore>
            <release>
                 <install as="doctrine-dbal" name="bin/doctrine-dbal" />
                 <install as="doctrine-dbal.php" name="bin/doctrine-dbal.php" />
@@ -174,9 +177,12 @@
     </target>
 
     <target name="git-tag">
-        <exec command="grep '${version}' ${project.basedir}/lib/Doctrine/DBAL/Version.php" checkreturn="true"/>
+        <exec command="grep '${version}-DEV' ${project.basedir}/lib/Doctrine/DBAL/Version.php" checkreturn="true"/>
+        <exec command="sed 's/${version}-DEV/${version}/' ${project.basedir}/lib/Doctrine/DBAL/Version.php > ${project.basedir}/lib/Doctrine/DBAL/Version2.php" passthru="true" />
+        <exec command="mv ${project.basedir}/lib/Doctrine/DBAL/Version2.php ${project.basedir}/lib/Doctrine/DBAL/Version.php" passthru="true" />
+        <exec command="git add ${project.basedir}/lib/Doctrine/DBAL/Version.php" passthru="true" />
+        <exec command="git commit -m 'Release ${version}'" />
         <exec command="git tag -a ${version}" passthru="true" />
-        <exec command="git push origin ${version}" passthru="true" />
     </target>
 
     <target name="pirum-release">
@@ -191,11 +197,10 @@
     <target name="update-dev-version">
         <exec command="grep '${version}' ${project.basedir}/lib/Doctrine/DBAL/Version.php" checkreturn="true"/>
         <propertyprompt propertyName="next_version" defaultValue="${version}" promptText="Enter next version string (without -DEV)" />
-        <exec command="sed 's/${version}-DEV/${next_version}-DEV/' ${project.basedir}/lib/Doctrine/DBAL/Version.php > ${project.basedir}/lib/Doctrine/DBAL/Version2.php" passthru="true" />
+        <exec command="sed 's/${version}/${next_version}-DEV/' ${project.basedir}/lib/Doctrine/DBAL/Version.php > ${project.basedir}/lib/Doctrine/DBAL/Version2.php" passthru="true" />
         <exec command="mv ${project.basedir}/lib/Doctrine/DBAL/Version2.php ${project.basedir}/lib/Doctrine/DBAL/Version.php" passthru="true" />
         <exec command="git add ${project.basedir}/lib/Doctrine/DBAL/Version.php" passthru="true" />
-        <exec command="git commit -m 'Bump Dev Version to ${next_version}'" passthru="true" />
-        <exec command="git push origin master" passthru="true" />
+        <exec command="git commit -m 'Bump Dev Version to ${next_version}-DEV'" passthru="true" />
     </target>
 
     <target name="release" depends="git-tag,build-packages,distribute-download,pirum-release,update-dev-version" />

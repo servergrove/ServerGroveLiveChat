@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,7 @@ use Symfony\Component\Routing\RouteCollection;
  * AnnotationGlobLoader loads routing information from annotations set
  * on PHP classes and methods.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class AnnotationGlobLoader extends AnnotationDirectoryLoader
 {
@@ -34,7 +34,7 @@ class AnnotationGlobLoader extends AnnotationDirectoryLoader
     public function load($glob, $type = null)
     {
         $collection = new RouteCollection();
-        foreach ($this->locator->getAbsolutePaths($glob) as $path) {
+        foreach ($this->getAbsolutePaths($glob) as $path) {
             $collection->addCollection(parent::load($path, $type));
         }
 

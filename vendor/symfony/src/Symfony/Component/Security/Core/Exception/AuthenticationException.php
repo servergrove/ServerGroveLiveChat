@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,9 +14,9 @@ namespace Symfony\Component\Security\Core\Exception;
 /**
  * AuthenticationException is the base class for all authentication exceptions.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
-class AuthenticationException extends \RuntimeException
+class AuthenticationException extends \RuntimeException implements \Serializable
 {
     protected $extraInformation;
 
@@ -35,5 +35,27 @@ class AuthenticationException extends \RuntimeException
     public function setExtraInformation($extraInformation)
     {
         $this->extraInformation = $extraInformation;
+    }
+
+    public function serialize()
+    {
+        return serialize(array(
+            $this->extraInformation,
+            $this->code,
+            $this->message,
+            $this->file,
+            $this->line,
+        ));
+    }
+
+    public function unserialize($str)
+    {
+        list(
+            $this->extraInformation,
+            $this->code,
+            $this->message,
+            $this->file,
+            $this->line
+        ) = unserialize($str);
     }
 }

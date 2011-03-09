@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\ClassLoader;
 /**
  * ClassCollectionLoader.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ClassCollectionLoader
 {
@@ -119,6 +119,10 @@ class ClassCollectionLoader
 
     /**
      * Adds brackets around each namespace if it's not already the case.
+     *
+     * @param string $source Namespace string
+     *
+     * @return string Namespaces with brackets
      */
     static public function fixNamespaceDeclarations($source)
     {
@@ -162,6 +166,15 @@ class ClassCollectionLoader
         return $output;
     }
 
+    /**
+     * Writes a cache file.
+     *
+     * @param string $file Filename
+     * @param string $content Temporary file content
+     *
+     * @throws \RuntimeException when a cache file cannot be written
+     */
+     
     static protected function writeCacheFile($file, $content)
     {
         $tmpFile = tempnam(dirname($file), basename($file));

@@ -148,6 +148,25 @@ class HydratorFactory
         return $this->hydrators[$className];
     }
 
+    /**
+     * Generates hydrator classes for all given classes.
+     *
+     * @param array $classes The classes (ClassMetadata instances) for which to generate hydrators.
+     * @param string $toDir The target directory of the hydrator classes. If not specified, the
+     *                      directory configured on the Configuration of the DocumentManager used
+     *                      by this factory is used.
+     */
+    public function generateHydratorClasses(array $classes, $toDir = null)
+    {
+        $hydratorDir = $toDir ?: $this->hydratorDir;
+        $hydratorDir = rtrim($hydratorDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        foreach ($classes as $class) {
+            $hydratorClassName = str_replace('\\', '', $class->name) . 'Hydrator';
+            $hydratorFileName = $hydratorDir . $hydratorClassName . '.php';
+            $this->generateHydratorClass($class, $hydratorClassName, $hydratorFileName);
+        }
+    }
+
     private function generateHydratorClass(ClassMetadata $class, $hydratorClassName, $fileName)
     {
         $code = '';
@@ -184,7 +203,7 @@ EOF
                     $mapping['fieldName'],
                     Type::getType($mapping['type'])->closureToPHP()
                 );
-            } elseif ($mapping['association'] === ClassMetadata::REFERENCE_ONE) {
+            } elseif ($mapping['association'] === ClassMetadata::REFERENCE_ONE && $mapping['isOwningSide']) {
                 $code .= sprintf(<<<EOF
 
         /** @ReferenceOne */
@@ -203,6 +222,40 @@ EOF
                     $mapping['name'],
                     $mapping['fieldName']
                 );
+            } elseif ($mapping['association'] === ClassMetadata::REFERENCE_ONE && $mapping['isInverseSide']) {
+                if ($mapping['repositoryMethod']) {
+                    $code .= sprintf(<<<EOF
+
+        \$className = \$this->class->fieldMappings['%2\$s']['targetDocument'];
+        \$return = \$this->dm->getRepository(\$className)->%3\$s();
+        \$this->class->reflFields['%2\$s']->setValue(\$document, \$return);
+        \$hydratedData['%2\$s'] = \$return;
+
+EOF
+                ,
+                    $mapping['name'],
+                    $mapping['fieldName'],
+                    $mapping['repositoryMethod']
+                );
+                } else {
+                    $code .= sprintf(<<<EOF
+
+        \$className = \$this->class->fieldMappings['%2\$s']['targetDocument'];
+        \$criteria = array_merge(
+            array(\$this->class->fieldMappings['%2\$s']['mappedBy'] . '.\$id' => \$data['_id']),
+            isset(\$this->class->fieldMappings['%2\$s']['criteria']) ? \$this->class->fieldMappings['%2\$s']['criteria'] : array() 
+        );
+        \$sort = isset(\$this->class->fieldMappings['%2\$s']['sort']) ? \$this->class->fieldMappings['%2\$s']['sort'] : array();
+        \$return = \$this->unitOfWork->getDocumentPersister(\$className)->load(\$criteria, null, array(), 0, \$sort);
+        \$this->class->reflFields['%2\$s']->setValue(\$document, \$return);
+        \$hydratedData['%2\$s'] = \$return;
+
+EOF
+                    ,
+                        $mapping['name'],
+                        $mapping['fieldName']
+                    );
+                }
             } elseif ($mapping['association'] === ClassMetadata::REFERENCE_MANY || $mapping['association'] === ClassMetadata::EMBED_MANY) {
                 $code .= sprintf(<<<EOF
 

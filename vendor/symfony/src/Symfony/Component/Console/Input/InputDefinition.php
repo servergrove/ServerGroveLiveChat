@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ namespace Symfony\Component\Console\Input;
  *       new InputOption('foo', 'f', InputOption::VALUE_REQUIRED),
  *     ));
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class InputDefinition
 {
@@ -42,6 +42,11 @@ class InputDefinition
         $this->setDefinition($definition);
     }
 
+    /**
+     * Sets the definition of the input.
+     *
+     * @param array $definition The definition array
+     */
     public function setDefinition(array $definition)
     {
         $arguments = array();
@@ -296,6 +301,8 @@ class InputDefinition
 
     /**
      * Gets an InputOption by shortcut.
+     *
+     * @param string $shortcut the Shortcut name
      *
      * @return InputOption An InputOption object
      */

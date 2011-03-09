@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,26 +19,23 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * This engine knows how to render Twig templates.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class TwigEngine implements EngineInterface
 {
     protected $environment;
-    protected $container;
     protected $parser;
 
     /**
      * Constructor.
      *
      * @param \Twig_Environment           $environment A \Twig_Environment instance
-     * @param ContainerInterface          $container   The DI container
      * @param TemplateNameParserInterface $parser      A TemplateNameParserInterface instance
      * @param GlobalVariables             $globals     A GlobalVariables instance
      */
-    public function __construct(\Twig_Environment $environment, ContainerInterface $container, TemplateNameParserInterface $parser, GlobalVariables $globals)
+    public function __construct(\Twig_Environment $environment, TemplateNameParserInterface $parser, GlobalVariables $globals)
     {
         $this->environment = $environment;
-        $this->container = $container;
         $this->parser = $parser;
 
         $environment->addGlobal('app', $globals);
@@ -71,7 +68,7 @@ class TwigEngine implements EngineInterface
     {
         try {
             $this->load($name);
-        } catch (\Twig_Error_Loader $e) {
+        } catch (\InvalidArgumentException $e) {
             return false;
         }
 
@@ -93,7 +90,7 @@ class TwigEngine implements EngineInterface
 
         $template = $this->parser->parse($name);
 
-        return 'twig' === $template['engine'];
+        return 'twig' === $template->get('engine');
     }
 
     /**
@@ -108,7 +105,7 @@ class TwigEngine implements EngineInterface
     public function renderResponse($view, array $parameters = array(), Response $response = null)
     {
         if (null === $response) {
-            $response = $this->container->get('response');
+            $response = new Response();
         }
 
         $response->setContent($this->render($view, $parameters));
@@ -119,11 +116,11 @@ class TwigEngine implements EngineInterface
     /**
      * Loads the given template.
      *
-     * @param mixed $name A template name
+     * @param mixed $name A template name or an instance of Twig_Template
      *
      * @return \Twig_TemplateInterface A \Twig_TemplateInterface instance
      *
-     * @throws \Twig_Error_Loader if the template cannot be found
+     * @throws \InvalidArgumentException if the template does not exist
      */
     protected function load($name)
     {
@@ -131,6 +128,10 @@ class TwigEngine implements EngineInterface
             return $name;
         }
 
-        return $this->environment->loadTemplate($this->parser->parse($name), is_array($name) ? json_encode($name) : $name);
+        try {
+            return $this->environment->loadTemplate($name);
+        } catch (\Twig_Error_Loader $e) {
+            throw new \InvalidArgumentException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

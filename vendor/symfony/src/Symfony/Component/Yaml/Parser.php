@@ -2,7 +2,7 @@
 
 /*
  * This file is part of the Symfony package.
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,7 @@ namespace Symfony\Component\Yaml;
 /**
  * Parser parses YAML strings to convert them to PHP arrays.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Parser
 {
@@ -167,7 +167,7 @@ class Parser
                     $value = Inline::load($this->lines[0]);
                     if (is_array($value)) {
                         $first = reset($value);
-                        if ('*' === substr($first, 0, 1)) {
+                        if (is_string($first) && '*' === substr($first, 0, 1)) {
                             $data = array();
                             foreach ($value as $alias) {
                                 $data[] = $this->refs[substr($alias, 1)];
@@ -293,6 +293,8 @@ class Parser
 
     /**
      * Moves the parser to the next line.
+     *
+     * @return Boolean
      */
     protected function moveToNextLine()
     {
@@ -320,7 +322,7 @@ class Parser
      *
      * @return mixed  A PHP value
      *
-     * @throws ParserException When reference doesn't not exist
+     * @throws ParserException When reference does not exist
      */
     protected function parseValue($value)
     {
@@ -341,9 +343,9 @@ class Parser
             $modifiers = isset($matches['modifiers']) ? $matches['modifiers'] : '';
 
             return $this->parseFoldedScalar($matches['separator'], preg_replace('#\d+#', '', $modifiers), intval(abs($modifiers)));
-        } else {
-            return Inline::load($value);
         }
+
+        return Inline::load($value);
     }
 
     /**

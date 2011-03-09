@@ -148,6 +148,16 @@ class DocumentPersister
         $this->collection = $dm->getDocumentCollection($class->name);
     }
 
+    public function getInserts()
+    {
+        return $this->queuedInserts;
+    }
+
+    public function isQueuedForInsert($document)
+    {
+        return isset($this->queuedInserts[spl_object_hash($document)]) ? true : false;
+    }
+
     /**
      * Adds a document to the queued insertions.
      * The document remains queued until {@link executeInserts} is invoked.
@@ -324,13 +334,18 @@ class DocumentPersister
      *        a new document is created.
      * @param array $hints Hints for document creation.
      * @param int $lockMode
+     * @param array $sort
      * @return object The loaded and managed document instance or NULL if the document can not be found.
      * @todo Check identity map? loadById method? Try to guess whether $criteria is the id?
      */
-    public function load($criteria, $document = null, array $hints = array(), $lockMode = 0)
+    public function load($criteria, $document = null, array $hints = array(), $lockMode = 0, array $sort = array())
     {
         $criteria = $this->prepareQuery($criteria);
-        $result = $this->collection->findOne($criteria);
+        $cursor = $this->collection->find($criteria)->limit(1);
+        if ($sort) {
+            $cursor->sort($sort);
+        }
+        $result = $cursor->getSingleResult();
 
         if ($this->class->isLockable) {
             $lockMapping = $this->class->fieldMappings[$this->class->lockField];
@@ -457,7 +472,16 @@ class DocumentPersister
                 break;
 
             case ClassMetadata::REFERENCE_MANY:
-                $this->loadReferenceManyCollection($collection);
+                $mapping = $collection->getMapping();
+                if ($mapping['repositoryMethod']) {
+                    $this->loadReferenceManyWithRepositoryMethod($collection);
+                } else {
+                    if ($mapping['isOwningSide']) {
+                        $this->loadReferenceManyCollectionOwningSide($collection);
+                    } else {
+                        $this->loadReferenceManyCollectionInverseSide($collection);
+                    }
+                }
                 break;
         }
     }
@@ -481,7 +505,7 @@ class DocumentPersister
         }
     }
 
-    private function loadReferenceManyCollection(PersistentCollection $collection)
+    private function loadReferenceManyCollectionOwningSide(PersistentCollection $collection)
     {
         $mapping = $collection->getMapping();
         $cmd = $this->cmd;
@@ -502,12 +526,72 @@ class DocumentPersister
         foreach ($groupedIds as $className => $ids) {
             $class = $this->dm->getClassMetadata($className);
             $mongoCollection = $this->dm->getDocumentCollection($className);
-            $data = $mongoCollection->find(array('_id' => array($cmd . 'in' => $ids)));
-            foreach ($data as $documentData) {
+            $criteria = array_merge(
+                array('_id' => array($cmd . 'in' => $ids)),
+                $mapping['criteria']
+            );
+            $cursor = $mongoCollection->find($criteria);
+            if ($mapping['sort']) {
+                $cursor->sort($mapping['sort']);
+            }
+            if ($mapping['limit']) {
+                $cursor->limit($mapping['limit']);
+            }
+            if ($mapping['skip']) {
+                $cursor->skip($mapping['skip']);
+            }
+            foreach ($cursor as $documentData) {
                 $document = $this->uow->getById((string) $documentData['_id'], $class->rootDocumentName);
                 $data = $this->hydratorFactory->hydrate($document, $documentData);
                 $this->uow->setOriginalDocumentData($document, $data);
+                $document->__isInitialized__ = true;
             }
+        }
+    }
+
+    private function loadReferenceManyCollectionInverseSide(PersistentCollection $collection)
+    {
+        $mapping = $collection->getMapping();
+        $owner = $collection->getOwner();
+        $ownerClass = $this->dm->getClassMetadata(get_class($owner));
+        $criteria = array_merge(
+            array($mapping['mappedBy'].'.'.$this->cmd.'id' => $ownerClass->getIdentifierObject($owner)),
+            $mapping['criteria']
+        );
+        $qb = $this->dm->createQueryBuilder($mapping['targetDocument'])
+            ->setQueryArray($criteria);
+
+        if ($mapping['sort']) {
+            $qb->sort($mapping['sort']);
+        }
+        if ($mapping['limit']) {
+            $qb->limit($mapping['limit']);
+        }
+        if ($mapping['skip']) {
+            $qb->skip($mapping['skip']);
+        }
+        $query = $qb->getQuery();
+        $cursor = $query->execute();
+        foreach ($cursor as $document) {
+            $collection->add($document);
+        }
+    }
+
+    private function loadReferenceManyWithRepositoryMethod(PersistentCollection $collection)
+    {
+        $mapping = $collection->getMapping();
+        $cursor = $this->dm->getRepository($mapping['targetDocument'])->$mapping['repositoryMethod']();
+        if ($mapping['sort']) {
+            $cursor->sort($mapping['sort']);
+        }
+        if ($mapping['limit']) {
+            $cursor->limit($mapping['limit']);
+        }
+        if ($mapping['skip']) {
+            $cursor->skip($mapping['skip']);
+        }
+        foreach ($cursor as $document) {
+            $collection->add($document);
         }
     }
 
@@ -579,14 +663,21 @@ class DocumentPersister
             if (isset($mapping['targetDocument'])) {
                 $targetClass = $this->dm->getClassMetadata($mapping['targetDocument']);
                 if ($targetClass->hasField($e[1])) {
-                    if ($targetClass->identifier === $e[1] || $e[1] === '$id') {
+                    if ($targetClass->identifier === $e[1]) {
                         $fieldName = $e[0] . '.$id';
-                        $value = $targetClass->getDatabaseIdentifierValue($value);
+                        if (is_array($value)) {
+                            foreach ($value as $k => $v) {
+                                $value[$k] = $targetClass->getDatabaseIdentifierValue($v);
+                            }
+                        } else {
+                            $value = $targetClass->getDatabaseIdentifierValue($value);
+                        }
                     }
                 }
             }
 
         // Process all non identifier fields
+        // We only change the field names here to the mongodb field name used for persistence
         } elseif ($this->class->hasField($fieldName) && ! $this->class->isIdentifier($fieldName)) {
             $name = $this->class->fieldMappings[$fieldName]['name'];
             $mapping = $this->class->fieldMappings[$fieldName];
@@ -595,9 +686,21 @@ class DocumentPersister
             }
 
         // Process identifier
-        } elseif ($fieldName === $this->class->identifier || $fieldName === '_id') {
+        } elseif (($this->class->hasField($fieldName) && $this->class->isIdentifier($fieldName)) || $fieldName === '_id') {
             $fieldName = '_id';
-            $value = $this->class->getDatabaseIdentifierValue($value);
+            if (is_array($value)) {
+                foreach ($value as $k => $v) {
+                    if ($k[0] === '$' && is_array($v)) {
+                        foreach ($v as $k2 => $v2) {
+                            $value[$k][$k2] = $this->class->getDatabaseIdentifierValue($v2);
+                        }
+                    } else {
+                        $value[$k] = $this->class->getDatabaseIdentifierValue($v);
+                    }
+                }
+            } else {
+                $value = $this->class->getDatabaseIdentifierValue($value);
+            }
         }
         return $value;
     }

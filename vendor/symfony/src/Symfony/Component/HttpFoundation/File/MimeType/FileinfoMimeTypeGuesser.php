@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  * 
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 /**
  * Guesses the mime type using the PECL extension FileInfo
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class FileinfoMimeTypeGuesser implements MimeTypeGuesserInterface
 {
@@ -50,17 +50,10 @@ class FileinfoMimeTypeGuesser implements MimeTypeGuesserInterface
             return null;
         }
 
-        if (!$finfo = new \finfo(FILEINFO_MIME)) {
+        if (!$finfo = new \finfo(FILEINFO_MIME_TYPE)) {
             return null;
         }
 
-        $type = $finfo->file($path);
-
-        // remove charset (added as of PHP 5.3)
-        if (false !== $pos = strpos($type, ';')) {
-            $type = substr($type, 0, $pos);
-        }
-
-        return $type;
+        return $finfo->file($path);
     }
 }

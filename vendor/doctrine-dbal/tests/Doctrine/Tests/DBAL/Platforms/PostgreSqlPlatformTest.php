@@ -23,7 +23,7 @@ class PostgreSqlPlatformTest extends AbstractPlatformTestCase
     {
         return array(
             'CREATE TABLE test (foo VARCHAR(255) DEFAULT NULL, bar VARCHAR(255) DEFAULT NULL)',
-            'CREATE UNIQUE INDEX test_foo_bar_uniq ON test (foo, bar)'
+            'CREATE UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA ON test (foo, bar)'
         );
     }
 
@@ -135,7 +135,7 @@ class PostgreSqlPlatformTest extends AbstractPlatformTestCase
             'Variable string declaration is not correct'
         );
         $this->assertEquals(
-            'TEXT',
+            'VARCHAR(255)',
             $this->_platform->getVarcharTypeDeclarationSQL(array()),
             'Long string declaration is not correct'
         );

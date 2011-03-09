@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,19 +17,20 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Resource\FileResource;
+use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Bundle\DoctrineAbstractBundle\DependencyInjection\AbstractDoctrineExtension;
 
 /**
  * Doctrine MongoDB ODM extension.
  *
  * @author Bulat Shakirzyanov <bulat@theopenskyproject.com>
- * @author Kris Wallsmith <kris.wallsmith@symfony-project.com>
+ * @author Kris Wallsmith <kris.wallsmith@symfony.com>
  * @author Jonathan H. Wage <jonwage@gmail.com>
  */
 class DoctrineMongoDBExtension extends AbstractDoctrineExtension
 {
-    public function mongodbLoad(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
         foreach ($configs as $config) {
             $this->doMongodbLoad($config, $container);
@@ -64,7 +65,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
     {
         if (!$container->hasDefinition('doctrine.odm.mongodb.metadata.annotation')) {
             // Load DoctrineMongoDBBundle/Resources/config/mongodb.xml
-            $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
+            $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('mongodb.xml');
         }
 
@@ -104,6 +105,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
             $documentManager['name'] = $name;
             $this->loadDocumentManager($documentManager, $container);
         }
+        $container->setParameter('doctrine.odm.mongodb.document_managers', array_keys($documentManagers));
     }
 
     /**
@@ -165,6 +167,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
             new Reference($eventManagerId),
         );
         $odmDmDef = new Definition('%doctrine.odm.mongodb.document_manager_class%', $odmDmArgs);
+        $odmDmDef->setFactoryClass('%doctrine.odm.mongodb.document_manager_class%');
         $odmDmDef->setFactoryMethod('create');
         $odmDmDef->addTag('doctrine.odm.mongodb.document_manager');
         $container->setDefinition(sprintf('doctrine.odm.mongodb.%s_document_manager', $documentManager['name']), $odmDmDef);
@@ -296,8 +299,8 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
      *
      * There are two distinct configuration possibilities for mapping information:
      *
-     * 1. Specifiy a bundle and optionally details where the entity and mapping information reside.
-     * 2. Specifiy an arbitrary mapping location.
+     * 1. Specify a bundle and optionally details where the entity and mapping information reside.
+     * 2. Specify an arbitrary mapping location.
      *
      * @example
      *
@@ -336,7 +339,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
         if ($odmConfigDef->hasMethodCall('setDocumentNamespaces')) {
             // TODO: Can we make a method out of it on Definition? replaceMethodArguments() or something.
             $calls = $odmConfigDef->getMethodCalls();
-            foreach ($calls AS $call) {
+            foreach ($calls as $call) {
                 if ($call[0] == 'setDocumentNamespaces') {
                     $this->aliasMap = array_merge($call[1][0], $this->aliasMap);
                 }
@@ -378,7 +381,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
      */
     public function getNamespace()
     {
-        return 'http://www.symfony-project.org/schema/dic/doctrine/odm/mongodb';
+        return 'http://symfony.com/schema/dic/doctrine/odm/mongodb';
     }
 
     /**
@@ -387,17 +390,5 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
     public function getXsdValidationBasePath()
     {
         return __DIR__.'/../Resources/config/schema';
-    }
-
-    /**
-     * Returns the recommended alias to use in XML.
-     *
-     * This alias is also the mandatory prefix to use when using YAML.
-     *
-     * @return string The alias
-     */
-    public function getAlias()
-    {
-        return 'doctrine_odm';
     }
 }

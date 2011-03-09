@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\BrowserKit;
 /**
  * Response object.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Response
 {
@@ -39,14 +39,39 @@ class Response
         $this->headers = $headers;
     }
 
+    /**
+     * Converts the response object to string containing all headers and the response content.
+     *
+     * @return string The response with headers and content
+     */
     public function __toString()
     {
         $headers = '';
         foreach ($this->headers as $name => $value) {
-            $headers .= sprintf("%s: %s\n", $name, $value);
+            
+            if (is_string($value)) {
+                $headers .= $this->buildHeader($name, $value);
+            } else {
+                foreach ($value as $headerValue) {
+                    $headers .= $this->buildHeader($name, $headerValue);
+                }
+            }
         }
 
         return $headers."\n".$this->content;
+    }
+
+    /**
+     * Returns the build header line.
+     *
+     * @param string $name  The header name
+     * @param string $value The header value
+     *
+     * @return string The built header line
+     */
+    protected function buildHeader($name, $value)
+    {
+        return sprintf("%s: %s\n", $name, $value);
     }
 
     /**
@@ -93,9 +118,9 @@ class Response
             if (str_replace('-', '_', strtolower($key)) == str_replace('-', '_', strtolower($header))) {
                 if ($first) {
                     return is_array($value) ? (count($value) ? $value[0] : '') : $value;
-                } else {
-                    return is_array($value) ? $value : array($value);
                 }
+
+                return is_array($value) ? $value : array($value);
             }
         }
 

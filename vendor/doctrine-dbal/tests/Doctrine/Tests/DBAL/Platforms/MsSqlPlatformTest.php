@@ -24,7 +24,7 @@ class MsSqlPlatformTest extends AbstractPlatformTestCase
     {
         return array(
             'CREATE TABLE test (foo NVARCHAR(255) DEFAULT NULL, bar NVARCHAR(255) DEFAULT NULL)',
-            'CREATE UNIQUE INDEX test_foo_bar_uniq ON test (foo, bar) WHERE foo IS NOT NULL AND bar IS NOT NULL'
+            'CREATE UNIQUE INDEX UNIQ_D87F7E0C8C73652176FF8CAA ON test (foo, bar) WHERE foo IS NOT NULL AND bar IS NOT NULL'
         );
     }
 
@@ -105,7 +105,7 @@ class MsSqlPlatformTest extends AbstractPlatformTestCase
                 'Variable string declaration is not correct'
         );
         $this->assertEquals(
-                'NTEXT',
+                'NVARCHAR(255)',
                 $this->_platform->getVarcharTypeDeclarationSQL(array()),
                 'Long string declaration is not correct'
         );

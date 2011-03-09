@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,12 +13,13 @@ namespace Symfony\Component\Routing\Loader;
 
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\Resource\FileResource;
+use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\Config\Loader\FileLoader;
 
 /**
  * XmlFileLoader loads XML routing files.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class XmlFileLoader extends FileLoader
 {
@@ -56,8 +57,7 @@ class XmlFileLoader extends FileLoader
                     $type = (string) $node->getAttribute('type');
                     $prefix = (string) $node->getAttribute('prefix');
                     $this->currentDir = dirname($path);
-                    $file = $this->locator->locate($resource, $this->currentDir);
-                    $collection->addCollection($this->import($file, $type), $prefix);
+                    $collection->addCollection($this->import($resource, ('' !== $type ? $type : null)), $prefix);
                     break;
                 default:
                     throw new \InvalidArgumentException(sprintf('Unable to parse tag "%s"', $node->tagName));
@@ -103,7 +103,7 @@ class XmlFileLoader extends FileLoader
             switch ($node->tagName) {
                 case 'default':
                     $defaults[(string) $node->getAttribute('key')] = trim((string) $node->nodeValue);
-                 break;
+                    break;
                 case 'option':
                     $options[(string) $node->getAttribute('key')] = trim((string) $node->nodeValue);
                     break;

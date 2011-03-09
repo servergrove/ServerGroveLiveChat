@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,7 +12,7 @@
 namespace Symfony\Component\Security\Http\Firewall;
 
 use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\Security\Core\SecurityContext;
+use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\AccountCheckerInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -21,6 +21,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -28,10 +29,10 @@ use Symfony\Component\Security\Core\Exception\AuthenticationCredentialsNotFoundE
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
- * SwitchUserListener allows a user to impersonate another one temporarly
+ * SwitchUserListener allows a user to impersonate another one temporarily
  * (like the Unix su command).
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class SwitchUserListener implements ListenerInterface
 {
@@ -48,7 +49,7 @@ class SwitchUserListener implements ListenerInterface
     /**
      * Constructor.
      */
-    public function __construct(SecurityContext $securityContext, UserProviderInterface $provider, AccountCheckerInterface $accountChecker, $providerKey, AccessDecisionManagerInterface $accessDecisionManager, LoggerInterface $logger = null, $usernameParameter = '_switch_user', $role = 'ROLE_ALLOWED_TO_SWITCH')
+    public function __construct(SecurityContextInterface $securityContext, UserProviderInterface $provider, AccountCheckerInterface $accountChecker, $providerKey, AccessDecisionManagerInterface $accessDecisionManager, LoggerInterface $logger = null, $usernameParameter = '_switch_user', $role = 'ROLE_ALLOWED_TO_SWITCH')
     {
         if (empty($providerKey)) {
             throw new \InvalidArgumentException('$providerKey must not be empty.');
@@ -109,9 +110,8 @@ class SwitchUserListener implements ListenerInterface
             }
         }
 
-        $response = new Response();
         $request->server->set('QUERY_STRING', '');
-        $response->setRedirect($request->getUri(), 302);
+        $response = new RedirectResponse($request->getUri(), 302);
 
         $event->setProcessed();
 

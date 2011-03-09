@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,12 +11,14 @@
 
 namespace Symfony\Component\Routing\Loader;
 
+use Symfony\Component\Config\Loader\Loader;
+
 /**
  * ClosureLoader loads routes from a PHP closure.
  *
  * The Closure must return a RouteCollection instance.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ClosureLoader extends Loader
 {

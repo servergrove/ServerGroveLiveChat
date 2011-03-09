@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -30,7 +30,15 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
     const ALL   = 'all';
     const ANY   = 'any';
 
+    protected static $noAceException;
     protected $auditLogger;
+
+    public function __construct()
+    {
+        if (null === static::$noAceException) {
+            static::$noAceException = new NoAceFoundException('No ACE.');
+        }
+    }
 
     /**
      * Sets the audit logger
@@ -62,16 +70,16 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
             try {
                 $aces = $acl->getObjectAces();
 
-                if (0 === count($aces)) {
-                    throw new NoAceFoundException('No applicable ACE was found.');
+                if (!$aces) {
+                    throw static::$noAceException;
                 }
 
                 return $this->hasSufficientPermissions($acl, $aces, $masks, $sids, $administrativeMode);
             } catch (NoAceFoundException $noObjectAce) {
                 $aces = $acl->getClassAces();
 
-                if (0 === count($aces)) {
-                    throw new NoAceFoundException('No applicable ACE was found.');
+                if (!$aces) {
+                    throw static::$noAceException;
                 }
 
                 return $this->hasSufficientPermissions($acl, $aces, $masks, $sids, $administrativeMode);
@@ -93,15 +101,15 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
         try {
             try {
                 $aces = $acl->getObjectFieldAces($field);
-                if (0 === count($aces)) {
-                    throw new NoAceFoundException('No applicable ACE was found.');
+                if (!$aces) {
+                    throw static::$noAceException;
                 }
 
                 return $this->hasSufficientPermissions($acl, $aces, $masks, $sids, $administrativeMode);
             } catch (NoAceFoundException $noObjectAces) {
                 $aces = $acl->getClassFieldAces($field);
-                if (0 === count($aces)) {
-                    throw new NoAceFoundException('No applicable ACE was found.');
+                if (!$aces) {
+                    throw static::$noAceException;
                 }
 
                 return $this->hasSufficientPermissions($acl, $aces, $masks, $sids, $administrativeMode);
@@ -151,12 +159,8 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
 
         foreach ($masks as $requiredMask) {
             foreach ($sids as $sid) {
-                if (!$acl->isSidLoaded($sid)) {
-                    throw new SidNotLoadedException(sprintf('The SID "%s" has not been loaded.', $sid));
-                }
-
                 foreach ($aces as $ace) {
-                    if ($this->isAceApplicable($requiredMask, $sid, $ace)) {
+                    if ($sid->equals($ace->getSecurityIdentity()) && $this->isAceApplicable($requiredMask, $ace)) {
                         if ($ace->isGranting()) {
                             if (!$administrativeMode && null !== $this->auditLogger) {
                                 $this->auditLogger->logIfNeeded(true, $ace);
@@ -183,7 +187,7 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
             return false;
         }
 
-        throw new NoAceFoundException('No applicable ACE was found.');
+        throw static::$noAceException;
     }
 
     /**
@@ -203,17 +207,12 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
      * Strategy EQUAL:
      * The ACE will be considered applicable when the bitmasks are equal.
      *
-     * @param SecurityIdentityInterface $sid
+     * @param integer $requiredMask
      * @param EntryInterface $ace
-     * @param int $requiredMask
      * @return Boolean
      */
-    protected function isAceApplicable($requiredMask, SecurityIdentityInterface $sid, EntryInterface $ace)
+    protected function isAceApplicable($requiredMask, EntryInterface $ace)
     {
-        if (false === $ace->getSecurityIdentity()->equals($sid)) {
-            return false;
-        }
-
         $strategy = $ace->getStrategy();
         if (self::ALL === $strategy) {
             return $requiredMask === ($ace->getMask() & $requiredMask);
@@ -221,8 +220,8 @@ class PermissionGrantingStrategy implements PermissionGrantingStrategyInterface
             return 0 !== ($ace->getMask() & $requiredMask);
         } else if (self::EQUAL === $strategy) {
             return $requiredMask === $ace->getMask();
-        } else {
-            throw new \RuntimeException(sprintf('The strategy "%s" is not supported.', $strategy));
         }
+
+        throw new \RuntimeException(sprintf('The strategy "%s" is not supported.', $strategy));
     }
 }

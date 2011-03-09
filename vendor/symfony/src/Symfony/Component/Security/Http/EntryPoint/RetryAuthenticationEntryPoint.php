@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,6 +15,7 @@ use Symfony\Component\EventDispatcher\EventInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -22,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * This entry point is not intended to work with HTTP post requests.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class RetryAuthenticationEntryPoint implements AuthenticationEntryPointInterface
 {
@@ -53,9 +54,6 @@ class RetryAuthenticationEntryPoint implements AuthenticationEntryPointInterface
 
         $url = $scheme.'://'.$request->getHost().$port.$request->getScriptName().$request->getPathInfo().$qs;
 
-        $response = new Response();
-        $response->setRedirect($url, 301);
-
-        return $response;
+        return new RedirectResponse($url, 301);
     }
 }

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,7 +16,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 /**
  * Transforms between a normalized format and a localized money string.
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  * @author Florian Eckerstorfer <florian@eckerstorfer.org>
  */
 class MoneyToLocalizedStringTransformer extends NumberToLocalizedStringTransformer
@@ -58,9 +58,9 @@ class MoneyToLocalizedStringTransformer extends NumberToLocalizedStringTransform
      * @param string $value Localized money string
      * @return number Normalized number
      */
-    public function reverseTransform($value, $originalValue)
+    public function reverseTransform($value)
     {
-        $value = parent::reverseTransform($value, $originalValue);
+        $value = parent::reverseTransform($value);
 
         if (null !== $value) {
             $value *= $this->getOption('divisor');

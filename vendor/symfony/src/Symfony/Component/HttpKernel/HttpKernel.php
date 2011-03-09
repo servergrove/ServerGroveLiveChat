@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * HttpKernel notifies events to convert a Request object to a Response one.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class HttpKernel implements HttpKernelInterface
 {
@@ -89,7 +89,7 @@ class HttpKernel implements HttpKernelInterface
 
         // load controller
         if (false === $controller = $this->resolver->getController($request)) {
-            throw new NotFoundHttpException(sprintf('Unable to find the controller for "%s", check your route configuration.', $request->getPathInfo()));
+            throw new NotFoundHttpException(sprintf('Unable to find the controller for path "%s". Maybe you forgot to add the matching route in your routing configuration?', $request->getPathInfo()));
         }
 
         $event = new Event($this, 'core.controller', array('request_type' => $type, 'request' => $request));
@@ -108,8 +108,11 @@ class HttpKernel implements HttpKernelInterface
 
         // view
         if (!$response instanceof Response) {
-            $event = new Event($this, 'core.view', array('request_type' => $type, 'request' => $request));
-            $response = $this->dispatcher->filter($event, $response);
+            $event = new Event($this, 'core.view', array('request_type' => $type, 'request' => $request, 'controller_value' => $response));
+            $retval = $this->dispatcher->notifyUntil($event);
+            if ($event->isProcessed()) {
+                $response = $retval;
+            }
         }
 
         return $this->filterResponse($response, $request, sprintf('The controller must return a response (%s given).', $this->varToString($response)), $type);

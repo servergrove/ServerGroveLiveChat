@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,7 +20,7 @@ use Symfony\Component\Templating\Loader\LoaderInterface;
 /**
  * PhpEngine is an engine able to render PHP templates.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class PhpEngine implements EngineInterface, \ArrayAccess
 {
@@ -63,7 +63,7 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     /**
      * Renders a template.
      *
-     * @param mixed $name       A template name
+     * @param mixed $name       A template name or a TemplateReferenceInterface instance
      * @param array $parameters An array of parameters to pass to the template
      *
      * @return string The evaluated template as a string
@@ -73,19 +73,16 @@ class PhpEngine implements EngineInterface, \ArrayAccess
      */
     public function render($name, array $parameters = array())
     {
-        $template = $this->load($name);
-
-        $key = md5(serialize($template));
-
+        $storage = $this->load($name);
+        $key = md5(serialize($storage));
         $this->current = $key;
         $this->parents[$key] = null;
 
         // attach the global variables
         $parameters = array_replace($this->getGlobals(), $parameters);
-
         // render
-        if (false === $content = $this->evaluate($template, $parameters)) {
-            throw new \RuntimeException(sprintf('The template "%s" cannot be rendered.', json_encode($template)));
+        if (false === $content = $this->evaluate($storage, $parameters)) {
+            throw new \RuntimeException(sprintf('The template "%s" cannot be rendered.', json_encode($name)));
         }
 
         // decorator
@@ -105,7 +102,7 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     /**
      * Returns true if the template exists.
      *
-     * @param mixed $name A template name
+     * @param mixed $name A template name or a TemplateReferenceInterface instance
      *
      * @return Boolean true if the template exists, false otherwise
      */
@@ -123,15 +120,15 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     /**
      * Returns true if this class is able to render the given template.
      *
-     * @param mixed $name A template name
+     * @param mixed $name A template name or a TemplateReferenceInterface instance
      *
-     * @return Boolean True if this class supports the given resource, false otherwise
+     * @return Boolean true if this class supports the given resource, false otherwise
      */
     public function supports($name)
     {
         $template = $this->parser->parse($name);
 
-        return 'php' === $template['engine'];
+        return 'php' === $template->get('engine');
     }
 
     /**
@@ -221,6 +218,11 @@ class PhpEngine implements EngineInterface, \ArrayAccess
         }
     }
 
+    /**
+     * Sets the helpers.
+     *
+     * @params Helper[] $helpers An array of helper
+     */
     public function setHelpers(array $helpers)
     {
         $this->helpers = array();
@@ -286,7 +288,8 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     /**
      * Escapes a string by using the current charset.
      *
-     * @param mixed $value A variable to escape
+     * @param mixed  $value   A variable to escape
+     * @param string $context The context name
      *
      * @return string The escaped value
      */
@@ -409,7 +412,7 @@ class PhpEngine implements EngineInterface, \ArrayAccess
                 function ($value) use ($that)
                 {
                     if ('UTF-8' != $that->getCharset()) {
-                        $string = $that->convertEncoding($value, 'UTF-8', $that->getCharset());
+                        $value = $that->convertEncoding($value, 'UTF-8', $that->getCharset());
                     }
 
                     $callback = function ($matches) use ($that)
@@ -427,28 +430,39 @@ class PhpEngine implements EngineInterface, \ArrayAccess
                         return '\\u'.substr('0000'.bin2hex($char), -4);
                     };
 
-                    if (null === $string = preg_replace_callback('#[^\p{L}\p{N} ]#u', $callback, $string)) {
+                    if (null === $value = preg_replace_callback('#[^\p{L}\p{N} ]#u', $callback, $value)) {
                         throw new \InvalidArgumentException('The string to escape is not a valid UTF-8 string.');
                     }
 
                     if ('UTF-8' != $that->getCharset()) {
-                        $string = $that->convertEncoding($string, $that->getCharset(), 'UTF-8');
+                        $value = $that->convertEncoding($value, $that->getCharset(), 'UTF-8');
                     }
 
-                    return $string;
+                    return $value;
                 },
         );
     }
 
+    /**
+     * Convert a string from one encoding to another.
+     *
+     * @param string $string The string to convert
+     * @param string $to     The input encoding
+     * @param string $from   The output encoding
+     *
+     * @return string The string with the new encoding
+     *
+     * @throws \RuntimeException if no suitable encoding function is found (iconv or mbstring)
+     */
     public function convertEncoding($string, $to, $from)
     {
         if (function_exists('iconv')) {
             return iconv($from, $to, $string);
         } elseif (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $to, $from);
-        } else {
-            throw new \RuntimeException('No suitable convert encoding function (use UTF-8 as your encoding or install the iconv or mbstring extension).');
         }
+
+        throw new \RuntimeException('No suitable convert encoding function (use UTF-8 as your encoding or install the iconv or mbstring extension).');
     }
 
     /**
@@ -464,7 +478,7 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     /**
      * Loads the given template.
      *
-     * @param mixed $name A template name
+     * @param mixed $name A template name or a TemplateReferenceInterface instance
      *
      * @return Storage A Storage instance
      *
@@ -474,18 +488,17 @@ class PhpEngine implements EngineInterface, \ArrayAccess
     {
         $template = $this->parser->parse($name);
 
-        $key = md5(serialize($template));
+        $key = $template->getSignature();
         if (isset($this->cache[$key])) {
             return $this->cache[$key];
         }
 
-        // load
-        $template = $this->loader->load($template);
+        $storage = $this->loader->load($template);
 
-        if (false === $template) {
-            throw new \InvalidArgumentException(sprintf('The template "%s" does not exist.', $name));
+        if (false === $storage) {
+            throw new \InvalidArgumentException(sprintf('The template "%s" does not exist.', is_string($name) ? $name : json_encode($name)));
         }
 
-        return $this->cache[$key] = $template;
+        return $this->cache[$key] = $storage;
     }
 }

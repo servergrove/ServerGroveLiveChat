@@ -30,7 +30,10 @@ final class Document extends Annotation
     public $repositoryClass;
     public $indexes = array();
 }
-final class EmbeddedDocument extends Annotation {}
+final class EmbeddedDocument extends Annotation
+{
+    public $indexes = array();
+}
 final class MappedSuperclass extends Annotation {}
 
 final class Inheritance extends Annotation
@@ -74,6 +77,7 @@ class Field extends Annotation
     public $type = 'string';
     public $nullable = false;
     public $options = array();
+    public $strategy;
 }
 final class Id extends Field
 {
@@ -172,6 +176,13 @@ final class ReferenceOne extends Field
     public $discriminatorField;
     public $discriminatorMap;
     public $cascade;
+    public $inversedBy;
+    public $mappedBy;
+    public $repositoryMethod;
+    public $sort = array();
+    public $criteria = array();
+    public $limit;
+    public $skip;
 }
 final class ReferenceMany extends Field
 {
@@ -181,6 +192,13 @@ final class ReferenceMany extends Field
     public $discriminatorField;
     public $discriminatorMap;
     public $cascade;
+    public $inversedBy;
+    public $mappedBy;
+    public $repositoryMethod;
+    public $sort = array();
+    public $criteria = array();
+    public $limit;
+    public $skip;
     public $strategy = 'pushAll'; // pushAll, set
 }
 class NotSaved extends Field {}

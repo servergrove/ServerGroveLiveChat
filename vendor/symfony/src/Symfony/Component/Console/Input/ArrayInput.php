@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,7 @@ namespace Symfony\Component\Console\Input;
  *
  *     $input = new ArrayInput(array('name' => 'foo', '--bar' => 'foobar'));
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ArrayInput extends Input
 {
@@ -80,6 +80,34 @@ class ArrayInput extends Input
         }
 
         return false;
+    }
+
+    /**
+     * Returns the value of a raw option (not parsed).
+     *
+     * This method is to be used to introspect the input parameters
+     * before it has been validated. It must be used carefully.
+     *
+     * @param string|array $values The value(s) to look for in the raw parameters (can be an array)
+     * @param mixed $default The default value to return if no result is found
+     *
+     * @return mixed The option value
+     */
+    public function getParameterOption($values, $default = false)
+    {
+        if (!is_array($values)) {
+            $values = array($values);
+        }
+
+        foreach ($this->parameters as $k => $v) {
+            if (is_int($k) && in_array($v, $values)) {
+                return true;
+            } elseif (in_array($k, $values)) {
+                return $v;
+            }
+        }
+
+        return $default;
     }
 
     /**

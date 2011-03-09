@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Dumper as YamlDumper;
 
 /**
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class TemplatingExtension extends \Twig_Extension
 {
@@ -52,7 +52,7 @@ class TemplatingExtension extends \Twig_Extension
             'abbr_class'            => new \Twig_Filter_Method($this, 'abbrClass', array('is_safe' => array('html'))),
             'abbr_method'           => new \Twig_Filter_Method($this, 'abbrMethod', array('is_safe' => array('html'))),
             'format_args'           => new \Twig_Filter_Method($this, 'formatArgs', array('is_safe' => array('html'))),
-            'format_args_as_text'   => new \Twig_Filter_Method($this, 'formatArgsAsText', array('is_safe' => array('html'))),
+            'format_args_as_text'   => new \Twig_Filter_Method($this, 'formatArgsAsText'),
             'file_excerpt'          => new \Twig_Filter_Method($this, 'fileExcerpt', array('is_safe' => array('html'))),
             'format_file'           => new \Twig_Filter_Method($this, 'formatFile', array('is_safe' => array('html'))),
             'format_file_from_text' => new \Twig_Filter_Method($this, 'formatFileFromText', array('is_safe' => array('html'))),
@@ -101,8 +101,7 @@ class TemplatingExtension extends \Twig_Extension
     {
         $options['attributes'] = $attributes;
 
-        if (isset($options['query']))
-        {
+        if (isset($options['query'])) {
             $options['query'] = $options['query'];
         }
 

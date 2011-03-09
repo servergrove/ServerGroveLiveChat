@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -31,7 +31,7 @@ namespace Symfony\Component\Console\Input;
  * the same rules as the argv one. It's almost always better to use the
  * `StringInput` when you want to provide your own input.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  *
  * @see http://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
  * @see http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap12.html#tag_12_02
@@ -150,11 +150,22 @@ class ArgvInput extends Input
      */
     protected function parseArgument($token)
     {
-        if (!$this->definition->hasArgument(count($this->arguments))) {
+        $c = count($this->arguments);
+
+        // if input is expecting another argument, add it
+        if ($this->definition->hasArgument($c)) {
+            $arg = $this->definition->getArgument($c);
+            $this->arguments[$arg->getName()] = $arg->isArray()? array($token) : $token;
+
+        // if last argument isArray(), append token to last argument
+        } elseif ($this->definition->hasArgument($c - 1) && $this->definition->getArgument($c - 1)->isArray()) {
+            $arg = $this->definition->getArgument($c - 1);
+            $this->arguments[$arg->getName()][] = $token;
+
+        // unexpected argument
+        } else {
             throw new \RuntimeException('Too many arguments.');
         }
-
-        $this->arguments[$this->definition->getArgument(count($this->arguments))->getName()] = $token;
     }
 
     /**
@@ -251,5 +262,37 @@ class ArgvInput extends Input
         }
 
         return false;
+    }
+
+    /**
+     * Returns the value of a raw option (not parsed).
+     *
+     * This method is to be used to introspect the input parameters
+     * before it has been validated. It must be used carefully.
+     *
+     * @param string|array $values The value(s) to look for in the raw parameters (can be an array)
+     * @param mixed $default The default value to return if no result is found
+     * @return mixed The option value
+     */
+    public function getParameterOption($values, $default = false)
+    {
+        if (!is_array($values)) {
+            $values = array($values);
+        }
+
+        $tokens = $this->tokens;
+        while ($token = array_shift($tokens)) {
+            foreach ($values as $value) {
+                if (0 === strpos($token, $value)) {
+                    if (false !== $pos = strpos($token, '=')) {
+                        return substr($token, $pos + 1);
+                    }
+
+                    return array_shift($tokens);
+                }
+            }
+        }
+
+        return $default;
     }
 }

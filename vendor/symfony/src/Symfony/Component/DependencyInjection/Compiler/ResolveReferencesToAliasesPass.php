@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -24,12 +24,16 @@ class ResolveReferencesToAliasesPass implements CompilerPassInterface
 {
     protected $container;
 
+    /**
+     * Processes the ContainerBuilder to replace references to aliases with actual service references.
+     *
+     * @param ContainerBuilder $container 
+     */
     public function process(ContainerBuilder $container)
     {
         $this->container = $container;
 
-        foreach ($container->getDefinitions() as $definition)
-        {
+        foreach ($container->getDefinitions() as $definition) {
             if ($definition->isSynthetic() || $definition->isAbstract()) {
                 continue;
             }
@@ -46,12 +50,18 @@ class ResolveReferencesToAliasesPass implements CompilerPassInterface
         }
     }
 
+    /**
+     * Processes the arguments to replace aliases
+     *
+     * @param array $arguments An array of References
+     * @return array An array of References
+     */
     protected function processArguments(array $arguments)
     {
         foreach ($arguments as $k => $argument) {
             if (is_array($argument)) {
                 $arguments[$k] = $this->processArguments($argument);
-            } else if ($argument instanceof Reference) {
+            } elseif ($argument instanceof Reference) {
                 $defId = $this->getDefinitionId($id = (string) $argument);
 
                 if ($defId !== $id) {
@@ -63,6 +73,12 @@ class ResolveReferencesToAliasesPass implements CompilerPassInterface
         return $arguments;
     }
 
+    /**
+     * Resolve an alias into a definition id
+     *
+     * @param string $id The definition or alias id to resolve
+     * @return string The definition id with aliases resolved
+     */
     protected function getDefinitionId($id)
     {
         while ($this->container->hasAlias($id)) {

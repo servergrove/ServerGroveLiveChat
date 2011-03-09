@@ -21,6 +21,7 @@ namespace Doctrine\ORM;
 
 use Closure, Exception,
     Doctrine\Common\EventManager,
+    Doctrine\Common\Persistence\ObjectManager,
     Doctrine\DBAL\Connection,
     Doctrine\DBAL\LockMode,
     Doctrine\ORM\Mapping\ClassMetadata,
@@ -37,7 +38,7 @@ use Closure, Exception,
  * @author  Jonathan Wage <jonwage@gmail.com>
  * @author  Roman Borschel <roman@code-factory.org>
  */
-class EntityManager
+class EntityManager implements ObjectManager
 {
     /**
      * The used Configuration.
@@ -354,7 +355,7 @@ class EntityManager
 
         // Check identity map first, if its already in there just return it.
         if ($entity = $this->unitOfWork->tryGetById($identifier, $class->rootEntityName)) {
-            return $entity;
+            return ($entity instanceof $class->name) ? $entity : null;
         }
         if ($class->subClasses) {
             $entity = $this->find($entityName, $identifier);
@@ -394,7 +395,7 @@ class EntityManager
 
         // Check identity map first, if its already in there just return it.
         if ($entity = $this->unitOfWork->tryGetById($identifier, $class->rootEntityName)) {
-            return $entity;
+            return ($entity instanceof $class->name) ? $entity : null;
         }
         if ( ! is_array($identifier)) {
             $identifier = array($class->identifier[0] => $identifier);

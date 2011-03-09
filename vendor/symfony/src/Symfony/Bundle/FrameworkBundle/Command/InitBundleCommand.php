@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ use Symfony\Bundle\FrameworkBundle\Util\Mustache;
 /**
  * Initializes a new bundle.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class InitBundleCommand extends Command
 {
@@ -35,6 +35,7 @@ class InitBundleCommand extends Command
                 new InputArgument('namespace', InputArgument::REQUIRED, 'The namespace of the bundle to create'),
                 new InputArgument('dir', InputArgument::REQUIRED, 'The directory where to create the bundle'),
                 new InputArgument('bundleName', InputArgument::OPTIONAL, 'The optional bundle name'),
+                new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, or yml)', 'yml')
             ))
             ->setHelp(<<<EOT
 The <info>init:bundle</info> command generates a new bundle with a basic skeleton.
@@ -71,16 +72,18 @@ EOT
 
         // user specified bundle name?
         $bundle = $input->getArgument('bundleName');
-        if ('' === $bundle) {
+        if (!$bundle) {
             $bundle = strtr($namespace, array('\\' => ''));
-        } elseif (!preg_match('/Bundle$/', $bundle)) {
+        }
+
+        if (!preg_match('/Bundle$/', $bundle)) {
             throw new \InvalidArgumentException('The bundle name must end with Bundle.');
         }
 
         $dir = $input->getArgument('dir');
 
         // add trailing / if necessary
-        $dir = '/' === substr($dir, -1, 1) ? $dir : $dir . '/';
+        $dir = '/' === substr($dir, -1, 1) ? $dir : $dir.'/';
 
         $targetDir = $dir.strtr($namespace, '\\', '/');
 
@@ -91,7 +94,8 @@ EOT
         }
 
         $filesystem = $this->container->get('filesystem');
-        $filesystem->mirror(__DIR__.'/../Resources/skeleton/bundle', $targetDir);
+        $filesystem->mirror(__DIR__.'/../Resources/skeleton/bundle/generic', $targetDir);
+        $filesystem->mirror(__DIR__.'/../Resources/skeleton/bundle/'.$input->getOption('format'), $targetDir);
 
         Mustache::renderDir($targetDir, array(
             'namespace' => $namespace,

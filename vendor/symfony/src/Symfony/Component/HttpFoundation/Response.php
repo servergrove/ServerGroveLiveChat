@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\HttpFoundation;
 /**
  * Response represents an HTTP response.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Response
 {
@@ -27,7 +27,7 @@ class Response
     protected $version;
     protected $statusCode;
     protected $statusText;
-    protected $charset = 'UTF-8';
+    protected $charset;
 
     static public $statusTexts = array(
         100 => 'Continue',
@@ -98,7 +98,7 @@ class Response
         $content = '';
 
         if (!$this->headers->has('Content-Type')) {
-            $this->headers->set('Content-Type', 'text/html; charset='.$this->charset);
+            $this->headers->set('Content-Type', 'text/html; charset='.(null === $this->charset ? 'UTF-8' : $this->charset));
         }
 
         // status
@@ -130,7 +130,7 @@ class Response
     public function sendHeaders()
     {
         if (!$this->headers->has('Content-Type')) {
-            $this->headers->set('Content-Type', 'text/html; charset='.$this->charset);
+            $this->headers->set('Content-Type', 'text/html; charset='.(null === $this->charset ? 'UTF-8' : $this->charset));
         }
 
         // status
@@ -217,7 +217,7 @@ class Response
     public function setStatusCode($code, $text = null)
     {
         $this->statusCode = (int) $code;
-        if ($this->statusCode < 100 || $this->statusCode > 599) {
+        if ($this->isInvalid()) {
             throw new \InvalidArgumentException(sprintf('The HTTP status code "%s" is not valid.', $code));
         }
 
@@ -511,7 +511,7 @@ class Response
      */
     public function getLastModified()
     {
-        return $this->headers->getDate('LastModified');
+        return $this->headers->getDate('Last-Modified');
     }
 
     /**
@@ -624,26 +624,6 @@ class Response
         foreach (array('Allow', 'Content-Encoding', 'Content-Language', 'Content-Length', 'Content-MD5', 'Content-Type', 'Last-Modified') as $header) {
             $this->headers->remove($header);
         }
-    }
-
-    /**
-     * Modifies the response so that it conforms to the rules defined for a redirect status code.
-     *
-     * @see http://tools.ietf.org/html/rfc2616#section-10.3.5
-     */
-    public function setRedirect($url, $status = 302)
-    {
-        if (empty($url)) {
-            throw new \InvalidArgumentException('Cannot redirect to an empty URL.');
-        }
-
-        $this->setStatusCode($status);
-        if (!$this->isRedirect()) {
-            throw new \InvalidArgumentException(sprintf('The HTTP status code is not a redirect ("%s" given).', $status));
-        }
-
-        $this->headers->set('Location', $url);
-        $this->setContent(sprintf('<html><head><meta http-equiv="refresh" content="1;url=%s"/></head></html>', htmlspecialchars($url, ENT_QUOTES)));
     }
 
     /**

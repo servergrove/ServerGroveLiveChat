@@ -5,7 +5,7 @@ namespace Symfony\Component\Form;
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -44,7 +44,7 @@ use Symfony\Component\Form\ValueTransformer\TransformationFailedException;
  * setNormalizationTransformer() in configure(). The normalized data is then
  * converted to the displayed data as described before.
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class Field extends Configurable implements FieldInterface
 {
@@ -494,7 +494,9 @@ class Field extends Configurable implements FieldInterface
     protected function transform($value)
     {
         if (null === $this->valueTransformer) {
-            return null === $value ? '' : $value;
+            // Scalar values should always be converted to strings to
+            // facilitate differentiation between empty ("") and zero (0).
+            return null === $value || is_scalar($value) ? (string)$value : $value;
         }
         return $this->valueTransformer->transform($value);
     }
@@ -535,5 +537,13 @@ class Field extends Configurable implements FieldInterface
         if ($this->propertyPath !== null) {
             $this->propertyPath->setValue($objectOrArray, $this->getData());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isEmpty()
+    {
+        return null === $this->data || '' === $this->data;
     }
 }

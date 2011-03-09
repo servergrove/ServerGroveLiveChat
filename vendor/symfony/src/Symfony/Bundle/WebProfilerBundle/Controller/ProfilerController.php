@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,12 +13,13 @@ namespace Symfony\Bundle\WebProfilerBundle\Controller;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * ProfilerController.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ProfilerController extends ContainerAware
 {
@@ -70,12 +71,10 @@ class ProfilerController extends ContainerAware
             throw new NotFoundHttpException(sprintf('Token "%s" does not exist.', $token));
         }
 
-        $response = $this->container->get('response');
-        $response->setContent($profiler->export());
-        $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename= '.$token.'.txt');
-
-        return $response;
+        return new Response($profiler->export(), 200, array(
+            'Content-Type'        => 'text/plain',
+            'Content-Disposition' => 'attachment; filename= '.$token.'.txt',
+        ));
     }
 
     /**
@@ -89,10 +88,7 @@ class ProfilerController extends ContainerAware
         $profiler->disable();
         $profiler->purge();
 
-        $response = $this->container->get('response');
-        $response->setRedirect($this->container->get('router')->generate('_profiler', array('token' => '-')));
-
-        return $response;
+        return new RedirectResponse($this->container->get('router')->generate('_profiler', array('token' => '-')));
     }
 
     /**
@@ -116,10 +112,7 @@ class ProfilerController extends ContainerAware
             throw new \RuntimeException('Problem uploading the data (token already exists).');
         }
 
-        $response = $this->container->get('response');
-        $response->setRedirect($this->container->get('router')->generate('_profiler', array('token' => $token)));
-
-        return $response;
+        return new RedirectResponse($this->container->get('router')->generate('_profiler', array('token' => $token)));
     }
 
     /**
@@ -130,26 +123,37 @@ class ProfilerController extends ContainerAware
      *
      * @return Response A Response instance
      */
-    public function toolbarAction($token = null, $position = null)
+    public function toolbarAction($token, $position = null)
     {
+        if (null === $token) {
+            return new Response();
+        }
+
         $profiler = $this->container->get('profiler');
+        $profiler->disable();
 
-        if (null !== $token) {
-            $profiler = $profiler->loadFromToken($token);
+        $profiler = $profiler->loadFromToken($token);
 
-            if ($profiler->isEmpty()) {
-                return $this->container->get('response');
-            }
+        if ($profiler->isEmpty()) {
+            return new Response();
         }
 
         if (null === $position) {
             $position = false === strpos($this->container->get('request')->headers->get('user-agent'), 'Mobile') ? 'fixed' : 'absolute';
         }
 
+        $url = null;
+        try {
+            $url = $this->container->get('router')->generate('_profiler', array('token' => $token));
+        } catch (\Exception $e) {
+            // the profiler is not enabled
+        }
+
         return $this->container->get('templating')->renderResponse('WebProfilerBundle:Profiler:toolbar.html.twig', array(
-            'position'  => $position,
-            'profiler'  => $profiler,
-            'templates' => $this->getTemplates($profiler),
+            'position'     => $position,
+            'profiler'     => $profiler,
+            'templates'    => $this->getTemplates($profiler),
+            'profiler_url' => $url,
         ));
     }
 
@@ -217,10 +221,7 @@ class ProfilerController extends ContainerAware
         $request = $this->container->get('request');
 
         if ($token = $request->query->get('token')) {
-            $response = $this->container->get('response');
-            $response->setRedirect($this->container->get('router')->generate('_profiler', array('token' => $token)));
-
-            return $response;
+            return new RedirectResponse($this->container->get('router')->generate('_profiler', array('token' => $token)));
         }
 
         $session = $request->getSession();
@@ -232,10 +233,7 @@ class ProfilerController extends ContainerAware
         $profiler->disable();
         $tokens = $profiler->find($ip, $url, $limit);
 
-        $response = $this->container->get('response');
-        $response->setRedirect($this->container->get('router')->generate('_profiler_search_results', array('token' => $tokens ? $tokens[0]['token'] : '')));
-
-        return $response;
+        return new RedirectResponse($this->container->get('router')->generate('_profiler_search_results', array('token' => $tokens ? $tokens[0]['token'] : '')));
     }
 
     protected function getTemplateNames($profiler)

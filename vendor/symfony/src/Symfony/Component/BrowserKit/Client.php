@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -27,7 +27,7 @@ use Symfony\Component\BrowserKit\Client;
  * If you want to be able to run requests in their own process (insulated flag),
  * you need to also implement the getScript() method.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 abstract class Client
 {
@@ -266,16 +266,39 @@ abstract class Client
         // @codeCoverageIgnoreEnd
     }
 
+    /**
+     * Filters the request.
+     *
+     * @param Request $request The request to filter
+     *
+     * @return Request
+     */
     protected function filterRequest(Request $request)
     {
         return $request;
     }
 
+    /**
+     * Filters the Response.
+     *
+     * @param Response $response The Response to filter
+     *
+     * @return Response
+     */
     protected function filterResponse($response)
     {
         return $response;
     }
 
+    /**
+     * Creates a crawler.
+     *
+     * @param string $uri A uri
+     * @param string $content Content for the crawler to use
+     * @param string $type Content type
+     *
+     * @return Crawler
+     */
     protected function createCrawlerFromContent($uri, $content, $type)
     {
         $crawler = new Crawler(null, $uri);
@@ -286,6 +309,8 @@ abstract class Client
 
     /**
      * Goes back in the browser history.
+     *
+     * @return Crawler
      */
     public function back()
     {
@@ -294,6 +319,8 @@ abstract class Client
 
     /**
      * Goes forward in the browser history.
+     *
+     * @return Crawler
      */
     public function forward()
     {
@@ -302,6 +329,8 @@ abstract class Client
 
     /**
      * Reloads the current browser.
+     *
+     * @return Crawler
      */
     public function reload()
     {
@@ -311,7 +340,7 @@ abstract class Client
     /**
      * Follow redirects?
      *
-     * @return Client
+     * @return Crawler
      *
      * @throws \LogicException If request was not a redirect
      */
@@ -335,6 +364,12 @@ abstract class Client
         $this->history->clear();
     }
 
+    /**
+     * Takes a URI and converts it to absolute if it is not already absolute.
+     *
+     * @param string $uri A uri
+     * @return string An absolute uri
+     */
     protected function getAbsoluteUri($uri)
     {
         // already absolute?

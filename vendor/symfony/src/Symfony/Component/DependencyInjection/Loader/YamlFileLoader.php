@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\InterfaceInjector;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Resource\FileResource;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -27,7 +27,7 @@ use Symfony\Component\Yaml\Yaml;
  *
  * The YAML format does not support anonymous services (cf. the XML loader).
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class YamlFileLoader extends FileLoader
 {
@@ -35,10 +35,11 @@ class YamlFileLoader extends FileLoader
      * Loads a Yaml file.
      *
      * @param mixed $resource The resource
+     * @param string $type    The resource type
      */
-    public function load($file)
+    public function load($file, $type = null)
     {
-        $path = $this->findFile($file);
+        $path = $this->locator->locate($file);
 
         $content = $this->loadFile($path);
 
@@ -72,15 +73,23 @@ class YamlFileLoader extends FileLoader
     /**
      * Returns true if this class supports the given resource.
      *
-     * @param  mixed $resource A resource
+     * @param mixed  $resource A resource
+     * @param string $type     The resource type
      *
      * @return Boolean true if this class supports the given resource, false otherwise
      */
-    public function supports($resource)
+    public function supports($resource, $type = null)
     {
         return is_string($resource) && 'yml' === pathinfo($resource, PATHINFO_EXTENSION);
     }
 
+    /**
+     * Parses all imports
+     *
+     * @param array $content 
+     * @param string $file 
+     * @return void
+     */
     protected function parseImports($content, $file)
     {
         if (!isset($content['imports'])) {
@@ -93,6 +102,13 @@ class YamlFileLoader extends FileLoader
         }
     }
 
+    /**
+     * Parses interface injectors.
+     *
+     * @param array $content 
+     * @param string $file 
+     * @return void
+     */
     protected function parseInterfaceInjectors($content, $file)
     {
         if (!isset($content['interfaces'])) {
@@ -104,6 +120,14 @@ class YamlFileLoader extends FileLoader
         }
     }
 
+    /**
+     * Parses an interface injector.
+     *
+     * @param string $class
+     * @param array $interface
+     * @param string $file
+     * @return void
+     */
     protected function parseInterfaceInjector($class, $interface, $file)
     {
         $injector = new InterfaceInjector($class);
@@ -115,6 +139,13 @@ class YamlFileLoader extends FileLoader
         $this->container->addInterfaceInjector($injector);
     }
 
+    /**
+     * Parses definitions
+     *
+     * @param array $content 
+     * @param string $file 
+     * @return void
+     */
     protected function parseDefinitions($content, $file)
     {
         if (!isset($content['services'])) {
@@ -126,6 +157,14 @@ class YamlFileLoader extends FileLoader
         }
     }
 
+    /**
+     * Parses a definition.
+     *
+     * @param string $id 
+     * @param array $service 
+     * @param string $file 
+     * @return void
+     */
     protected function parseDefinition($id, $service, $file)
     {
         if (is_string($service) && 0 === strpos($service, '@')) {
@@ -165,6 +204,10 @@ class YamlFileLoader extends FileLoader
             $definition->setAbstract($service['abstract']);
         }
 
+        if (isset($service['factory_class'])) {
+            $definition->setFactoryClass($service['factory_class']);
+        }
+
         if (isset($service['factory_method'])) {
             $definition->setFactoryMethod($service['factory_method']);
         }
@@ -196,7 +239,15 @@ class YamlFileLoader extends FileLoader
         }
 
         if (isset($service['tags'])) {
+            if (!is_array($service['tags'])) {
+                throw new \InvalidArgumentException(sprintf('Parameter "tags" must be an array for service "%s" in %s.', $id, $file));
+            }
+
             foreach ($service['tags'] as $tag) {
+                if (!isset($tag['name'])) {
+                    throw new \InvalidArgumentException(sprintf('A "tags" entry is missing a "name" key must be an array for service "%s" in %s.', $id, $file));
+                }
+
                 $name = $tag['name'];
                 unset($tag['name']);
 
@@ -207,12 +258,24 @@ class YamlFileLoader extends FileLoader
         $this->container->setDefinition($id, $definition);
     }
 
+    /**
+     * Loads a YAML file.
+     *
+     * @param string $file 
+     * @return array The file content
+     */
     protected function loadFile($file)
     {
         return $this->validate(Yaml::load($file), $file);
     }
 
     /**
+     * Validates a YAML file.
+     *
+     * @param mixed $content
+     * @param string $file
+     * @return array
+     *
      * @throws \InvalidArgumentException When service file is not valid
      */
     protected function validate($content, $file)
@@ -225,27 +288,25 @@ class YamlFileLoader extends FileLoader
             throw new \InvalidArgumentException(sprintf('The service file "%s" is not valid.', $file));
         }
 
-        foreach (array_keys($content) as $key) {
-            if (in_array($key, array('imports', 'parameters', 'services', 'interfaces'))) {
+        foreach (array_keys($content) as $namespace) {
+            if (in_array($namespace, array('imports', 'parameters', 'services', 'interfaces'))) {
                 continue;
             }
 
-            // can it be handled by an extension?
-            if (false !== strpos($key, '.')) {
-                list($namespace, $tag) = explode('.', $key);
-                if (!$this->container->hasExtension($namespace)) {
-                    throw new \InvalidArgumentException(sprintf('There is no extension able to load the configuration for "%s" (in %s).', $key, $file));
-                }
-
-                continue;
+            if (!$this->container->hasExtension($namespace)) {
+                throw new \InvalidArgumentException(sprintf('There is no extension able to load the configuration for "%s" (in %s).', $namespace, $file));
             }
-
-            throw new \InvalidArgumentException(sprintf('The "%s" tag is not valid (in %s).', $key, $file));
         }
 
         return $content;
     }
 
+    /**
+     * Resolves services.
+     *
+     * @param string $value 
+     * @return void
+     */
     protected function resolveServices($value)
     {
         if (is_array($value)) {
@@ -272,20 +333,24 @@ class YamlFileLoader extends FileLoader
         return $value;
     }
 
+    /**
+     * Loads from Extensions
+     *
+     * @param array $content 
+     * @return void
+     */
     protected function loadFromExtensions($content)
     {
-        foreach ($content as $key => $values) {
-            if (in_array($key, array('imports', 'parameters', 'services', 'interfaces'))) {
+        foreach ($content as $namespace => $values) {
+            if (in_array($namespace, array('imports', 'parameters', 'services', 'interfaces'))) {
                 continue;
             }
-
-            list($namespace, $tag) = explode('.', $key);
 
             if (!is_array($values)) {
                 $values = array();
             }
 
-            $this->container->loadFromExtension($namespace, $tag, $values);
+            $this->container->loadFromExtension($namespace, $values);
         }
     }
 }

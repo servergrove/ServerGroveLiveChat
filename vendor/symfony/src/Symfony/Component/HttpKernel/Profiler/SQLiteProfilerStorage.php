@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,11 +14,11 @@ namespace Symfony\Component\HttpKernel\Profiler;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 
 /**
- * SQLiteProfilerStorage stores profiling information in a SQLite database.
+ * SqliteProfilerStorage stores profiling information in a SQLite database.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
-class SQLiteProfilerStorage implements ProfilerStorageInterface
+class SqliteProfilerStorage implements ProfilerStorageInterface
 {
     protected $store;
     protected $lifetime;
@@ -73,19 +73,20 @@ class SQLiteProfilerStorage implements ProfilerStorageInterface
         $this->close($db);
         if (isset($data[0]['data'])) {
             return array($data[0]['data'], $data[0]['ip'], $data[0]['url'], $data[0]['time']);
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function write($token, $data, $ip, $url, $time)
+    public function write($token, $parent, $data, $ip, $url, $time)
     {
         $db = $this->initDb();
         $args = array(
             ':token'        => $token,
+            ':parent'       => $parent,
             ':data'         => $data,
             ':ip'           => $ip,
             ':url'          => $url,
@@ -93,12 +94,12 @@ class SQLiteProfilerStorage implements ProfilerStorageInterface
             ':created_at'   => time(),
         );
         try {
-            $this->exec($db, 'INSERT INTO data (token, data, ip, url, time, created_at) VALUES (:token, :data, :ip, :url, :time, :created_at)', $args);
+            $this->exec($db, 'INSERT INTO data (token, parent, data, ip, url, time, created_at) VALUES (:token, :parent, :data, :ip, :url, :time, :created_at)', $args);
+            $this->cleanup();
             $status = true;
         } catch (\Exception $e) {
             $status = false;
         }
-        $this->cleanup();
         $this->close($db);
 
         return $status;
@@ -134,10 +135,11 @@ class SQLiteProfilerStorage implements ProfilerStorageInterface
             throw new \RuntimeException('You need to enable either the SQLite or PDO_SQLite extension for the profiler to run properly.');
         }
 
-        $db->exec('CREATE TABLE IF NOT EXISTS data (token STRING, data STRING, ip STRING, url STRING, time INTEGER, created_at INTEGER)');
+        $db->exec('CREATE TABLE IF NOT EXISTS data (token STRING, data STRING, ip STRING, url STRING, time INTEGER, parent STRING, created_at INTEGER)');
         $db->exec('CREATE INDEX IF NOT EXISTS data_created_at ON data (created_at)');
         $db->exec('CREATE INDEX IF NOT EXISTS data_ip ON data (ip)');
         $db->exec('CREATE INDEX IF NOT EXISTS data_url ON data (url)');
+        $db->exec('CREATE INDEX IF NOT EXISTS data_parent ON data (parent)');
         $db->exec('CREATE UNIQUE INDEX IF NOT EXISTS data_token ON data (token)');
 
         return $db;
@@ -146,18 +148,29 @@ class SQLiteProfilerStorage implements ProfilerStorageInterface
     protected function exec($db, $query, array $args = array())
     {
         $stmt = $db->prepare($query);
+
+        if (false === $stmt) {
+            throw new \RuntimeException('The database cannot successfully prepare the statement');
+        }
+
         if ($db instanceof \SQLite3) {
             foreach ($args as $arg => $val) {
                 $stmt->bindValue($arg, $val, is_int($val) ? \SQLITE3_INTEGER : \SQLITE3_TEXT);
             }
 
             $res = $stmt->execute();
+            if (false === $res) {
+                throw new \RuntimeException(sprintf('Error executing SQLite query "%s"', $query));
+            }
             $res->finalize();
         } else {
             foreach ($args as $arg => $val) {
                 $stmt->bindValue($arg, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
             }
-            $stmt->execute();
+            $success = $stmt->execute();
+            if (!$success) {
+                throw new \RuntimeException(sprintf('Error executing SQLite query "%s"', $query));
+            }
         }
     }
 

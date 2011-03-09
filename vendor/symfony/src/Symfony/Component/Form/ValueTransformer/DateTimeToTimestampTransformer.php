@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 /**
  * Transforms between a timestamp and a DateTime object
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  * @author Florian Eckerstorfer <florian@eckerstorfer.org>
  */
 class DateTimeToTimestampTransformer extends Configurable implements ValueTransformerInterface
@@ -27,8 +27,8 @@ class DateTimeToTimestampTransformer extends Configurable implements ValueTransf
      */
     protected function configure()
     {
-        $this->addOption('input_timezone', 'UTC');
-        $this->addOption('output_timezone', 'UTC');
+        $this->addOption('input_timezone', date_default_timezone_get());
+        $this->addOption('output_timezone', date_default_timezone_get());
 
         parent::configure();
     }
@@ -60,7 +60,7 @@ class DateTimeToTimestampTransformer extends Configurable implements ValueTransf
      * @param  string $value  A value as produced by PHP's date() function
      * @return DateTime       A DateTime object
      */
-    public function reverseTransform($value, $originalValue)
+    public function reverseTransform($value)
     {
         if (null === $value) {
             return null;

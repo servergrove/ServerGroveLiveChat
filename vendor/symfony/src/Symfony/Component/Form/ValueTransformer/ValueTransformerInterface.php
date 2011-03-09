@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\Form\ValueTransformer;
 /**
  * Transforms a value between different representations.
  *
- * @author     Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author     Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 interface ValueTransformerInterface
 {
@@ -65,11 +65,9 @@ interface ValueTransformerInterface
      * is passed.
      *
      * @param  mixed $value               The value in the transformed representation
-     * @param  mixed $originalValue       The original value from the datasource that is about to be overwritten by the new value.
-     * @return mixed                      The value in the original representation
      * @throws UnexpectedTypeException    when the argument is not of the
      *                                    expected type
      * @throws ValueTransformerException  when the transformation fails
      */
-    function reverseTransform($value, $originalValue);
+    function reverseTransform($value);
 }

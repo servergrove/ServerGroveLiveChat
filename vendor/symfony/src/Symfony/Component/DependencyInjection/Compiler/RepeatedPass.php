@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -23,6 +23,11 @@ class RepeatedPass implements CompilerPassInterface
     protected $repeat;
     protected $passes;
 
+    /**
+     * Constructor.
+     *
+     * @param array $passes An array of RepeatablePassInterface objects
+     */
     public function __construct(array $passes)
     {
         foreach ($passes as $pass) {
@@ -36,6 +41,11 @@ class RepeatedPass implements CompilerPassInterface
         $this->passes = $passes;
     }
 
+    /**
+     * Process the repeatable passes that run more than once.
+     *
+     * @param ContainerBuilder $container 
+     */
     public function process(ContainerBuilder $container)
     {
         $compiler = $container->getCompiler();
@@ -53,11 +63,19 @@ class RepeatedPass implements CompilerPassInterface
         }
     }
 
+    /**
+     * Sets if the pass should repeat
+     */
     public function setRepeat()
     {
         $this->repeat = true;
     }
 
+    /**
+     * Returns the passes
+     *
+     * @return array An array of RepeatablePassInterface objects
+     */
     public function getPasses()
     {
         return $this->passes;

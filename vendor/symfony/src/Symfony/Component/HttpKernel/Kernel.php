@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,9 +15,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\Loader\DelegatingLoader;
-use Symfony\Component\DependencyInjection\Loader\LoaderResolver;
-use Symfony\Component\DependencyInjection\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\IniFileLoader;
@@ -26,13 +23,18 @@ use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\HttpKernel\Config\FileLocator;
+use Symfony\Component\HttpKernel\DependencyInjection\MergeExtensionConfigurationPass;
+use Symfony\Component\Config\Loader\LoaderResolver;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\ConfigCache;
 
 /**
  * The Kernel is the heart of the Symfony system.
  *
  * It manages an environment made of bundles.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.org>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 abstract class Kernel implements KernelInterface
 {
@@ -97,7 +99,7 @@ abstract class Kernel implements KernelInterface
         // init container
         $this->initializeContainer();
 
-        foreach ($this->bundles as $bundle) {
+        foreach ($this->getBundles() as $bundle) {
             $bundle->setContainer($this->container);
             $bundle->boot();
         }
@@ -114,7 +116,7 @@ abstract class Kernel implements KernelInterface
     {
         $this->booted = false;
 
-        foreach ($this->bundles as $bundle) {
+        foreach ($this->getBundles() as $bundle) {
             $bundle->shutdown();
             $bundle->setContainer(null);
         }
@@ -131,7 +133,17 @@ abstract class Kernel implements KernelInterface
             $this->boot();
         }
 
-        return $this->container->get('http_kernel')->handle($request, $type, $catch);
+        return $this->getHttpKernel()->handle($request, $type, $catch);
+    }
+
+    /**
+     * Gets a http kernel from the container
+     *
+     * @return HttpKernel
+     */
+    protected function getHttpKernel()
+    {
+        return $this->container->get('http_kernel');
     }
 
     /**
@@ -153,9 +165,8 @@ abstract class Kernel implements KernelInterface
      */
     public function isClassInActiveBundle($class)
     {
-        foreach ($this->bundles as $bundle) {
-            $bundleClass = get_class($bundle);
-            if (0 === strpos($class, substr($bundleClass, 0, strrpos($bundleClass, '\\')))) {
+        foreach ($this->getBundles() as $bundle) {
+            if (0 === strpos($class, $bundle->getNamespace())) {
                 return true;
             }
         }
@@ -176,7 +187,7 @@ abstract class Kernel implements KernelInterface
     public function getBundle($name, $first = true)
     {
         if (!isset($this->bundleMap[$name])) {
-            throw new \InvalidArgumentException(sprintf('Bundle "%s" does not exist or it is not enabled.', $name));
+            throw new \InvalidArgumentException(sprintf('Bundle "%s" does not exist or it is not enabled. Maybe you forgot to add it in the registerBundles() function of your %s.php file?', $name, get_class($this)));
         }
 
         if (true === $first) {
@@ -237,7 +248,7 @@ abstract class Kernel implements KernelInterface
         }
 
         foreach ($this->getBundle($bundle, false) as $bundle) {
-            if (file_exists($file = $bundle->getNormalizedPath().'/'.$path)) {
+            if (file_exists($file = $bundle->getPath().'/'.$path)) {
                 if ($first) {
                     return $file;
                 }
@@ -329,7 +340,7 @@ abstract class Kernel implements KernelInterface
 
     /**
      * Initialize the data structures related to the bundle management:
-     *  - the bundle property maps a bundle name to the bundle instance,
+     *  - the bundles property maps a bundle name to the bundle instance,
      *  - the bundleMap property maps a bundle name to the bundle inheritance hierarchy (most derived bundle first).
      *
      * @throws \LogicException if two bundles share a common name
@@ -343,7 +354,7 @@ abstract class Kernel implements KernelInterface
         $this->bundles = array();
         $topMostBundles = array();
         $directChildren = array();
-        
+
         foreach ($this->registerBundles() as $bundle) {
             $name = $bundle->getName();
             if (isset($this->bundles[$name])) {
@@ -358,11 +369,11 @@ abstract class Kernel implements KernelInterface
                 $directChildren[$parentName] = $name;
             } else {
                 $topMostBundles[$name] = $bundle;
-            }            
+            }
         }
 
         // look for orphans
-        if (count($diff = array_diff(array_keys($directChildren), array_keys($this->bundles)))) {
+        if (count($diff = array_values(array_diff(array_keys($directChildren), array_keys($this->bundles))))) {
             throw new \LogicException(sprintf('Bundle "%s" extends bundle "%s", which is not registered.', $directChildren[$diff[0]], $diff[0]));
         }
 
@@ -377,7 +388,7 @@ abstract class Kernel implements KernelInterface
                 array_unshift($bundleMap, $this->bundles[$name]);
                 $hierarchy[] = $name;
             }
-            
+
             foreach ($hierarchy as $bundle) {
                 $this->bundleMap[$bundle] = $bundleMap;
                 array_pop($bundleMap);
@@ -389,18 +400,16 @@ abstract class Kernel implements KernelInterface
     protected function initializeContainer()
     {
         $class = $this->name.ucfirst($this->environment).($this->debug ? 'Debug' : '').'ProjectContainer';
-        $location = $this->getCacheDir().'/'.$class;
-        $reload = $this->debug ? $this->needsReload($class, $location) : false;
-
+        $cache = new ConfigCache($this->getCacheDir(), $class, $this->debug);
         $fresh = false;
-        if ($reload || !file_exists($location.'.php')) {
+        if (!$cache->isFresh()) {
             $container = $this->buildContainer();
-            $this->dumpContainer($container, $class, $location.'.php');
+            $this->dumpContainer($cache, $container, $class);
 
             $fresh = true;
         }
 
-        require_once $location.'.php';
+        require_once $cache;
 
         $this->container = new $class();
         $this->container->set('kernel', $this);
@@ -444,35 +453,20 @@ abstract class Kernel implements KernelInterface
         return $parameters;
     }
 
-    protected function needsReload($class, $location)
-    {
-        if (!file_exists($location.'.meta') || !file_exists($location.'.php')) {
-            return true;
-        }
-
-        $meta = unserialize(file_get_contents($location.'.meta'));
-        $time = filemtime($location.'.php');
-        foreach ($meta as $resource) {
-            if (!$resource->isUptodate($time)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     protected function buildContainer()
     {
         $parameterBag = new ParameterBag($this->getKernelParameters());
 
         $container = new ContainerBuilder($parameterBag);
+        $container->getCompilerPassConfig()->setMergePass(new MergeExtensionConfigurationPass());
         foreach ($this->bundles as $bundle) {
-            $bundle->registerExtensions($container);
+            $bundle->build($container);
 
             if ($this->debug) {
                 $container->addObjectResource($bundle);
             }
         }
+        $container->addObjectResource($this);
 
         if (null !== $cont = $this->registerContainerConfiguration($this->getContainerLoader($container))) {
             $container->merge($cont);
@@ -482,16 +476,16 @@ abstract class Kernel implements KernelInterface
         return $container;
     }
 
-    protected function dumpContainer(ContainerBuilder $container, $class, $file)
+    protected function dumpContainer(ConfigCache $cache, ContainerBuilder $container, $class)
     {
         foreach (array('cache', 'logs') as $name) {
             $dir = $container->getParameter(sprintf('kernel.%s_dir', $name));
             if (!is_dir($dir)) {
                 if (false === @mkdir($dir, 0777, true)) {
-                    die(sprintf('Unable to create the %s directory (%s)', $name, dirname($dir)));
+                    die(sprintf("Unable to create the %s directory (%s)\n", $name, dirname($dir)));
                 }
             } elseif (!is_writable($dir)) {
-                die(sprintf('Unable to write in the %s directory (%s)', $name, $dir));
+                die(sprintf("Unable to write in the %s directory (%s)\n", $name, $dir));
             }
         }
 
@@ -501,24 +495,18 @@ abstract class Kernel implements KernelInterface
         if (!$this->debug) {
             $content = self::stripComments($content);
         }
-        $this->writeCacheFile($file, $content);
 
-        if ($this->debug) {
-            $container->addObjectResource($this);
-
-            // save the resources
-            $this->writeCacheFile($this->getCacheDir().'/'.$class.'.meta', serialize($container->getResources()));
-        }
+        $cache->write($content, $container->getResources());
     }
 
     protected function getContainerLoader(ContainerInterface $container)
     {
         $resolver = new LoaderResolver(array(
-            new XmlFileLoader($container),
-            new YamlFileLoader($container),
-            new IniFileLoader($container),
-            new PhpFileLoader($container),
-            new ClosureLoader($container),
+            new XmlFileLoader($container, new FileLocator($this)),
+            new YamlFileLoader($container, new FileLocator($this)),
+            new IniFileLoader($container, new FileLocator($this)),
+            new PhpFileLoader($container, new FileLocator($this)),
+            new ClosureLoader($container, new FileLocator($this)),
         ));
 
         return new DelegatingLoader($resolver);
@@ -553,18 +541,6 @@ abstract class Kernel implements KernelInterface
         $output = preg_replace(array('/\s+$/Sm', '/\n+/S'), "\n", $output);
 
         return $output;
-    }
-
-    protected function writeCacheFile($file, $content)
-    {
-        $tmpFile = tempnam(dirname($file), basename($file));
-        if (false !== @file_put_contents($tmpFile, $content) && @rename($tmpFile, $file)) {
-            chmod($file, 0644);
-
-            return;
-        }
-
-        throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $file));
     }
 
     public function serialize()

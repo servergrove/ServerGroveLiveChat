@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -20,25 +20,27 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\SimpleXMLElement;
-use Symfony\Component\DependencyInjection\Resource\FileResource;
+use Symfony\Component\Config\Resource\FileResource;
 
 /**
  * XmlFileLoader loads XML files service definitions.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class XmlFileLoader extends FileLoader
 {
     /**
      * Loads an XML file.
      *
-     * @param mixed $resource The resource
+     * @param mixed  $resource The resource
+     * @param string $type The resource type
      */
-    public function load($file)
+    public function load($file, $type = null)
     {
-        $path = $this->findFile($file);
+        $path = $this->locator->locate($file);
 
         $xml = $this->parseFile($path);
+        $xml->registerXPathNamespace('container', 'http://symfony.com/schema/dic/services');
 
         $this->container->addResource(new FileResource($path));
 
@@ -64,15 +66,23 @@ class XmlFileLoader extends FileLoader
     /**
      * Returns true if this class supports the given resource.
      *
-     * @param  mixed $resource A resource
+     * @param mixed  $resource A resource
+     * @param string $type     The resource type
      *
      * @return Boolean true if this class supports the given resource, false otherwise
      */
-    public function supports($resource)
+    public function supports($resource, $type = null)
     {
         return is_string($resource) && 'xml' === pathinfo($resource, PATHINFO_EXTENSION);
     }
 
+    /**
+     * Parses parameters
+     *
+     * @param SimpleXMLElement $xml 
+     * @param string $file 
+     * @return void
+     */
     protected function parseParameters(SimpleXMLElement $xml, $file)
     {
         if (!$xml->parameters) {
@@ -82,18 +92,32 @@ class XmlFileLoader extends FileLoader
         $this->container->getParameterBag()->add($xml->parameters->getArgumentsAsPhp('parameter'));
     }
 
+    /**
+     * Parses imports
+     *
+     * @param SimpleXMLElement $xml 
+     * @param string $file 
+     * @return void
+     */
     protected function parseImports(SimpleXMLElement $xml, $file)
     {
-        if (!$xml->imports) {
+        if (false === $imports = $xml->xpath('//container:imports/container:import')) {
             return;
         }
 
-        foreach ($xml->imports->import as $import) {
+        foreach ($imports as $import) {
             $this->currentDir = dirname($file);
             $this->import((string) $import['resource'], (Boolean) $import->getAttributeAsPhp('ignore-errors'));
         }
     }
 
+    /**
+     * Parses interface injectors
+     *
+     * @param SimpleXMLElement $xml 
+     * @param string $file 
+     * @return void
+     */
     protected function parseInterfaceInjectors(SimpleXMLElement $xml, $file)
     {
         if (!$xml->interfaces) {
@@ -105,6 +129,13 @@ class XmlFileLoader extends FileLoader
         }
     }
 
+    /**
+     * Parses an individual interface injector
+     *
+     * @param string $class
+     * @param SimpleXMLElement $interface
+     * @param string $file
+     */
     protected function parseInterfaceInjector($class, $interface, $file)
     {
         $injector = new InterfaceInjector($class);
@@ -114,17 +145,32 @@ class XmlFileLoader extends FileLoader
         $this->container->addInterfaceInjector($injector);
     }
 
+    /**
+     * Parses multiple definitions
+     *
+     * @param SimpleXMLElement $xml 
+     * @param string $file 
+     * @return void
+     */
     protected function parseDefinitions(SimpleXMLElement $xml, $file)
     {
-        if (!$xml->services) {
+        if (false === $services = $xml->xpath('//container:services/container:service')) {
             return;
         }
 
-        foreach ($xml->services->service as $service) {
+        foreach ($services as $service) {
             $this->parseDefinition((string) $service['id'], $service, $file);
         }
     }
 
+    /**
+     * Parses an individual Definition
+     *
+     * @param string $id 
+     * @param SimpleXMLElement $service 
+     * @param string $file 
+     * @return void
+     */
     protected function parseDefinition($id, $service, $file)
     {
         if ((string) $service['alias']) {
@@ -143,7 +189,7 @@ class XmlFileLoader extends FileLoader
             $definition = new Definition();
         }
 
-        foreach (array('class', 'scope', 'public', 'factory-method', 'factory-service', 'synthetic', 'abstract') as $key) {
+        foreach (array('class', 'scope', 'public', 'factory-class', 'factory-method', 'factory-service', 'synthetic', 'abstract') as $key) {
             if (isset($service[$key])) {
                 $method = 'set'.str_replace('-', '', $key);
                 $definition->$method((string) $service->getAttributeAsPhp($key));
@@ -191,6 +237,9 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
+     * Parses a XML file.
+     *
+     * @param string $file Path to a file
      * @throws \InvalidArgumentException When loading of XML file returns error
      */
     protected function parseFile($file)
@@ -208,16 +257,22 @@ class XmlFileLoader extends FileLoader
         return simplexml_import_dom($dom, 'Symfony\\Component\\DependencyInjection\\SimpleXMLElement');
     }
 
+    /**
+     * Processes anonymous services
+     *
+     * @param SimpleXMLElement $xml 
+     * @param string $file 
+     * @return array An array of anonymous services
+     */
     protected function processAnonymousServices(SimpleXMLElement $xml, $file)
     {
         $definitions = array();
         $count = 0;
 
-        // find anonymous service definitions
-        $xml->registerXPathNamespace('container', 'http://www.symfony-project.org/schema/dic/services');
-
         // anonymous services as arguments
-        $nodes = $xml->xpath('//container:argument[@type="service"][not(@id)]');
+        if (false === $nodes = $xml->xpath('//container:argument[@type="service"][not(@id)]')) {
+            return $xml;
+        }
         foreach ($nodes as $node) {
             // give it a unique name
             $node['id'] = sprintf('%s_%d', md5($file), ++$count);
@@ -227,7 +282,9 @@ class XmlFileLoader extends FileLoader
         }
 
         // anonymous services "in the wild"
-        $nodes = $xml->xpath('//container:service[not(@id)]');
+        if (false === $nodes = $xml->xpath('//container:services/container:service[not(@id)]')) {
+            return $xml;
+        }
         foreach ($nodes as $node) {
             // give it a unique name
             $node['id'] = sprintf('%s_%d', md5($file), ++$count);
@@ -254,6 +311,12 @@ class XmlFileLoader extends FileLoader
         return $xml;
     }
 
+    /**
+     * Validates an XML document.
+     *
+     * @param DOMDocument $dom 
+     * @param string $file 
+     */
     protected function validate(\DOMDocument $dom, $file)
     {
         $this->validateSchema($dom, $file);
@@ -261,12 +324,18 @@ class XmlFileLoader extends FileLoader
     }
 
     /**
+     * Validates a documents XML schema.
+     *
+     * @param \DOMDocument $dom
+     * @param string $file
+     * @return void
+     *
      * @throws \RuntimeException         When extension references a non-existent XSD file
      * @throws \InvalidArgumentException When xml doesn't validate its xsd schema
      */
     protected function validateSchema(\DOMDocument $dom, $file)
     {
-        $schemaLocations = array('http://www.symfony-project.org/schema/dic/services' => str_replace('\\', '/', __DIR__.'/schema/dic/services/services-1.0.xsd'));
+        $schemaLocations = array('http://symfony.com/schema/dic/services' => str_replace('\\', '/', __DIR__.'/schema/dic/services/services-1.0.xsd'));
 
         if ($element = $dom->documentElement->getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'schemaLocation')) {
             $items = preg_split('/\s+/', $element);
@@ -307,9 +376,9 @@ class XmlFileLoader extends FileLoader
 
         $source = <<<EOF
 <?xml version="1.0" encoding="utf-8" ?>
-<xsd:schema xmlns="http://www.symfony-project.org/schema"
+<xsd:schema xmlns="http://symfony.com/schema"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://www.symfony-project.org/schema"
+    targetNamespace="http://symfony.com/schema"
     elementFormDefault="qualified">
 
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
@@ -330,12 +399,18 @@ EOF
     }
 
     /**
+     * Validates an extension.
+     *
+     * @param \DOMDocument $dom
+     * @param string $file
+     * @return void
+     *
      * @throws  \InvalidArgumentException When non valid tag are found or no extension are found
      */
     protected function validateExtensions(\DOMDocument $dom, $file)
     {
         foreach ($dom->documentElement->childNodes as $node) {
-            if (!$node instanceof \DOMElement || in_array($node->tagName, array('imports', 'parameters', 'services', 'interfaces'))) {
+            if (!$node instanceof \DOMElement || 'http://symfony.com/schema/dic/services' === $node->namespaceURI) {
                 continue;
             }
 
@@ -346,6 +421,11 @@ EOF
         }
     }
 
+    /**
+     * Returns an array of XML errors.
+     *
+     * @return array
+     */
     protected function getXmlErrors()
     {
         $errors = array();
@@ -365,10 +445,16 @@ EOF
         return $errors;
     }
 
+    /**
+     * Loads from an extension.
+     *
+     * @param SimpleXMLElement $xml 
+     * @return void
+     */
     protected function loadFromExtensions(SimpleXMLElement $xml)
     {
         foreach (dom_import_simplexml($xml)->childNodes as $node) {
-            if (!$node instanceof \DOMElement || $node->namespaceURI === 'http://www.symfony-project.org/schema/dic/services') {
+            if (!$node instanceof \DOMElement || $node->namespaceURI === 'http://symfony.com/schema/dic/services') {
                 continue;
             }
 
@@ -377,7 +463,7 @@ EOF
                 $values = array();
             }
 
-            $this->container->loadFromExtension($node->namespaceURI, $node->localName, $values);
+            $this->container->loadFromExtension($node->namespaceURI, $values);
         }
     }
 

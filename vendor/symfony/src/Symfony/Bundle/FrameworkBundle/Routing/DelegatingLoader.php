@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,8 +12,8 @@
 namespace Symfony\Bundle\FrameworkBundle\Routing;
 
 use Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser;
-use Symfony\Component\Routing\Loader\DelegatingLoader as BaseDelegatingLoader;
-use Symfony\Component\Routing\Loader\LoaderResolverInterface;
+use Symfony\Component\Config\Loader\DelegatingLoader as BaseDelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
 /**
@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
  * This implementation resolves the _controller attribute from the short notation
  * to the fully-qualified form (from a:b:c to class:method).
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class DelegatingLoader extends BaseDelegatingLoader
 {

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  * 
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 /**
  * A file in the file system
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class File
 {
@@ -85,7 +85,7 @@ class File
         'application/vnd.curl' => 'curl',
         'application/vnd.data-vision.rdz' => 'rdz',
         'application/vnd.dreamfactory' => 'dfac',
-        'application/vnd.fsc.weblauch' => 'fsc',
+        'application/vnd.fsc.weblaunch' => 'fsc',
         'application/vnd.genomatix.tuxedo' => 'txd',
         'application/vnd.hbci' => 'hbci',
         'application/vnd.hhe.lesson-player' => 'les',
@@ -519,9 +519,9 @@ class File
     {
         if ($ext = pathinfo($this->getName(), \PATHINFO_EXTENSION)) {
             return '.' . $ext;
-        } else {
-            return '';
         }
+
+        return '';
     }
 
     /**
@@ -537,9 +537,9 @@ class File
 
         if (isset(self::$defaultExtensions[$type])) {
             return '.' . self::$defaultExtensions[$type];
-        } else {
-            return $this->getExtension();
         }
+
+        return $this->getExtension();
     }
 
     /**
@@ -605,7 +605,7 @@ class File
      */
     public function size()
     {
-        if (false === ($size = filesize($this->getPath()))) {
+        if (false === ($size = @filesize($this->getPath()))) {
             throw new FileException(sprintf('Could not read file size of %s', $this->getPath()));
         }
 
@@ -623,7 +623,7 @@ class File
     {
         $newPath = $directory . DIRECTORY_SEPARATOR . $filename;
 
-        if (!rename($this->getPath(), $newPath)) {
+        if (!@rename($this->getPath(), $newPath)) {
             throw new FileException(sprintf('Could not move file %s to %s', $this->getPath(), $newPath));
         }
 

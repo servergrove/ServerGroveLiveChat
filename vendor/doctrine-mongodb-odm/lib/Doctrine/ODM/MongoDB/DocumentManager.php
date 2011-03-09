@@ -27,7 +27,8 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata,
     Doctrine\ODM\MongoDB\Proxy\ProxyFactory,
     Doctrine\Common\Collections\ArrayCollection,
     Doctrine\Common\EventManager,
-    Doctrine\ODM\MongoDB\Hydrator\HydratorFactory;
+    Doctrine\ODM\MongoDB\Hydrator\HydratorFactory,
+    Doctrine\Common\Persistence\ObjectManager;
 
 /**
  * The DocumentManager class is the central access point for managing the
@@ -44,7 +45,7 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata,
  * @author      Jonathan H. Wage <jonwage@gmail.com>
  * @author      Roman Borschel <roman@code-factory.org>
  */
-class DocumentManager
+class DocumentManager implements ObjectManager
 {
     /**
      * The Doctrine MongoDB connection instance.
@@ -276,14 +277,14 @@ class DocumentManager
      */
     public function getDocumentDatabase($className)
     {
+        if (isset($this->documentDatabases[$className])) {
+            return $this->documentDatabases[$className];
+        }
         $metadata = $this->metadataFactory->getMetadataFor($className);
         $db = $metadata->getDatabase();
         $db = $db ? $db : $this->config->getDefaultDB();
         $db = $db ? $db : 'doctrine';
-        $db = sprintf('%s%s', $this->config->getEnvironmentPrefix(), $db);
-        if ( ! isset($this->documentDatabases[$className])) {
-            $this->documentDatabases[$className] = $this->connection->selectDatabase($db);
-        }
+        $this->documentDatabases[$className] = $this->connection->selectDatabase($db);
         return $this->documentDatabases[$className];
     }
 
@@ -306,7 +307,6 @@ class DocumentManager
     public function getDocumentCollection($className)
     {
         $metadata = $this->metadataFactory->getMetadataFor($className);
-        $db = $metadata->getDatabase();
         $collection = $metadata->getCollection();
 
         if ( ! $collection) {
@@ -618,15 +618,6 @@ class DocumentManager
         return $this->config;
     }
 
-    public function formatDBName($dbName)
-    {
-        return sprintf('%s%s%s',
-            $this->config->getDatabasePrefix(),
-            $dbName,
-            $this->config->getDatabaseSuffix()
-        );
-    }
-
     public function getClassNameFromDiscriminatorValue(array $mapping, $value)
     {
         $discriminatorField = isset($mapping['discriminatorField']) ? $mapping['discriminatorField'] : '_doctrine_class_name';
@@ -648,13 +639,14 @@ class DocumentManager
      */
     public function createDBRef($document, array $referenceMapping = null)
     {
-        $class = $this->getClassMetadata(get_class($document));
+        $className = get_class($document);
+        $class = $this->getClassMetadata($className);
         $id = $this->unitOfWork->getDocumentIdentifier($document);
 
         $dbRef = array(
             $this->cmd . 'ref' => $class->getCollection(),
             $this->cmd . 'id'  => $class->getDatabaseIdentifierValue($id),
-            $this->cmd . 'db'  => $class->getDatabase()
+            $this->cmd . 'db'  => $this->getDocumentDatabase($className)->getName()
         );
 
         // add a discriminator value if the referenced document is not mapped explicitely to a targetDocument

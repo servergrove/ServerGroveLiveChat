@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * DelegatingEngine selects an engine for a given template.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class DelegatingEngine extends BaseDelegatingEngine implements EngineInterface
 {
@@ -69,7 +69,7 @@ class DelegatingEngine extends BaseDelegatingEngine implements EngineInterface
             }
         }
 
-        throw new \RuntimeException(sprintf('No engine is able to work with the "%s" template.', $name));
+        throw new \RuntimeException(sprintf('No engine is able to work with the %s template.', json_encode($name)));
     }
 
     /**
@@ -84,7 +84,7 @@ class DelegatingEngine extends BaseDelegatingEngine implements EngineInterface
     public function renderResponse($view, array $parameters = array(), Response $response = null)
     {
         if (null === $response) {
-            $response = $this->container->get('response');
+            $response = new Response();
         }
 
         $response->setContent($this->render($view, $parameters));

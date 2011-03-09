@@ -19,7 +19,6 @@
 
 namespace Doctrine\ODM\MongoDB\Mapping;
 
-
 use Doctrine\ODM\MongoDB\DocumentManager,
     Doctrine\ODM\MongoDB\Configuration,
     Doctrine\ODM\MongoDB\Mapping\ClassMetadata,
@@ -39,7 +38,7 @@ use Doctrine\ODM\MongoDB\DocumentManager,
  * @author      Jonathan H. Wage <jonwage@gmail.com>
  * @author      Roman Borschel <roman@code-factory.org>
  */
-class ClassMetadataFactory
+class ClassMetadataFactory implements \Doctrine\Common\Persistence\Mapping\ClassMetadataFactory
 {
     /** The DocumentManager instance */
     private $dm;
@@ -267,9 +266,6 @@ class ClassMetadataFactory
                 $class->setDatabase($parent->getDatabase());
                 $class->setCollection($parent->getCollection());
             }
-
-            $db = $class->getDatabase() ?: $this->config->getDefaultDB();
-            $class->setDatabase($this->dm->formatDBName($db));
 
             $class->setParentClasses($visited);
 

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,14 +11,15 @@
 
 namespace Symfony\Bundle\TwigBundle\Loader;
 
-use Symfony\Bundle\FrameworkBundle\Templating\Loader\TemplateLocatorInterface;
 use Symfony\Component\Templating\TemplateNameParserInterface;
+use Symfony\Component\Config\FileLocatorInterface;
+use Symfony\Component\Templating\TemplateReferenceInterface;
 
 /**
  * FilesystemLoader extends the default Twig filesystem loader
  * to work with the Symfony2 paths.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class FilesystemLoader implements \Twig_LoaderInterface
 {
@@ -29,9 +30,9 @@ class FilesystemLoader implements \Twig_LoaderInterface
     /**
      * Constructor.
      *
-     * @param TemplateLocator $locator A TemplateLocator instance
+     * @param FileLocatorInterface $locator A FileLocatorInterface instance
      */
-    public function __construct(TemplateLocatorInterface $locator, TemplateNameParserInterface $parser)
+    public function __construct(FileLocatorInterface $locator, TemplateNameParserInterface $parser)
     {
         $this->locator = $locator;
         $this->parser = $parser;
@@ -41,7 +42,7 @@ class FilesystemLoader implements \Twig_LoaderInterface
     /**
      * Gets the source code of a template, given its name.
      *
-     * @param  string $name The name of the template to load
+     * @param  mixed $name The template name or a TemplateReferenceInterface instance
      *
      * @return string The template source code
      */
@@ -53,7 +54,7 @@ class FilesystemLoader implements \Twig_LoaderInterface
     /**
      * Gets the cache key to use for the cache for a given template name.
      *
-     * @param  string $name The name of the template to load
+     * @param  mixed $name The template name or a TemplateReferenceInterface instance
      *
      * @return string The cache key
      */
@@ -65,8 +66,10 @@ class FilesystemLoader implements \Twig_LoaderInterface
     /**
      * Returns true if the template is still fresh.
      *
-     * @param string    $name The template name
+     * @param mixed     $name The template name or a TemplateReferenceInterface instance
      * @param timestamp $time The last modification time of the cached template
+     *
+     * @throws \Twig_Error_Loader if the template does not exist
      */
     public function isFresh($name, $time)
     {
@@ -75,11 +78,9 @@ class FilesystemLoader implements \Twig_LoaderInterface
 
     protected function findTemplate($name)
     {
-        if (!is_array($name)) {
-            $name = $this->parser->parse($name);
-        }
+        $tpl = ($name instanceof TemplateReferenceInterface) ? $name : $this->parser->parse($name);
 
-        $key = md5(serialize($name));
+        $key = $tpl->getSignature();
         if (isset($this->cache[$key])) {
             return $this->cache[$key];
         }
@@ -87,13 +88,13 @@ class FilesystemLoader implements \Twig_LoaderInterface
         $file = null;
         $previous = null;
         try {
-            $file = $this->locator->locate($name);
+            $file = $this->locator->locate($tpl);
         } catch (\InvalidArgumentException $e) {
             $previous = $e;
         }
 
         if (false === $file || null === $file) {
-            throw new \Twig_Error_Loader(sprintf('Unable to find template "%s".', $name), 0, null, $previous);
+            throw new \Twig_Error_Loader(sprintf('Unable to find template "%s".', json_encode($name)), 0, null, $previous);
         }
 
         return $this->cache[$key] = $file;

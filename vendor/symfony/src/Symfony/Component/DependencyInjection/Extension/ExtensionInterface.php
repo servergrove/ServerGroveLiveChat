@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,22 +16,19 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 /**
  * ExtensionInterface is the interface implemented by container extension classes.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 interface ExtensionInterface
 {
     /**
      * Loads a specific configuration.
      *
-     * @param string  $tag           The tag name
      * @param array   $config        An array of configuration values
-     * @param ContainerBuilder $configuration A ContainerBuilder instance
-     *
-     * @return ContainerBuilder A ContainerBuilder instance
+     * @param ContainerBuilder $container A ContainerBuilder instance
      *
      * @throws \InvalidArgumentException When provided tag is not defined in this extension
      */
-    function load($tag, array $config, ContainerBuilder $configuration);
+    function load(array $config, ContainerBuilder $container);
 
     /**
      * Returns the namespace to be used for this extension (XML namespace).

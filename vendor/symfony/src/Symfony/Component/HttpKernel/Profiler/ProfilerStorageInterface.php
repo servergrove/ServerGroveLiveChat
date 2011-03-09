@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\HttpKernel\Profiler;
 /**
  * ProfilerStorageInterface.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 interface ProfilerStorageInterface
 {
@@ -43,15 +43,16 @@ interface ProfilerStorageInterface
     /**
      * Write data associated with the given token.
      *
-     * @param string  $token A token
-     * @param string  $data  The data associated with token
-     * @param string  $ip    An IP
-     * @param string  $url   An URL
-     * @param integer $time  The time of the data
+     * @param string  $token  A token
+     * @param string  $parent The parent token
+     * @param string  $data   The data associated with token
+     * @param string  $ip     An IP
+     * @param string  $url    An URL
+     * @param integer $time   The time of the data
      *
      * @return Boolean Write operation successful
      */
-    function write($token, $data, $ip, $url, $time);
+    function write($token, $parent, $data, $ip, $url, $time);
 
     /**
      * Purges all data from the database.

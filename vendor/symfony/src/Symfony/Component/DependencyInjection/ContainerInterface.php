@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\DependencyInjection;
 /**
  * ContainerInterface is the interface implemented by service container classes.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 interface ContainerInterface
@@ -104,11 +104,10 @@ interface ContainerInterface
     /**
      * Adds a scope to the container
      *
-     * @param string $name
-     * @param string $parentScope
+     * @param ScopeInterface $scope
      * @return void
      */
-    function addScope($name, $parentScope = self::SCOPE_CONTAINER);
+    function addScope(ScopeInterface $scope);
 
     /**
      * Whether this container has the given scope
@@ -123,6 +122,7 @@ interface ContainerInterface
      *
      * It does however not check if the scope actually exists.
      *
+     * @param string $name
      * @return Boolean
      */
     function isScopeActive($name);

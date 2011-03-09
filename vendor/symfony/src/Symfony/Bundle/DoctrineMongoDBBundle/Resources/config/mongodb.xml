@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 
-<container xmlns="http://www.symfony-project.org/schema/dic/services"
+<container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
   <parameters>
     <parameter key="doctrine.odm.mongodb.default_document_manager">default</parameter>
@@ -49,8 +49,14 @@
     <parameter key="doctrine.odm.mongodb.document_dirs" type="collection"></parameter>
 
     <!-- security/user -->
-    <parameter key="security.user.provider.document.class">Symfony\Bundle\DoctrineMongoDBBundle\Security\DocumentUserProvider</parameter>
-    
+    <parameter key="doctrine.odm.mongodb.security.user.provider.class">Symfony\Bundle\DoctrineMongoDBBundle\Security\DocumentUserProvider</parameter>
+
+    <!-- proxy cache warmer -->
+    <parameter key="doctrine.odm.mongodb.proxy_cache_warmer.class">Symfony\Bundle\DoctrineMongoDBBundle\CacheWarmer\ProxyCacheWarmer</parameter>
+
+    <!-- hydrator cache warmer -->
+    <parameter key="doctrine.odm.mongodb.hydrator_cache_warmer.class">Symfony\Bundle\DoctrineMongoDBBundle\CacheWarmer\HydratorCacheWarmer</parameter>
+
     <!-- validator -->
     <parameter key="doctrine_odm.mongodb.validator.unique.class">Symfony\Bundle\DoctrineMongoDBBundle\Validator\Constraints\UniqueValidator</parameter>
   </parameters>
@@ -87,13 +93,27 @@
       <argument type="service" id="doctrine.odm.mongodb.logger" />
     </service>
 
-    <service id="security.user.document_manager" alias="doctrine.odm.mongodb.default_document_manager" />
-    
+    <!-- Cache Warmers -->
+    <service id="doctrine.odm.mongodb.proxy_cache_warmer" class="%doctrine.odm.mongodb.proxy_cache_warmer.class%" public="false">
+        <tag name="kernel.cache_warmer" />
+        <argument type="service" id="service_container" />
+    </service>
+    <service id="doctrine.odm.mongodb.hydrator_cache_warmer" class="%doctrine.odm.mongodb.hydrator_cache_warmer.class%" public="false">
+        <tag name="kernel.cache_warmer" />
+        <argument type="service" id="service_container" />
+    </service>
+
     <!--  validator -->
     <service id="doctrine_odm.mongodb.validator.unique" class="%doctrine_odm.mongodb.validator.unique.class%">
         <tag name="validator.constraint_validator" alias="doctrine_odm.mongodb.unique" />
         <argument type="service" id="service_container" />
     </service>
 
+    <!-- Security -->
+    <service id="doctrine.odm.mongodb.security.user.provider" class="%doctrine.odm.mongodb.security.user.provider.class%" public="false" abstract="true">
+        <argument type="service" id="doctrine.odm.mongodb.security.user.document_manager" />
+    </service>
+    <service id="doctrine.odm.mongodb.security.user.document_manager" alias="doctrine.odm.mongodb.default_document_manager" public="false" />
+    
   </services>
 </container>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<xsd:schema xmlns="http://www.symfony-project.org/schema/dic/services"
+<xsd:schema xmlns="http://symfony.com/schema/dic/services"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-     targetNamespace="http://www.symfony-project.org/schema/dic/services"
+     targetNamespace="http://symfony.com/schema/dic/services"
      elementFormDefault="qualified">
 
   <xsd:annotation>
@@ -105,6 +105,7 @@
     <xsd:attribute name="public" type="boolean" />
     <xsd:attribute name="synthetic" type="boolean" />
     <xsd:attribute name="abstract" type="boolean" />
+    <xsd:attribute name="factory-class" type="xsd:string" />
     <xsd:attribute name="factory-method" type="xsd:string" />
     <xsd:attribute name="factory-service" type="xsd:string" />
     <xsd:attribute name="alias" type="xsd:string" />

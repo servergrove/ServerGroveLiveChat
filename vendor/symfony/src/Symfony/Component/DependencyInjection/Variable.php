@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -28,11 +28,21 @@ class Variable
 {
     protected $name;
 
+    /**
+     * Constructor
+     *
+     * @param string $name 
+     */
     public function __construct($name)
     {
         $this->name = $name;
     }
 
+    /**
+     * Converts the object to a string
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->name;

@@ -1,21 +1,13 @@
 <?xml version="1.0" ?>
 
-<container xmlns="http://www.symfony-project.org/schema/dic/services"
+<container xmlns="http://symfony.com/schema/dic/services"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
         <parameter key="twig.class">Twig_Environment</parameter>
-        <parameter key="twig.options" type="collection">
-            <parameter key="charset">%kernel.charset%</parameter>
-            <parameter key="debug">%kernel.debug%</parameter>
-            <parameter key="cache">%kernel.cache_dir%/twig</parameter>
-        </parameter>
         <parameter key="twig.loader.class">Symfony\Bundle\TwigBundle\Loader\FilesystemLoader</parameter>
         <parameter key="twig.globals.class">Symfony\Bundle\TwigBundle\GlobalVariables</parameter>
-        <parameter key="twig.form.resources" type="collection">
-            <parameter>TwigBundle::form.html.twig</parameter>
-        </parameter>
         <parameter key="templating.engine.twig.class">Symfony\Bundle\TwigBundle\TwigEngine</parameter>
         <parameter key="templating.cache_warmer.templates_cache.class">Symfony\Bundle\TwigBundle\CacheWarmer\TemplateCacheCacheWarmer</parameter>
     </parameters>
@@ -37,7 +29,6 @@
 
         <service id="templating.engine.twig" class="%templating.engine.twig.class%" public="false">
             <argument type="service" id="twig" />
-            <argument type="service" id="service_container" />
             <argument type="service" id="templating.name_parser" />
             <argument type="service" id="twig.globals" />
         </service>

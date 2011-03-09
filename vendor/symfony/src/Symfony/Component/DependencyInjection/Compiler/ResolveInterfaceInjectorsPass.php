@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -32,7 +32,7 @@ class ResolveInterfaceInjectorsPass implements CompilerPassInterface
 
             $loaded = false;
             foreach ($container->getInterfaceInjectors() as $injector) {
-                if (null !== $definition->getFactoryService()) {
+                if (null !== $definition->getFactoryClass() || null !== $definition->getFactoryService()) {
                     continue;
                 }
 

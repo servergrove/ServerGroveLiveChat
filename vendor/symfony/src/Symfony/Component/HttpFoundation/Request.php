@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 /**
  * Request represents an HTTP request.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Request
 {
@@ -223,14 +223,34 @@ class Request
     public function duplicate(array $query = null, array $request = null, array $attributes = null, array $cookies = null, array $files = null, array $server = null)
     {
         $dup = clone $this;
-        $dup->initialize(
-            null !== $query ? $query : $this->query->all(),
-            null !== $request ? $request : $this->request->all(),
-            null !== $attributes ? $attributes : $this->attributes->all(),
-            null !== $cookies ? $cookies : $this->cookies->all(),
-            null !== $files ? $files : $this->files->all(),
-            null !== $server ? $server : $this->server->all()
-        );
+        if ($query !== null) {
+          $dup->query = new ParameterBag($query);
+        }
+        if ($request !== null) {
+          $dup->request = new ParameterBag($request);
+        }
+        if ($attributes !== null) {
+          $dup->attributes = new ParameterBag($attributes);
+        }
+        if ($cookies !== null) {
+          $dup->cookies = new ParameterBag($cookies);
+        }
+        if ($files !== null) {
+          $dup->files = new FileBag($files);
+        }
+        if ($server !== null) {
+          $dup->server = new ServerBag($server);
+          $dup->headers = new HeaderBag($dup->server->getHeaders());
+        }
+        $this->languages = null;
+        $this->charsets = null;
+        $this->acceptableContentTypes = null;
+        $this->pathInfo = null;
+        $this->requestUri = null;
+        $this->baseUrl = null;
+        $this->basePath = null;
+        $this->method = null;
+        $this->format = null;
 
         return $dup;
     }
@@ -416,9 +436,9 @@ class Request
 
         if (('http' == $scheme && $port == 80) || ('https' == $scheme && $port == 443)) {
             return $name;
-        } else {
-            return $name.':'.$port;
         }
+
+        return $name.':'.$port;
     }
 
     public function getRequestUri()

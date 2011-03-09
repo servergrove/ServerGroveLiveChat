@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -35,8 +35,8 @@ use Symfony\Component\Form\CsrfProvider\CsrfProviderInterface;
  * CSRF secret. If the global CSRF secret is also null, then a random one
  * is generated on the fly.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class Form extends Field implements \IteratorAggregate, FormInterface
 {
@@ -57,6 +57,12 @@ class Form extends Field implements \IteratorAggregate, FormInterface
      * @var string
      */
     protected $dataClass;
+
+    /**
+     * Stores the constructor closure for creating new domain object instances
+     * @var \Closure
+     */
+    protected $dataConstructor;
 
     /**
      * The context used when creating the form
@@ -86,6 +92,7 @@ class Form extends Field implements \IteratorAggregate, FormInterface
     public function __construct($name = null, array $options = array())
     {
         $this->addOption('data_class');
+        $this->addOption('data_constructor');
         $this->addOption('csrf_field_name', '_token');
         $this->addOption('csrf_provider');
         $this->addOption('field_factory');
@@ -93,6 +100,7 @@ class Form extends Field implements \IteratorAggregate, FormInterface
         $this->addOption('virtual', false);
         $this->addOption('validator');
         $this->addOption('context');
+        $this->addOption('by_reference', true);
 
         if (isset($options['validation_groups'])) {
             $options['validation_groups'] = (array)$options['validation_groups'];
@@ -100,6 +108,10 @@ class Form extends Field implements \IteratorAggregate, FormInterface
 
         if (isset($options['data_class'])) {
             $this->dataClass = $options['data_class'];
+        }
+
+        if (isset($options['data_constructor'])) {
+            $this->dataConstructor = $options['data_constructor'];
         }
 
         parent::__construct($name, $options);
@@ -340,6 +352,16 @@ class Form extends Field implements \IteratorAggregate, FormInterface
      */
     public function setData($data)
     {
+        if (empty($data)) {
+            if ($this->dataConstructor) {
+                $constructor = $this->dataConstructor;
+                $data = $constructor();
+            } else if ($this->dataClass) {
+                $class = $this->dataClass;
+                $data = new $class();
+            }
+        }
+
         parent::setData($data);
 
         // get transformed data and pass its values to child fields
@@ -712,6 +734,10 @@ class Form extends Field implements \IteratorAggregate, FormInterface
      */
     public function bind(Request $request, $data = null)
     {
+        if (!$this->getName()) {
+            throw new FormException('You cannot bind anonymous forms. Please give this form a name');
+        }
+
         // Store object from which to read the default values and where to
         // write the submitted values
         if (null !== $data) {
@@ -810,9 +836,9 @@ class Form extends Field implements \IteratorAggregate, FormInterface
             }
 
             return $length > $max;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -878,6 +904,41 @@ class Form extends Field implements \IteratorAggregate, FormInterface
                 $graphWalker->walkReference($this->getData(), $group, $propertyPath, true);
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function writeProperty(&$objectOrArray)
+    {
+        $isReference = false;
+
+        // If the data is identical to the value in $objectOrArray, we are
+        // dealing with a reference
+        if ($this->getPropertyPath() !== null) {
+            $isReference = $this->getData() === $this->getPropertyPath()->getValue($objectOrArray);
+        }
+
+        // Don't write into $objectOrArray if $objectOrArray is an object,
+        // $isReference is true (see above) and the option "by_reference" is
+        // true as well
+        if (!is_object($objectOrArray) || !$isReference || !$this->getOption('by_reference')) {
+            parent::writeProperty($objectOrArray);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isEmpty()
+    {
+        foreach ($this->fields as $field) {
+            if (!$field->isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

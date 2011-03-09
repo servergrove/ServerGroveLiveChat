@@ -28,8 +28,26 @@ use Doctrine\ORM\EntityManager;
  */
 class Loader
 {
-    /** Array of fixture object instances to execute. */
+    /**
+     * Array of fixture object instances to execute.
+     *
+     * @var array
+     */
     private $fixtures = array();
+
+    /**
+     * Array of ordered fixture object instances.
+     *
+     * @var array
+     */
+    private $orderedFixtures;
+
+    /**
+     * The file extension of fixture files.
+     *
+     * @var string
+     */
+    private $fileExtension = '.php';
 
     /**
      * Find fixtures classes in a given directory and load them.
@@ -47,11 +65,14 @@ class Loader
         $includedFiles = array();
 
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            new \RecursiveDirectoryIterator($dir),
             \RecursiveIteratorIterator::LEAVES_ONLY
         );
 
         foreach ($iterator as $file) {
+            if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
+                continue;
+            }
             $sourceFile = realpath($file->getPathName());
             require_once $sourceFile;
             $includedFiles[] = $sourceFile;
@@ -77,6 +98,7 @@ class Loader
      */
     public function addFixture(FixtureInterface $fixture)
     {
+        $this->orderedFixtures = null;
         $this->fixtures[] = $fixture;
     }
 
@@ -87,7 +109,10 @@ class Loader
      */
     public function getFixtures()
     {
-        return $this->fixtures;
+        if ($this->orderedFixtures === null) {
+            $this->orderFixtures();
+        }
+        return $this->orderedFixtures;
     }
 
     /**
@@ -100,5 +125,29 @@ class Loader
     {
         $interfaces = class_implements($className);
         return in_array('Doctrine\Common\DataFixtures\FixtureInterface', $interfaces) ? false : true;
+    }
+    
+    /**
+     * Orders fixtures
+     * 
+     * @todo maybe there is a better way to handle reordering
+     * @return void
+     */
+    private function orderFixtures()
+    {
+        $this->orderedFixtures = $this->fixtures;
+        usort($this->orderedFixtures, function($a, $b) {
+            if ($a instanceof OrderedFixtureInterface && $b instanceof OrderedFixtureInterface) {
+                if ($a->getOrder() === $b->getOrder()) {
+                    return 0;
+                }
+                return $a->getOrder() < $b->getOrder() ? -1 : 1;
+            } elseif ($a instanceof OrderedFixtureInterface) {
+                return $a->getOrder() === 0 ? 0 : 1;
+            } elseif ($b instanceof OrderedFixtureInterface) {
+                return $b->getOrder() === 0 ? 0 : -1;
+            }
+            return 0;
+        });
     }
 }

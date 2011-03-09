@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,10 +17,18 @@ namespace Symfony\Component\CssSelector;
  * This component is a port of the Python lxml library,
  * which is copyright Infrae and distributed under the BSD license.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Tokenizer
 {
+    /**
+     * Takes a CSS selector and returns an array holding the Tokens
+     * it contains.
+     *
+     * @param  string $s The selector to lex.
+     *
+     * @return array Token[]
+     */
     public function tokenize($s)
     {
         if (function_exists('mb_internal_encoding') && ((int) ini_get('mbstring.func_overload')) & 2) {
@@ -34,10 +42,10 @@ class Tokenizer
 
         while (true) {
             if (preg_match('#\s+#A', $s, $match, 0, $pos)) {
-                $preceding_whitespace_pos = $pos;
+                $precedingWhitespacePos = $pos;
                 $pos += strlen($match[0]);
             } else {
-                $preceding_whitespace_pos = 0;
+                $precedingWhitespacePos = 0;
             }
 
             if ($pos >= strlen($s)) {
@@ -66,8 +74,8 @@ class Tokenizer
             }
 
             if (in_array($c, array('>', '+', '~', ',', '.', '*', '=', '[', ']', '(', ')', '|', ':', '#'))) {
-                if (in_array($c, array('.', '#', '[')) && $preceding_whitespace_pos > 0) {
-                    $tokens[] = new Token('Token', ' ', $preceding_whitespace_pos);
+                if (in_array($c, array('.', '#', '[')) && $precedingWhitespacePos > 0) {
+                    $tokens[] = new Token('Token', ' ', $precedingWhitespacePos);
                 }
                 $tokens[] = new Token('Token', $c, $pos);
                 ++$pos;
@@ -77,25 +85,34 @@ class Tokenizer
 
             if ('"' === $c || "'" === $c) {
                 // Quoted string
-                $old_pos = $pos;
+                $oldPos = $pos;
                 list($sym, $pos) = $this->tokenizeEscapedString($s, $pos);
 
-                $tokens[] = new Token('String', $sym, $old_pos);
+                $tokens[] = new Token('String', $sym, $oldPos);
 
                 continue;
             }
 
-            $old_pos = $pos;
+            $oldPos = $pos;
             list($sym, $pos) = $this->tokenizeSymbol($s, $pos);
 
-            $tokens[] = new Token('Symbol', $sym, $old_pos);
+            $tokens[] = new Token('Symbol', $sym, $oldPos);
 
             continue;
         }
     }
 
     /**
+     * Tokenizes a quoted string (i.e. 'A string quoted with \' characters'),
+     * and returns an array holding the unquoted string contained by $s and
+     * the new position from which tokenizing should take over.
+     *
      * @throws SyntaxError When expected closing is not found
+     *
+     * @param  string  $s   The selector string containing the quoted string.
+     * @param  integer $pos The starting position for the quoted string.
+     *
+     * @return array
      */
     protected function tokenizeEscapedString($s, $pos)
     {
@@ -125,7 +142,13 @@ class Tokenizer
     }
 
     /**
+     * Unescapes a string literal and returns the unescaped string.
+     *
      * @throws SyntaxError When invalid escape sequence is found
+     *
+     * @param  string $literal The string literal to unescape.
+     *
+     * @return string
      */
     protected function unescapeStringLiteral($literal)
     {
@@ -143,7 +166,16 @@ class Tokenizer
     }
 
     /**
+     * Lexes selector $s and returns an array holding the name of the symbol
+     * contained in it and the new position from which tokenizing should take
+     * over.
+     *
      * @throws SyntaxError When Unexpected symbol is found
+     *
+     * @param  string  $s   The selector string.
+     * @param  integer $pos The position in $s at which the symbol starts.
+     *
+     * @return array
      */
     protected function tokenizeSymbol($s, $pos)
     {

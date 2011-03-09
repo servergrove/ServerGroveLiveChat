@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -56,7 +56,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         )));
         $loader = new DoctrineExtension();
         $container->registerExtension($loader);
-        $loader->dbalLoad(array(array(
+        $loader->load(array(array('dbal' => array(
             'connections' => array(
                 'default' => array(
                     'driver' => 'pdo_mysql',
@@ -67,14 +67,14 @@ class TestCase extends \PHPUnit_Framework_TestCase
             'types' => array(
                 'test' => 'Symfony\Bundle\DoctrineBundle\Tests\DependencyInjection\TestType',
             ),
-        )), $container);
-        $loader->ormLoad(array(
-            array(
+        ))), $container);
+        $loader->load(array(
+            array('orm' => array(
                 'mappings' => array('YamlBundle' => array(
                     'type' => 'yml',
                     'dir' => __DIR__ . "/DependencyInjection/Fixtures/Bundles/YamlBundle/Resources/config/doctrine/metadata/orm",
                     'prefix' => 'Fixtures\Bundles\YamlBundle',
-            )))), $container);
+            ))))), $container);
 
         $container->setDefinition('my.platform', new \Symfony\Component\DependencyInjection\Definition('Doctrine\DBAL\Platforms\MySqlPlatform'));
 

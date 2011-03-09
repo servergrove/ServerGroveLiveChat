@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\Yaml;
 /**
  * Yaml offers convenience methods to load and dump YAML.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Yaml
 {
@@ -58,7 +58,7 @@ class Yaml
      *   print_r($array);
      *  </code>
      *
-     * @param string $input Path of YAML file or string containing YAML
+     * @param string $input Path to a YAML file or a string containing YAML
      *
      * @return array The YAML converted to a PHP array
      *
@@ -69,7 +69,7 @@ class Yaml
         $file = '';
 
         // if input is a file, process it
-        if (strpos($input, "\n") === false && is_file($input)) {
+        if (strpos($input, "\n") === false && is_file($input) && is_readable($input)) {
             $file = $input;
 
             ob_start();

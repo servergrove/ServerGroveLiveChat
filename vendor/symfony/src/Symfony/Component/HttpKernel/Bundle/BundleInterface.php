@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,10 +11,12 @@
 
 namespace Symfony\Component\HttpKernel\Bundle;
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
 /**
  * BundleInterface.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 interface BundleInterface
 {
@@ -27,6 +29,15 @@ interface BundleInterface
      * Shutdowns the Bundle.
      */
     function shutdown();
+
+    /**
+     * Builds the bundle.
+     *
+     * It is only ever called once when the cache is empty.
+     *
+     * @param ContainerBuilder $container A ContainerBuilder instance
+     */
+    function build(ContainerBuilder $container);
 
     /**
      * Returns the bundle parent name.
@@ -49,14 +60,6 @@ interface BundleInterface
      */
     function getNamespace();
 
-
-    /**
-     * Gets the Bundle directory path.
-     *
-     * @return string The Bundle absolute path
-     */
-    function getPath();
-
     /**
      * Gets the Bundle directory path.
      *
@@ -64,5 +67,5 @@ interface BundleInterface
      *
      * @return string The Bundle absolute path
      */
-    function getNormalizedPath();
+    function getPath();
 }

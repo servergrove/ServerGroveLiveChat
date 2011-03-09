@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,11 +12,10 @@
 namespace Symfony\Bundle\DoctrineAbstractBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Resource\FileResource;
+use Symfony\Component\Config\Resource\FileResource;
 
 /**
  * This abstract classes groups common code that Doctrine Object Manager extensions (ORM, MongoDB, CouchDB) need.
@@ -128,7 +127,7 @@ abstract class AbstractDoctrineExtension extends Extension
     }
 
     /**
-     * Registter the mapping driver configuration for later use with the object managers metadata driver chain.
+     * Register the mapping driver configuration for later use with the object managers metadata driver chain.
      *
      * @param array $mappingConfig
      * @param string $mappingName
@@ -188,7 +187,7 @@ abstract class AbstractDoctrineExtension extends Extension
     }
 
     /**
-     * Register all the collected mapping information with the object manager by registering the appropiate mapping drivers.
+     * Register all the collected mapping information with the object manager by registering the appropriate mapping drivers.
      *
      * @param array $objectManager
      * @param Container $container
@@ -299,7 +298,7 @@ abstract class AbstractDoctrineExtension extends Extension
     }
 
     /**
-     * Prefixes the relative dependency injenction container path with the object manager prefix.
+     * Prefixes the relative dependency injection container path with the object manager prefix.
      *
      * @example $name is 'entity_manager' then the result would be 'doctrine.orm.entity_manager'
      *

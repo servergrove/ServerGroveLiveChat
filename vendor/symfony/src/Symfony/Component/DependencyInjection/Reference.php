@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\DependencyInjection;
 /**
  * Reference represents a service reference.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Reference
 {
@@ -48,11 +48,21 @@ class Reference
         return (string) $this->id;
     }
 
+    /**
+     * Returns the behavior to be used when the service does not exist.
+     *
+     * @return int
+     */
     public function getInvalidBehavior()
     {
         return $this->invalidBehavior;
     }
 
+    /**
+     * Returns true when this Reference is strict
+     *
+     * @return boolean
+     */
     public function isStrict()
     {
         return $this->strict;

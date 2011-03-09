@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,11 +21,11 @@ use Symfony\Bundle\TwigBundle\GlobalVariables;
 
 class TwigEngineTest extends TestCase
 {
-    public function testEvalutateAddsAppGlobal()
+    public function testEvaluateAddsAppGlobal()
     {
         $environment = $this->getTwigEnvironment();
         $container = $this->getContainer();
-        $engine = new TwigEngine($environment, $container, new TemplateNameParser(), $app = new GlobalVariables($container));
+        $engine = new TwigEngine($environment, new TemplateNameParser(), $app = new GlobalVariables($container));
 
         $template = $this->getMock('\Twig_TemplateInterface');
 
@@ -40,11 +40,11 @@ class TwigEngineTest extends TestCase
         $this->assertSame($app, $globals['app']);
     }
 
-    public function testEvalutateWithoutAvailableRequest()
+    public function testEvaluateWithoutAvailableRequest()
     {
         $environment = $this->getTwigEnvironment();
         $container = new Container();
-        $engine = new TwigEngine($environment, $container, new TemplateNameParser(), new GlobalVariables($container));
+        $engine = new TwigEngine($environment, new TemplateNameParser(), new GlobalVariables($container));
 
         $template = $this->getMock('\Twig_TemplateInterface');
 

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,7 +22,7 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
  *  * "output": The type of the transformed format ("string" or "array"). Default: "string"
  *  * "format": The format of the time string ("short", "medium", "long" or "full"). Default: "short"
  *
- * @author Bernhard Schussek <bernhard.schussek@symfony-project.com>
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  * @author Florian Eckerstorfer <florian@eckerstorfer.org>
  */
 class DateTimeToArrayTransformer extends BaseDateTimeTransformer
@@ -32,8 +32,8 @@ class DateTimeToArrayTransformer extends BaseDateTimeTransformer
      */
     protected function configure()
     {
-        $this->addOption('input_timezone', 'UTC');
-        $this->addOption('output_timezone', 'UTC');
+        $this->addOption('input_timezone', date_default_timezone_get());
+        $this->addOption('output_timezone', date_default_timezone_get());
         $this->addOption('pad', false);
         $this->addOption('fields', array('year', 'month', 'day', 'hour', 'minute', 'second'));
 
@@ -95,7 +95,7 @@ class DateTimeToArrayTransformer extends BaseDateTimeTransformer
      * @param  array $value  Localized date string/array
      * @return DateTime      Normalized date
      */
-    public function reverseTransform($value, $originalValue)
+    public function reverseTransform($value)
     {
         if (null === $value) {
             return null;
@@ -112,16 +112,20 @@ class DateTimeToArrayTransformer extends BaseDateTimeTransformer
             return null;
         }
 
-        $dateTime = new \DateTime(sprintf(
-            '%s-%s-%s %s:%s:%s %s',
-            empty($value['year']) ? '1970' : $value['year'],
-            empty($value['month']) ? '1' : $value['month'],
-            empty($value['day']) ? '1' : $value['day'],
-            empty($value['hour']) ? '0' : $value['hour'],
-            empty($value['minute']) ? '0' : $value['minute'],
-            empty($value['second']) ? '0' : $value['second'],
-            $outputTimezone
-        ));
+        try {
+            $dateTime = new \DateTime(sprintf(
+                '%s-%s-%s %s:%s:%s %s',
+                empty($value['year']) ? '1970' : $value['year'],
+                empty($value['month']) ? '1' : $value['month'],
+                empty($value['day']) ? '1' : $value['day'],
+                empty($value['hour']) ? '0' : $value['hour'],
+                empty($value['minute']) ? '0' : $value['minute'],
+                empty($value['second']) ? '0' : $value['second'],
+                $outputTimezone
+            ));
+        } catch (\Exception $e) {
+            throw new TransformationFailedException($e->getMessage(), null, $e);
+        }
 
         if ($inputTimezone != $outputTimezone) {
             $dateTime->setTimezone(new \DateTimeZone($inputTimezone));

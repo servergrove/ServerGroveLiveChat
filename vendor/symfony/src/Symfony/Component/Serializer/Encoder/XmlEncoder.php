@@ -7,7 +7,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 /*
  * This file is part of the Symfony framework.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -24,6 +24,7 @@ class XmlEncoder extends AbstractEncoder
 {
     protected $dom;
     protected $format;
+    protected $rootNodeName = 'response';
 
     /**
      * {@inheritdoc}
@@ -38,11 +39,11 @@ class XmlEncoder extends AbstractEncoder
         $this->format = $format;
 
         if ($this->serializer->isStructuredType($data)) {
-            $root = $this->dom->createElement('response');
+            $root = $this->dom->createElement($this->rootNodeName);
             $this->dom->appendChild($root);
             $this->buildXml($root, $data);
         } else {
-            $this->appendNode($this->dom, $data, 'response');
+            $this->appendNode($this->dom, $data, $this->rootNodeName);
         }
         return $this->dom->saveXML();
     }
@@ -60,6 +61,24 @@ class XmlEncoder extends AbstractEncoder
     }
 
     /**
+     * Sets the root node name
+     * @param string $name root node name
+     */
+    public function setRootNodeName($name)
+    {
+        $this->rootNodeName = $name;
+    }
+
+    /**
+     * Returns the root node name
+     * @return string
+     */
+    public function getRootNodeName()
+    {
+        return $this->rootNodeName;
+    }
+
+    /**
      * Parse the input SimpleXmlElement into an array
      *
      * @param SimpleXmlElement $node xml to parse
@@ -71,6 +90,11 @@ class XmlEncoder extends AbstractEncoder
         foreach ($node->children() as $key => $subnode) {
             if ($subnode->count()) {
                 $value = $this->parseXml($subnode);
+                if ($subnode->attributes()) {
+                    foreach ($subnode->attributes() as $attrkey => $attr) {
+                        $value['@'.$attrkey] = (string) $attr;
+                    }
+                }
             } else {
                 $value = (string) $subnode;
             }
@@ -83,6 +107,11 @@ class XmlEncoder extends AbstractEncoder
                     $data[] = $tmp;
                     $data[] = $value;
                 }
+            } elseif (key_exists($key, $data)) {
+                if (false === is_array($data[$key])) {
+                    $data[$key] = array($data[$key]);
+                }
+                $data[$key][] = $value;
             } else {
                 $data[$key] = $value;
             }
@@ -103,8 +132,25 @@ class XmlEncoder extends AbstractEncoder
 
         if (is_array($data) || $data instanceof \Traversable) {
             foreach ($data as $key => $data) {
-                if (is_array($data) && false === is_numeric($key)) {
-                    $append = $this->appendNode($parentNode, $data, $key);
+                //Ah this is the magic @ attribute types.
+                if (0 === strpos($key, "@") && is_scalar($data) && $this->isElementNameValid($attributeName = substr($key,1))) {
+                    $parentNode->setAttribute($attributeName, $data);
+                } elseif (is_array($data) && false === is_numeric($key)) {
+                    /**
+                    * Is this array fully numeric keys?
+                    */
+                    if (ctype_digit(implode('', array_keys($data)))) {
+                        /**
+                        * Create nodes to append to $parentNode based on the $key of this array
+                        * Produces <xml><item>0</item><item>1</item></xml>
+                        * From array("item" => array(0,1));
+                        */
+                        foreach ($data as $subData) {
+                            $append = $this->appendNode($parentNode, $subData, $key);
+                        }
+                    } else {
+                        $append = $this->appendNode($parentNode, $data, $key);
+                    }
                 } elseif (is_numeric($key) || !$this->isElementNameValid($key)) {
                     $append = $this->appendNode($parentNode, $data, "item", $key);
                 } else {
@@ -120,7 +166,7 @@ class XmlEncoder extends AbstractEncoder
                 if (!$parentNode->parentNode->parentNode) {
                     $root = $parentNode->parentNode;
                     $root->removeChild($parentNode);
-                    return $this->appendNode($root, $data, 'response');
+                    return $this->appendNode($root, $data, $this->rootNodeName);
                 }
                 return $this->appendNode($parentNode, $data, 'data');
             }
@@ -162,20 +208,20 @@ class XmlEncoder extends AbstractEncoder
     {
         if (is_array($val)) {
             return $this->buildXml($node, $val);
-        } elseif (is_object($val)) {
-            return $this->buildXml($node, $this->serializer->normalizeObject($val, $this->format));
         } elseif ($val instanceof \SimpleXMLElement) {
             $child = $this->dom->importNode(dom_import_simplexml($val), true);
             $node->appendChild($child);
         } elseif ($val instanceof \Traversable) {
             $this->buildXml($node, $val);
+        } elseif (is_object($val)) {
+            return $this->buildXml($node, $this->serializer->normalizeObject($val, $this->format));
         } elseif (is_numeric($val)) {
             return $this->appendText($node, (string) $val);
         } elseif (is_string($val)) {
             return $this->appendCData($node, $val);
         } elseif (is_bool($val)) {
             return $this->appendText($node, (int) $val);
-        } elseif ($val instanceof \DOMNode){
+        } elseif ($val instanceof \DOMNode) {
             $child = $this->dom->importNode($val, true);
             $node->appendChild($child);
         }
@@ -248,6 +294,8 @@ class XmlEncoder extends AbstractEncoder
      */
     protected function isElementNameValid($name)
     {
-        return $name && strpos($name, ' ') === false && preg_match('|^\w+$|', $name);
+        return $name &&
+            false === strpos($name, ' ') &&
+            preg_match('#^[\pL_][\pL0-9._-]+$#ui', $name);
     }
 }

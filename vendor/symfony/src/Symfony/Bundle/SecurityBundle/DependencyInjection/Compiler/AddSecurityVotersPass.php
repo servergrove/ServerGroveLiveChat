@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -31,10 +31,15 @@ class AddSecurityVotersPass implements CompilerPassInterface
             return;
         }
 
-        $voters = array_map(function($id) {
-            return new Reference($id);
-        }, array_keys($container->findTaggedServiceIds('security.voter')));
+        $voters = new \SplPriorityQueue();
+        foreach ($container->findTaggedServiceIds('security.voter') as $id => $attributes) {
+            $priority = isset($attributes[0]['priority']) ? $attributes[0]['priority'] : 0;
+            $voters->insert(new Reference($id), $priority);
+        }
 
-        $container->getDefinition('security.access.decision_manager')->setArgument(0, $voters);
+        $voters = iterator_to_array($voters);
+        ksort($voters);
+
+        $container->getDefinition('security.access.decision_manager')->setArgument(0, array_values($voters));
     }
 }

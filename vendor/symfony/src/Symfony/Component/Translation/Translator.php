@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,7 +16,7 @@ use Symfony\Component\Translation\Loader\LoaderInterface;
 /**
  * Translator.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class Translator implements TranslatorInterface
 {
@@ -134,15 +134,15 @@ class Translator implements TranslatorInterface
     protected function loadCatalogue($locale)
     {
         $this->catalogues[$locale] = new MessageCatalogue($locale);
-        if (!isset($this->resources[$locale])) {
-            return;
-        }
 
-        foreach ($this->resources[$locale] as $resource) {
-            if (!isset($this->loaders[$resource[0]])) {
-                throw new \RuntimeException(sprintf('The "%s" translation loader is not registered.', $resource[0]));
+        if (isset($this->resources[$locale])) {
+
+            foreach ($this->resources[$locale] as $resource) {
+                if (!isset($this->loaders[$resource[0]])) {
+                    throw new \RuntimeException(sprintf('The "%s" translation loader is not registered.', $resource[0]));
+                }
+                $this->catalogues[$locale]->addCatalogue($this->loaders[$resource[0]]->load($resource[1], $locale, $resource[2]));
             }
-            $this->catalogues[$locale]->addCatalogue($this->loaders[$resource[0]]->load($resource[1], $locale, $resource[2]));
         }
 
         $this->optimizeCatalogue($locale);

@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@ namespace Symfony\Component\HttpFoundation;
 /**
  * ResponseHeaderBag is a container for Response HTTP headers.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ResponseHeaderBag extends HeaderBag
 {
@@ -25,13 +25,13 @@ class ResponseHeaderBag extends HeaderBag
      *
      * @param array $headers An array of HTTP headers
      */
-    public function __construct(array $parameters = array())
+    public function __construct(array $headers = array())
     {
-        // this line is not necessary, but including it avoids any stupid
-        // errors if we add code to the parent's constructor
-        parent::__construct();
+        parent::__construct($headers);
 
-        $this->replace($parameters);
+        if (!isset($this->headers['cache-control'])) {
+            $this->set('cache-control', '');
+        }
     }
 
     /**
@@ -54,7 +54,7 @@ class ResponseHeaderBag extends HeaderBag
         parent::set($key, $values, $replace);
 
         // ensure the cache-control header has sensible defaults
-        if ('cache-control' === strtr(strtolower($key), '_', '-')) {
+        if (in_array(strtr(strtolower($key), '_', '-'), array('cache-control', 'etag', 'last-modified', 'expires'))) {
             $computed = $this->computeCacheControlValue();
             $this->headers['cache-control'] = array($computed);
             $this->computedCacheControl = $this->parseCacheControl($computed);
@@ -99,7 +99,7 @@ class ResponseHeaderBag extends HeaderBag
      */
     public function clearCookie($name, $path = null, $domain = null)
     {
-        $this->setCookie(new Cookie($name, null, time() - 86400, $path, $domain));
+        $this->setCookie(new Cookie($name, null, 1, $path, $domain));
     }
 
     /**
@@ -118,7 +118,7 @@ class ResponseHeaderBag extends HeaderBag
 
         if (!$this->cacheControl) {
             // conservative by default
-            return 'private, max-age=0, must-revalidate';
+            return 'private, must-revalidate';
         }
 
         $header = $this->getCacheControlHeader();

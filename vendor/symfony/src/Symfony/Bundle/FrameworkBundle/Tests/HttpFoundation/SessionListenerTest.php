@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -37,53 +37,26 @@ class SessionListenerTest extends \PHPUnit_Framework_TestCase
 
     public function testShouldSaveMasterRequestSession()
     {
-        $this->handle(new Request());
-
-        $this->assertRequestIsMaster();
-
         $this->sessionMustBeSaved();
 
-        $this->filterResponse();
+        $this->filterResponse(new Request());
     }
 
     public function testShouldNotSaveSubRequestSession()
     {
-        $this->handle(new Request(), HttpKernelInterface::SUB_REQUEST);
-
-        $this->assertRequestIsNotMaster();
-
         $this->sessionMustNotBeSaved();
 
-        $this->filterResponse();
+        $this->filterResponse(new Request(), HttpKernelInterface::SUB_REQUEST);
     }
 
-    private function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST)
+    private function filterResponse(Request $request, $type = HttpKernelInterface::MASTER_REQUEST)
     {
         $request->setSession($this->session);
-
-        $this->listener->handle(new Event($this, 'core.request', array(
-            'request' => $request,
-            'request_type' => $type
-        )));
-    }
-
-    private function filterResponse()
-    {
         $response = new Response();
 
         $this->assertSame($response, $this->listener->filter(new Event(
-            $this, 'core.response'
+            $this, 'core.response', array('request' => $request, 'request_type' => $type)
         ), $response));
-    }
-
-    private function assertRequestIsMaster()
-    {
-        $this->assertTrue($this->listener->isMaster());
-    }
-
-    private function assertRequestIsNotMaster()
-    {
-        $this->assertFalse($this->listener->isMaster());
     }
 
     private function sessionMustNotBeSaved()

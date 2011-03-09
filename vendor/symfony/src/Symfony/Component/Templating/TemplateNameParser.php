@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,13 +11,16 @@
 
 namespace Symfony\Component\Templating;
 
+use Symfony\Component\Templating\TemplateReferenceInterface;
+use Symfony\Component\Templating\TemplateReference;
+
 /**
  * TemplateNameParser is the default implementation of TemplateNameParserInterface.
  *
  * This implementation takes everything as the template name
  * and the extension for the engine.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class TemplateNameParser implements TemplateNameParserInterface
 {
@@ -26,11 +29,11 @@ class TemplateNameParser implements TemplateNameParserInterface
      *
      * @param string $name A template name
      *
-     * @return array An array of parameters
+     * @return TemplateReferenceInterface A template
      */
     public function parse($name)
     {
-        if (is_array($name)) {
+        if ($name instanceof TemplateReferenceInterface) {
             return $name;
         }
 
@@ -39,6 +42,6 @@ class TemplateNameParser implements TemplateNameParserInterface
             $engine = substr($name, $pos + 1);
         }
 
-        return array('name' => $name, 'engine' => $engine);
+        return new TemplateReference($name, $engine);
     }
 }
