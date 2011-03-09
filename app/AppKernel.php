@@ -1,7 +1,7 @@
 <?php
 
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\DependencyInjection\Loader\LoaderInterface;
+use Symfony\Component\Config\Loader\LoaderInterface;
 
 class AppKernel extends Kernel
 {
@@ -11,22 +11,26 @@ class AppKernel extends Kernel
         $bundles = array(
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new Symfony\Bundle\TwigBundle\TwigBundle(),
-
-            // enable third-party bundles
             new Symfony\Bundle\ZendBundle\ZendBundle(),
             new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
-            new Symfony\Bundle\DoctrineBundle\DoctrineBundle(),
-            //new Symfony\Bundle\DoctrineMigrationsBundle\DoctrineMigrationsBundle(),
             new Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle(),
+            new Symfony\Bundle\AsseticBundle\AsseticBundle(),
+            //new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
 
-            // register your bundles
-            new ServerGrove\SGLiveChatBundle\SGLiveChatBundle());
+            new ServerGrove\SGLiveChatBundle\SGLiveChatBundle(),
+        );
 
-        if ($this->isDebug()) {
+        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
+            $bundles[] = new Symfony\Bundle\WebConfiguratorBundle\SymfonyWebConfiguratorBundle();
         }
 
         return $bundles;
+    }
+
+    public function registerContainerConfiguration(LoaderInterface $loader)
+    {
+        $loader->load(__DIR__ . '/config/config_' . $this->getEnvironment() . '.yml');
     }
 
     public function registerRootDir()
@@ -34,10 +38,4 @@ class AppKernel extends Kernel
         return __DIR__;
     }
 
-    public function registerContainerConfiguration(LoaderInterface $loader)
-    {
-        // use YAML for configuration
-        // comment to use another configuration format
-        $loader->load(__DIR__ . '/config/config_' . $this->getEnvironment() . '.yml');
-    }
 }

@@ -1,11 +1,18 @@
 _main:
     resource: routing.yml
 
-# Unexisting File
-#_wdt:
-#    resource: @WebProfilerBundle/Resources/config/routing/wdt.xml
-#    prefix:   /_wdt
+_assetic:
+    resource: .
+    type:     assetic
+
+_wdt:
+    resource: "@WebProfilerBundle/Resources/config/routing/wdt.xml"
+    prefix:   /_wdt
 
 _profiler:
-    resource: @WebProfilerBundle/Resources/config/routing/profiler.xml
+    resource: "@WebProfilerBundle/Resources/config/routing/profiler.xml"
     prefix:   /_profiler
+
+_configurator:
+    resource: "@SymfonyWebConfiguratorBundle/Resources/config/routing/configurator.xml"
+    prefix:   /_configurator
