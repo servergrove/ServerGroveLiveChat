@@ -1713,7 +1713,7 @@ namespace Symfony\Component\ClassLoader
 class ClassCollectionLoader
 {
     static private $loaded;
-    static public function load($classes, $cacheDir, $name, $autoReload, $adaptive = false)
+    static public function load($classes, $cacheDir, $name, $autoReload, $adaptive = false, $extension = '.php')
     {
                 if (isset(self::$loaded[$name])) {
             return;
@@ -1724,7 +1724,7 @@ class ClassCollectionLoader
                         $classes = array_diff($classes, get_declared_classes(), get_declared_interfaces());
                         $name = $name.'-'.substr(md5(implode('|', $classes)), 0, 5);
         }
-        $cache = $cacheDir.'/'.$name.'.php';
+        $cache = $cacheDir.'/'.$name.$extension;
                 $reload = false;
         if ($autoReload) {
             $metadata = $cacheDir.'/'.$name.'.meta';

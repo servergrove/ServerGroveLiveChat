@@ -1,0 +1,31 @@
+{% extends 'WebProfilerBundle:Profiler:base.html.twig' %}
+
+{% block body %}
+    <div id="content">
+        {% include 'WebProfilerBundle:Profiler:header.html.twig' only %}
+       
+        <div class="resume">
+            <p>
+                <strong>No request matching the token "{{ token }}".</strong>
+            </p>
+        </div>
+
+        <div class="main">
+            <div class="clear_fix">
+                <div class="navigation">
+                    {% render 'WebProfilerBundle:Profiler:searchBar' with { 'token': token } %}
+                    {% include 'WebProfilerBundle:Profiler:admin.html.twig' with { 'token': token } only %}
+                </div>
+                <div class="collector_content">
+                    {% block panel%}
+                        <h2>Token not found</h2>
+                        <p>
+                            <em>No request matching the token "{{ token }}".</em>
+                        </p>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+<!-- START of Symfony2 Web Debug Toolbar -->
+{% if 'normal' != position %}
+    <div style="clear: both; height: 40px;"></div>
+{% endif %}
+
+<div class="sf-toolbarreset"
+    {% if 'normal' != position %}
+    style="position: {{ position }};
+        background-color: #f7f7f7;
+            background-image: -moz-linear-gradient(-90deg, #e4e4e4, #ffffff);
+            background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#e4e4e4), to(#ffffff));
+            bottom: 0;
+            left:0;
+            margin:0;
+            padding: 0;
+            z-index: 6000000;
+            width: 100%;
+            border-top: 1px solid #bbb;
+            font: 11px Verdana, Arial, sans-serif;
+            color: #2f2f2f;"
+    {% endif %}
+>
+
+    <span style="display: inline-block; min-height: 24px; width: 40px; float: right;">&nbsp;</span>
+
+    {% for name, template in templates %}
+        {{ template.renderblock('toolbar', { 'collector': profiler.get(name), 'profiler_url': profiler_url }) }}
+    {% endfor %}
+
+    {% if 'normal' != position %}
+        <span style="display:block; position:absolute; top:12px; right:10px; width:14px; height:14px; cursor: pointer;">
+            <img width="14" height="14" alt="Hide Toolbar" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAPxJREFUeNqckk0LAVEUhq+PlJXfoGarrGytTLNSFkqUKCsbW7IlfoBSyoYSEVEWs7QS5U8opfwDpfGOzqnTdW289TT3o6cz99wbcF1XUbLgBi7qO0lggZU/sW1bBWmjB7bgBIqa5ND6ErR5MUiVmjQPgYmQM2ANIjTvgLQ/CIMHeIpNlhOgAaKGX/9UPIISyUrITYNUAwcWFR06r8nKII1lRc4OdH9IIynpoiOapKdCTfwSHepe9IcYoevISTFhkF5gSF8pz0GKRUuT/AYVQB1UDXKcxQ3oC6nETwuZgrKQB2DBD8BPi+7zDs7a+WbgCmJgz4sBz/PUP3kLMAAw2DR3cUcXrwAAAABJRU5ErkJggg==" onclick="this.parentNode.parentNode.previousSibling.style.display = this.parentNode.parentNode.style.display = 'none';" />
+        </span>
+    {% endif %}
+</div>
+<!-- END of Symfony2 Web Debug Toolbar -->
