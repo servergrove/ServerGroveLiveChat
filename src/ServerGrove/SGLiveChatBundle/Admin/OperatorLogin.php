@@ -2,6 +2,12 @@
 
 namespace ServerGrove\SGLiveChatBundle\Admin;
 
+/**
+ * Simple domain object for handling admin
+ * access to the backend
+ *
+ * @author Ismael Ambrosi<ismael@servergrove.com>
+ */
 class OperatorLogin
 {
 
@@ -21,7 +27,7 @@ class OperatorLogin
     private $passwd;
 
     /**
-     * @return the $email
+     * @return the $email The email account associated to the operator
      */
     public function getEmail()
     {
@@ -29,7 +35,8 @@ class OperatorLogin
     }
 
     /**
-     * @param string $email
+     * @param string $email The email account associated to the operator
+     * @return void
      */
     public function setEmail($email)
     {
@@ -37,7 +44,7 @@ class OperatorLogin
     }
 
     /**
-     * @return the $passwd
+     * @return the $passwd The operator's encoded password
      */
     public function getPasswd()
     {
@@ -45,7 +52,8 @@ class OperatorLogin
     }
 
     /**
-     * @param string $passwd
+     * @param string $passwd The operator's password
+     * @return void
      */
     public function setPasswd($passwd)
     {
