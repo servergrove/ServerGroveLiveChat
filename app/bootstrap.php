@@ -1712,7 +1712,7 @@ namespace Symfony\Component\ClassLoader
 {
 class ClassCollectionLoader
 {
-    static protected $loaded;
+    static private $loaded;
     static public function load($classes, $cacheDir, $name, $autoReload, $adaptive = false)
     {
                 if (isset(self::$loaded[$name])) {
@@ -1809,7 +1809,7 @@ class ClassCollectionLoader
         }
         return $output;
     }
-    static protected function writeCacheFile($file, $content)
+    static private function writeCacheFile($file, $content)
     {
         $tmpFile = tempnam(dirname($file), basename($file));
         if (false !== @file_put_contents($tmpFile, $content) && @rename($tmpFile, $file)) {
@@ -1818,7 +1818,7 @@ class ClassCollectionLoader
         }
         throw new \RuntimeException(sprintf('Failed to write cache file "%s".', $file));
     }
-    static protected function stripComments($source)
+    static private function stripComments($source)
     {
         if (!function_exists('token_get_all')) {
             return $source;
@@ -1840,10 +1840,10 @@ namespace Symfony\Component\ClassLoader
 {
 class UniversalClassLoader
 {
-    protected $namespaces = array();
-    protected $prefixes = array();
-    protected $namespaceFallback = array();
-    protected $prefixFallback = array();
+    private $namespaces = array();
+    private $prefixes = array();
+    private $namespaceFallback = array();
+    private $prefixFallback = array();
     public function getNamespaces()
     {
         return $this->namespaces;
@@ -1943,7 +1943,7 @@ namespace Symfony\Component\ClassLoader
 {
 class MapFileClassLoader
 {
-    protected $map = array();
+    private $map = array();
     public function __construct($file)
     {
         $this->map = require $file;
