@@ -12,3 +12,6 @@ web_profiler:
 zend:
     logger:
         priority: debug
+        
+doctrine_mongo_db:
+  default_database: livechat_test
