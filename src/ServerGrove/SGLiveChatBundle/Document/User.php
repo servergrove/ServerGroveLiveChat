@@ -6,7 +6,7 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * Description of User
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document
+ * @mongodb:MappedSuperclass
  * @mongodb:InheritanceType("COLLECTION_PER_CLASS")
  * @mongodb:HasLifecycleCallbacks
  */
