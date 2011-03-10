@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Form;
 
+use Symfony\Component\Form\PasswordField;
+
 use Symfony\Component\Form\TextareaField;
 
 use Symfony\Component\Form\Form;
@@ -16,6 +18,6 @@ class OperatorLoginForm extends Form
         $this->setDataClass('ServerGrove\\SGLiveChatBundle\\Admin\\OperatorLogin');
 
         $this->add('email');
-        $this->add('passwd');
+        $this->add(new PasswordField('passwd'));
     }
 }
