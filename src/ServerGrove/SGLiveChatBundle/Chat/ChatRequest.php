@@ -2,6 +2,11 @@
 
 namespace ServerGrove\SGLiveChatBundle\Chat;
 
+/**
+ * A domain object for handling new Chat requests
+ *
+ * @author Ismael Ambrosi<ismael@servergrove.com>
+ */
 class ChatRequest
 {
 
@@ -27,7 +32,9 @@ class ChatRequest
     private $question;
 
     /**
-     * @return the $name
+     * Returns he name of the user that requests the chat session
+     *
+     * @return string
      */
     public function getName()
     {
@@ -35,7 +42,10 @@ class ChatRequest
     }
 
     /**
-     * @param string $name
+     * Sets the name of the user that requests the chat session
+     *
+     * @param string $name The user's name
+     * @return void
      */
     public function setName($name)
     {
@@ -43,7 +53,9 @@ class ChatRequest
     }
 
     /**
-     * @return the $email
+     * Returns the email account of the user that requests the chat session
+     *
+     * @return string
      */
     public function getEmail()
     {
@@ -51,7 +63,10 @@ class ChatRequest
     }
 
     /**
-     * @param string $email
+     * Sets the email account of the user that requests the chat session
+     *
+     * @param string $email The user's email account
+     * @return void
      */
     public function setEmail($email)
     {
@@ -59,7 +74,9 @@ class ChatRequest
     }
 
     /**
-     * @return the $question
+     * Returns the question made by the user to request the chat session
+     *
+     * @return string
      */
     public function getQuestion()
     {
@@ -67,6 +84,8 @@ class ChatRequest
     }
 
     /**
+     * Sets the question made by the user to request the chat session
+     *
      * @param string $question
      */
     public function setQuestion($question)
