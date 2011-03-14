@@ -18,35 +18,51 @@ class Manager implements Cacheable
     private $engine;
 
     /**
-     * @return \ServerGrove\SGLiveChatBundle\Cache\Engine\Base
+     * @return ServerGrove\SGLiveChatBundle\Cache\Engine\Base
      */
     public function getEngine()
     {
         return $this->engine;
     }
 
+    /**
+     * Constructor
+     * @param Engine\Base $engine
+     */
     public function __construct(Engine\Base $engine)
     {
         $this->engine = $engine;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function set($key, $var, $ttl = self::DEFAULT_TTL)
     {
-        return $this->engine->set($key, $var, $ttl);
+        return $this->getEngine()->set($key, $var, $ttl);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function get($key, $default = null)
     {
-        return $this->engine->get($key, $default);
+        return $this->getEngine()->get($key, $default);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function has($key)
     {
-        return $this->engine->has($key);
+        return $this->getEngine()->has($key);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function remove($key)
     {
-        return $this->engine->remove($key);
+        return $this->getEngine()->remove($key);
     }
 }
