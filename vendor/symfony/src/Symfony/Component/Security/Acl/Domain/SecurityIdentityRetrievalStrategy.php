@@ -13,7 +13,7 @@ namespace Symfony\Component\Security\Acl\Domain;
 
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 
-use Symfony\Component\Security\Core\User\AccountInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationTrustResolver;
@@ -27,14 +27,15 @@ use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
  */
 class SecurityIdentityRetrievalStrategy implements SecurityIdentityRetrievalStrategyInterface
 {
-    protected $roleHierarchy;
-    protected $authenticationTrustResolver;
+    private $roleHierarchy;
+    private $authenticationTrustResolver;
 
     /**
      * Constructor
      *
-     * @param RoleHierarchyInterface $roleHierarchy
+     * @param RoleHierarchyInterface      $roleHierarchy
      * @param AuthenticationTrustResolver $authenticationTrustResolver
+     *
      * @return void
      */
     public function __construct(RoleHierarchyInterface $roleHierarchy, AuthenticationTrustResolver $authenticationTrustResolver)

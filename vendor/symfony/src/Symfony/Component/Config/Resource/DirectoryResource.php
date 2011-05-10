@@ -18,16 +18,19 @@ namespace Symfony\Component\Config\Resource;
  */
 class DirectoryResource implements ResourceInterface
 {
-    protected $resource;
+    private $resource;
+    private $pattern;
 
     /**
      * Constructor.
      *
      * @param string $resource The file path to the resource
+     * @param string $pattern  A pattern to restrict monitored files
      */
-    public function __construct($resource)
+    public function __construct($resource, $pattern = null)
     {
         $this->resource = $resource;
+        $this->pattern = $pattern;
     }
 
     /**
@@ -63,9 +66,20 @@ class DirectoryResource implements ResourceInterface
             return false;
         }
 
-        $newestMTime = 0;
-        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->resource), \RecursiveIteratorIterator::LEAVES_ONLY) as $file) {
-            $newestMTime = max(filemtime($file), $newestMTime);
+        $newestMTime = filemtime($this->resource);
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->resource), \RecursiveIteratorIterator::SELF_FIRST) as $file) {
+            // if regex filtering is enabled only check matching files
+            if ($this->pattern && $file->isFile() && !preg_match($this->pattern, $file->getBasename())) {
+                continue;
+            }
+
+            // always monitor directories for changes, except the .. entries
+            // (otherwise deleted files wouldn't get detected)
+            if ($file->isDir() && '/..' === substr($file, -3)) {
+                continue;
+            }
+
+            $newestMTime = max($file->getMTime(), $newestMTime);
         }
 
         return $newestMTime < $timestamp;

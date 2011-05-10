@@ -23,6 +23,7 @@ class Twig_Extension_Core extends Twig_Extension
             new Twig_TokenParser_Extends(),
             new Twig_TokenParser_Include(),
             new Twig_TokenParser_Block(),
+            new Twig_TokenParser_Use(),
             new Twig_TokenParser_Filter(),
             new Twig_TokenParser_Macro(),
             new Twig_TokenParser_Import(),
@@ -299,7 +300,7 @@ function twig_strtr($pattern, $replacements)
  * it would be right to leave the string as-is, but c-escape the apostrophe and
  * the new line.
  */
-function twig_escape_filter(Twig_Environment $env, $string, $type = 'html')
+function twig_escape_filter(Twig_Environment $env, $string, $type = 'html', $charset = null)
 {
     if (is_object($string) && $string instanceof Twig_Markup) {
         return $string;
@@ -309,12 +310,14 @@ function twig_escape_filter(Twig_Environment $env, $string, $type = 'html')
         return $string;
     }
 
+    if (null === $charset) {
+        $charset = $env->getCharset();
+    }
+
     switch ($type) {
         case 'js':
             // escape all non-alphanumeric characters
             // into their \xHH or \uHHHH representations
-            $charset = $env->getCharset();
-
             if ('UTF-8' != $charset) {
                 $string = _twig_convert_encoding($string, 'UTF-8', $charset);
             }
@@ -330,7 +333,7 @@ function twig_escape_filter(Twig_Environment $env, $string, $type = 'html')
             return $string;
 
         case 'html':
-            return htmlspecialchars($string, ENT_QUOTES, $env->getCharset());
+            return htmlspecialchars($string, ENT_QUOTES, $charset);
 
         default:
             throw new Twig_Error_Runtime(sprintf('Invalid escape type "%s".', $type));
@@ -421,8 +424,8 @@ if (function_exists('mb_get_info')) {
     function twig_capitalize_string_filter(Twig_Environment $env, $string)
     {
         if (null !== ($charset = $env->getCharset())) {
-            return mb_strtoupper(mb_substr($string, 0, 1, $charset)).
-                         mb_strtolower(mb_substr($string, 1, mb_strlen($string), $charset), $charset);
+            return mb_strtoupper(mb_substr($string, 0, 1, $charset), $charset).
+                         mb_strtolower(mb_substr($string, 1, mb_strlen($string, $charset), $charset), $charset);
         }
 
         return ucfirst(strtolower($string));
@@ -493,5 +496,5 @@ function twig_test_defined($name, $context)
 
 function twig_test_empty($value)
 {
-    return null === $value || false === $value || '' === (string) $value;
+    return false === $value || (empty($value) && '0' != $value);
 }

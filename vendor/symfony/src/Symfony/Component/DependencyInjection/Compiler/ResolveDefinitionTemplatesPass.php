@@ -14,21 +14,26 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class ResolveDefinitionTemplatesPass implements CompilerPassInterface
 {
-    protected $container;
+    private $container;
+    private $compiler;
+    private $formatter;
 
     /**
      * Process the ContainerBuilder to replace DefinitionDecorator instances with their real Definition instances.
      *
-     * @param ContainerBuilder $container 
+     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
         $this->container = $container;
+        $this->compiler = $container->getCompiler();
+        $this->formatter = $this->compiler->getLoggingFormatter();
+
         foreach (array_keys($container->getDefinitions()) as $id) {
             // yes, we are specifically fetching the definition from the
             // container to ensure we are not operating on stale data
             $definition = $container->getDefinition($id);
-            if (!$definition instanceof DefinitionDecorator) {
+            if (!$definition instanceof DefinitionDecorator || $definition->isAbstract()) {
                 continue;
             }
 
@@ -39,11 +44,11 @@ class ResolveDefinitionTemplatesPass implements CompilerPassInterface
     /**
      * Resolves the definition
      *
-     * @param string $id The definition identifier
-     * @param DefinitionDecorator $definition 
+     * @param string              $id         The definition identifier
+     * @param DefinitionDecorator $definition
      * @return Definition
      */
-    protected function resolveDefinition($id, DefinitionDecorator $definition)
+    private function resolveDefinition($id, DefinitionDecorator $definition)
     {
         if (!$this->container->hasDefinition($parent = $definition->getParent())) {
             throw new \RuntimeException(sprintf('The parent definition "%s" defined for definition "%s" does not exist.', $parent, $id));
@@ -54,6 +59,7 @@ class ResolveDefinitionTemplatesPass implements CompilerPassInterface
             $parentDef = $this->resolveDefinition($parent, $parentDef);
         }
 
+        $this->compiler->addLogMessage($this->formatter->formatResolveInheritance($this, $id, $parent));
         $def = new Definition();
 
         // merge in parent definition
@@ -61,6 +67,7 @@ class ResolveDefinitionTemplatesPass implements CompilerPassInterface
         $def->setClass($parentDef->getClass());
         $def->setArguments($parentDef->getArguments());
         $def->setMethodCalls($parentDef->getMethodCalls());
+        $def->setProperties($parentDef->getProperties());
         $def->setFactoryClass($parentDef->getFactoryClass());
         $def->setFactoryMethod($parentDef->getFactoryMethod());
         $def->setFactoryService($parentDef->getFactoryService());
@@ -104,7 +111,12 @@ class ResolveDefinitionTemplatesPass implements CompilerPassInterface
             }
 
             $index = (integer) substr($k, strlen('index_'));
-            $def->setArgument($index, $v);
+            $def->replaceArgument($index, $v);
+        }
+
+        // merge properties
+        foreach ($definition->getProperties() as $k => $v) {
+            $def->setProperty($k, $v);
         }
 
         // append method calls

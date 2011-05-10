@@ -23,8 +23,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class InlineServiceDefinitionsPass implements RepeatablePassInterface
 {
-    protected $repeatedPass;
-    protected $graph;
+    private $repeatedPass;
+    private $graph;
+    private $compiler;
+    private $formatter;
+    private $currentId;
 
     /**
      * {@inheritDoc}
@@ -41,15 +44,23 @@ class InlineServiceDefinitionsPass implements RepeatablePassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        $this->graph = $container->getCompiler()->getServiceReferenceGraph();
+        $this->compiler = $container->getCompiler();
+        $this->formatter = $this->compiler->getLoggingFormatter();
+        $this->graph = $this->compiler->getServiceReferenceGraph();
 
-        foreach ($container->getDefinitions() as $definition) {
+        foreach ($container->getDefinitions() as $id => $definition) {
+            $this->currentId = $id;
+
             $definition->setArguments(
                 $this->inlineArguments($container, $definition->getArguments())
             );
 
             $definition->setMethodCalls(
                 $this->inlineArguments($container, $definition->getMethodCalls())
+            );
+
+            $definition->setProperties(
+                $this->inlineArguments($container, $definition->getProperties())
             );
         }
     }
@@ -58,9 +69,9 @@ class InlineServiceDefinitionsPass implements RepeatablePassInterface
      * Processes inline arguments.
      *
      * @param ContainerBuilder $container The ContainerBuilder
-     * @param array $arguments An array of arguments
+     * @param array            $arguments An array of arguments
      */
-    protected function inlineArguments(ContainerBuilder $container, array $arguments)
+    private function inlineArguments(ContainerBuilder $container, array $arguments)
     {
         foreach ($arguments as $k => $argument) {
             if (is_array($argument)) {
@@ -71,6 +82,8 @@ class InlineServiceDefinitionsPass implements RepeatablePassInterface
                 }
 
                 if ($this->isInlinableDefinition($container, $id, $definition = $container->getDefinition($id))) {
+                    $this->compiler->addLogMessage($this->formatter->formatInlineService($this, $id, $this->currentId));
+
                     if (ContainerInterface::SCOPE_PROTOTYPE !== $definition->getScope()) {
                         $arguments[$k] = $definition;
                     } else {
@@ -80,6 +93,7 @@ class InlineServiceDefinitionsPass implements RepeatablePassInterface
             } else if ($argument instanceof Definition) {
                 $argument->setArguments($this->inlineArguments($container, $argument->getArguments()));
                 $argument->setMethodCalls($this->inlineArguments($container, $argument->getMethodCalls()));
+                $argument->setProperties($this->inlineArguments($container, $argument->getProperties()));
             }
         }
 
@@ -90,11 +104,11 @@ class InlineServiceDefinitionsPass implements RepeatablePassInterface
      * Checks if the definition is inlineable.
      *
      * @param ContainerBuilder $container
-     * @param string $id
-     * @param Definition $definition
-     * @return boolean If the definition is inlineable
+     * @param string           $id
+     * @param Definition       $definition
+     * @return Boolean If the definition is inlineable
      */
-    protected function isInlinableDefinition(ContainerBuilder $container, $id, Definition $definition)
+    private function isInlinableDefinition(ContainerBuilder $container, $id, Definition $definition)
     {
         if (ContainerInterface::SCOPE_PROTOTYPE === $definition->getScope()) {
             return true;

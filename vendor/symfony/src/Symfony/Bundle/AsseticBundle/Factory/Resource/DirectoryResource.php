@@ -17,7 +17,7 @@ use Symfony\Component\Templating\Loader\LoaderInterface;
 /**
  * A directory resource that creates Symfony2 templating resources.
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class DirectoryResource extends BaseDirectoryResource
 {
@@ -44,6 +44,8 @@ class DirectoryResource extends BaseDirectoryResource
 
     public function getIterator()
     {
-        return new DirectoryResourceIterator($this->loader, $this->bundle, $this->path, $this->getInnerIterator());
+        return is_dir($this->path)
+            ? new DirectoryResourceIterator($this->loader, $this->bundle, $this->path, $this->getInnerIterator())
+            : new \EmptyIterator();
     }
 }

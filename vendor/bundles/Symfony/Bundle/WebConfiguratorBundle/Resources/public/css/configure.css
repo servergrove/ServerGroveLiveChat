@@ -69,6 +69,11 @@ h2
 
 }
 
+h2.configure-error
+{
+    background-color: #CC514F;
+}
+
 p
 {
     line-height:    20px;
@@ -358,9 +363,13 @@ h1
 
 .symfony-form-row
 {
+    padding-bottom: 40px;
+}
+
+.symfony-form-column
+{
     width: 430px;
     float: left;
-    padding-bottom: 40px;
 }
 
 .symfony-form-footer

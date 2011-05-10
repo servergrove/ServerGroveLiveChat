@@ -5,7 +5,7 @@ namespace Sensio\Bundle\FrameworkExtraBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\EventDispatcher\EventInterface;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /*
  * This file is part of the Symfony framework.
@@ -17,32 +17,40 @@ use Symfony\Component\EventDispatcher\EventInterface;
  */
 
 /**
- * ParamConverterListener.
+ * The ParamConverterListener handles the @extra:ParamConverter annotation.
  *
- * The filter method must be connected to the core.controller event.
- *
- * @author     Fabien Potencier <fabien@symfony.com>
+ * @author Fabien Potencier <fabien@symfony.com>
  */
 class ParamConverterListener
 {
+    /**
+     * @var Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterManager
+     */
     protected $manager;
 
+    /**
+     * Constructor.
+     *
+     * @param ParamConverterManager $manager A ParamConverterManager instance
+     */
     public function __construct(ParamConverterManager $manager)
     {
         $this->manager = $manager;
     }
 
     /**
-     * 
+     * Modifies the ParamConverterManager instance.
      *
-     * @param Event $event An Event instance
+     * @param FilterControllerEvent $event A FilterControllerEvent instance
      */
-    public function filter(EventInterface $event, $controller)
+    public function onCoreController(FilterControllerEvent $event)
     {
-        $request = $event->get('request');
+        $controller = $event->getController();
+        $request = $event->getRequest();
+        $configurations = array();
 
         if ($configuration = $request->attributes->get('_converters')) {
-            $this->manager->apply($request, $configuration);
+            $configurations = is_array($configuration) ? $configuration : array($configuration);
         }
 
         if (is_array($controller)) {
@@ -58,10 +66,12 @@ class ParamConverterListener
                 $configuration->setName($param->getName());
                 $configuration->setClass($param->getClass()->getName());
 
-                $this->manager->apply($request, $configuration);
+                $configuration->setIsOptional($param->isOptional());
+
+                $configurations[] = $configuration;
             }
         }
 
-        return $controller;
+        $this->manager->apply($request, $configurations);
     }
 }

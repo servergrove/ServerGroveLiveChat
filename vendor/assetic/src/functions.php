@@ -9,60 +9,20 @@
  * file that was distributed with this source code.
  */
 
+use Assetic\Asset\UrlCollection;
 use Assetic\Factory\AssetFactory;
 
 /**
  * Initializes the global Assetic object.
  *
- * Available options:
- *
- *  * default_css_output: Default output option for assetic_stylesheets()
- *  * default_js_output:  Default output option for assetic_javascripts()
- *
  * @param AssetFactory $factory The asset factory
- * @param array        $options An array of options
  */
-function assetic_init(AssetFactory $factory, array $options = array())
+function assetic_init(AssetFactory $factory)
 {
     global $_assetic;
 
     $_assetic = new stdClass();
     $_assetic->factory = $factory;
-    $_assetic->options = $options;
-}
-
-/**
- * Returns an array of asset urls.
- *
- * @param array|string $inputs  Input strings
- * @param array|string $filters Filter names
- * @param array        $options An array of options
- *
- * @return array An array of URLs
- */
-function assetic_assets($inputs = array(), $filters = array(), array $options = array())
-{
-    global $_assetic;
-
-    if (!is_array($inputs)) {
-        $inputs = array_filter(array_map('trim', explode(',', $inputs)));
-    }
-
-    if (!is_array($filters)) {
-        $filters = array_filter(array_map('trim', explode(',', $filters)));
-    }
-
-    $coll = $_assetic->factory->createAsset($inputs, $filters, $options);
-    if (!$_assetic->factory->isDebug()) {
-        return array($coll->getTargetUrl());
-    }
-
-    $urls = array();
-    foreach ($coll as $leaf) {
-        $urls[] = $leaf->getTargetUrl();
-    }
-
-    return $urls;
 }
 
 /**
@@ -79,10 +39,10 @@ function assetic_javascripts($inputs = array(), $filters = array(), array $optio
     global $_assetic;
 
     if (!isset($options['output'])) {
-        $options['output'] = isset($_assetic->options['default_js_output']) ? $_assetic->options['default_js_output'] : 'js/*.js';
+        $options['output'] = 'js/*.js';
     }
 
-    return assetic_assets($inputs, $filters, $options);
+    return _assetic_assets($inputs, $filters, $options);
 }
 
 /**
@@ -99,8 +59,57 @@ function assetic_stylesheets($inputs = array(), $filters = array(), array $optio
     global $_assetic;
 
     if (!isset($options['output'])) {
-        $options['output'] = isset($_assetic->options['default_css_output']) ? $_assetic->options['default_css_output'] : 'css/*.css';
+        $options['output'] = 'css/*.css';
     }
 
-    return assetic_assets($inputs, $filters, $options);
+    return _assetic_assets($inputs, $filters, $options);
+}
+
+/**
+ * Returns an image URL.
+ *
+ * @param string       $input   An input
+ * @param array|string $filters Filter names
+ * @param array        $options An array of options
+ *
+ * @return string An image URL
+ */
+function assetic_image($input, $filters = array(), array $options = array())
+{
+    global $_assetic;
+
+    if (!isset($options['output'])) {
+        $options['output'] = 'images/*';
+    }
+
+    $urls = _assetic_assets($input, $filters, $options);
+
+    return current($urls);
+}
+
+/**
+ * Returns an array of asset urls.
+ *
+ * @param array|string $inputs  Input strings
+ * @param array|string $filters Filter names
+ * @param array        $options An array of options
+ *
+ * @return array An array of URLs
+ */
+function _assetic_assets($inputs = array(), $filters = array(), array $options = array())
+{
+    global $_assetic;
+
+    if (!is_array($inputs)) {
+        $inputs = array_filter(array_map('trim', explode(',', $inputs)));
+    }
+
+    if (!is_array($filters)) {
+        $filters = array_filter(array_map('trim', explode(',', $filters)));
+    }
+
+    $coll = $_assetic->factory->createAsset($inputs, $filters, $options);
+    $debug = isset($options['debug']) ? $options['debug'] : $_assetic->factory->isDebug();
+
+    return UrlCollection::createFromAssetCollection($coll, $debug);
 }

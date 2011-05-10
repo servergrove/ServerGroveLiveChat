@@ -16,25 +16,51 @@ use Assetic\Factory\AssetFactory;
 class AsseticExtension extends \Twig_Extension
 {
     protected $factory;
-    protected $debug;
-    protected $defaultJavascriptsOutput;
-    protected $defaultStylesheetsOutput;
+    protected $functions;
 
-    public function __construct(AssetFactory $factory, $debug = false, $defaultJavascriptsOutput = 'js/*.js', $defaultStylesheetsOutput = 'css/*.css')
+    public function __construct(AssetFactory $factory, $functions = array())
     {
         $this->factory = $factory;
-        $this->debug = $debug;
-        $this->defaultJavascriptsOutput = $defaultJavascriptsOutput;
-        $this->defaultStylesheetsOutput = $defaultStylesheetsOutput;
+        $this->functions = array();
+
+        foreach ($functions as $function => $options) {
+            if (is_integer($function) && is_string($options)) {
+                $this->functions[$options] = array('filter' => $options);
+            } else {
+                $this->functions[$function] = $options + array('filter' => $function);
+            }
+        }
     }
 
     public function getTokenParsers()
     {
         return array(
-            new AsseticTokenParser($this->factory, $this->debug),
-            new AsseticTokenParser($this->factory, $this->debug, $this->defaultJavascriptsOutput, 'javascripts'),
-            new AsseticTokenParser($this->factory, $this->debug, $this->defaultStylesheetsOutput, 'stylesheets'),
+            new AsseticTokenParser($this->factory, 'javascripts', 'js/*.js'),
+            new AsseticTokenParser($this->factory, 'stylesheets', 'css/*.css'),
+            new AsseticTokenParser($this->factory, 'image', 'images/*', true),
         );
+    }
+
+    public function getFunctions()
+    {
+        $functions = array();
+        foreach ($this->functions as $function => $filter) {
+            $functions[$function] = new AsseticFilterFunction($function);
+        }
+
+        return $functions;
+    }
+
+    public function getGlobals()
+    {
+        return array(
+            'assetic' => array('debug' => $this->factory->isDebug()),
+        );
+    }
+
+    public function getFilterInvoker($function)
+    {
+        return new AsseticFilterInvoker($this->factory, $this->functions[$function]);
     }
 
     public function getName()

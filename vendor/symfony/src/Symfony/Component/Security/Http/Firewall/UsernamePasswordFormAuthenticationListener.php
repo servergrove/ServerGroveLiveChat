@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Security\Http\Firewall;
 
-use Symfony\Component\Form\CsrfProvider\CsrfProviderInterface;
+use Symfony\Component\Form\Extension\Csrf\CsrfProvider\CsrfProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterfac
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * UsernamePasswordFormAuthenticationListener is the default implementation of
@@ -30,12 +31,12 @@ use Symfony\Component\Security\Core\SecurityContextInterface;
  */
 class UsernamePasswordFormAuthenticationListener extends AbstractAuthenticationListener
 {
-    protected $csrfProvider;
+    private $csrfProvider;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, SessionAuthenticationStrategyInterface $sessionStrategy, $providerKey, array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null, AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null, CsrfProviderInterface $csrfProvider = null)
+    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, SessionAuthenticationStrategyInterface $sessionStrategy, $providerKey, array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null, AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null, EventDispatcherInterface $dispatcher = null, CsrfProviderInterface $csrfProvider = null)
     {
         parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $providerKey, array_merge(array(
             'username_parameter' => '_username',
@@ -43,7 +44,7 @@ class UsernamePasswordFormAuthenticationListener extends AbstractAuthenticationL
             'csrf_parameter'     => '_csrf_token',
             'csrf_page_id'       => 'form_login',
             'post_only'          => true,
-        ), $options), $successHandler, $failureHandler, $logger);
+        ), $options), $successHandler, $failureHandler, $logger, $dispatcher);
 
         $this->csrfProvider = $csrfProvider;
     }
@@ -77,4 +78,3 @@ class UsernamePasswordFormAuthenticationListener extends AbstractAuthenticationL
         return $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
     }
 }
-

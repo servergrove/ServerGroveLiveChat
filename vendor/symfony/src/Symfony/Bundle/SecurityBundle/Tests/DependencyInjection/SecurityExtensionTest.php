@@ -83,7 +83,7 @@ abstract class SecurityExtensionTest extends \PHPUnit_Framework_TestCase
                 'security.authentication.listener.form.secure',
                 'security.authentication.listener.basic.secure',
                 'security.authentication.listener.digest.secure',
-                'security.authentication.listener.anonymous',
+                'security.authentication.listener.anonymous.secure',
                 'security.access_listener',
                 'security.authentication.switchuser_listener.secure',
             ),
@@ -148,6 +148,22 @@ abstract class SecurityExtensionTest extends \PHPUnit_Framework_TestCase
             ),
             'JMS\FooBundle\Entity\User4' => new Reference('security.encoder.foo'),
         )), $container->getDefinition('security.encoder_factory.generic')->getArguments());
+    }
+
+    public function testAcl()
+    {
+        $container = $this->getContainer('container1');
+
+        $this->assertTrue($container->hasDefinition('security.acl.dbal.provider'));
+        $this->assertEquals('security.acl.dbal.provider', (string) $container->getAlias('security.acl.provider'));
+    }
+
+    public function testCustomAclProvider()
+    {
+        $container = $this->getContainer('custom_acl_provider');
+
+        $this->assertFalse($container->hasDefinition('security.acl.dbal.provider'));
+        $this->assertEquals('foo', (string) $container->getAlias('security.acl.provider'));
     }
 
     protected function getContainer($file)

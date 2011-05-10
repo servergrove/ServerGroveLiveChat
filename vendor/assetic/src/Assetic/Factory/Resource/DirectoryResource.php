@@ -16,7 +16,7 @@ namespace Assetic\Factory\Resource;
  *
  * @author Kris Wallsmith <kris.wallsmith@gmail.com>
  */
-class DirectoryResource implements ResourceInterface, \IteratorAggregate
+class DirectoryResource implements IteratorResourceInterface
 {
     private $path;
     private $pattern;
@@ -29,12 +29,20 @@ class DirectoryResource implements ResourceInterface, \IteratorAggregate
      */
     public function __construct($path, $pattern = null)
     {
+        if (DIRECTORY_SEPARATOR != substr($path, -1)) {
+            $path .= DIRECTORY_SEPARATOR;
+        }
+
         $this->path = $path;
         $this->pattern = $pattern;
     }
 
     public function isFresh($timestamp)
     {
+        if (!is_dir($this->path) || filemtime($this->path) > $timestamp) {
+            return false;
+        }
+
         foreach ($this as $resource) {
             if (!$resource->isFresh($timestamp)) {
                 return false;
@@ -64,7 +72,9 @@ class DirectoryResource implements ResourceInterface, \IteratorAggregate
 
     public function getIterator()
     {
-        return new DirectoryResourceIterator($this->getInnerIterator());
+        return is_dir($this->path)
+            ? new DirectoryResourceIterator($this->getInnerIterator())
+            : new \EmptyIterator();
     }
 
     protected function getInnerIterator()

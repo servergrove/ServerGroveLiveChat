@@ -19,7 +19,7 @@
  * @see http://en.wikipedia.org/wiki/Operator-precedence_parser
  *
  * @package    twig
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Twig_ExpressionParser
 {
@@ -117,14 +117,19 @@ class Twig_ExpressionParser
                 $this->parser->getStream()->next();
                 switch ($token->getValue()) {
                     case 'true':
+                    case 'TRUE':
                         $node = new Twig_Node_Expression_Constant(true, $token->getLine());
                         break;
 
                     case 'false':
+                    case 'FALSE':
                         $node = new Twig_Node_Expression_Constant(false, $token->getLine());
                         break;
 
                     case 'none':
+                    case 'NONE':
+                    case 'null':
+                    case 'NULL':
                         $node = new Twig_Node_Expression_Constant(null, $token->getLine());
                         break;
 

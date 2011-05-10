@@ -39,8 +39,7 @@ class TwigExtension extends Extension
 
         $processor = new Processor();
         $configuration = new Configuration();
-
-        $config = $processor->process($configuration->getConfigTree(), $configs);
+        $config = $processor->processConfiguration($configuration, $configs);
 
         $container->setParameter('twig.form.resources', $config['form']['resources']);
 
@@ -61,8 +60,8 @@ class TwigExtension extends Extension
             }
         }
 
-        if (!empty($config['cache_warmer'])) {
-            $container->getDefinition('templating.cache_warmer.templates_cache')->addTag('kernel.cache_warmer');
+        if ($config['cache_warmer']) {
+            $container->getDefinition('twig.cache_warmer')->addTag('kernel.cache_warmer');
         }
 
         unset(

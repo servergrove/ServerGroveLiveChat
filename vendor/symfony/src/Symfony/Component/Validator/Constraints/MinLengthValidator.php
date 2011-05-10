@@ -23,11 +23,11 @@ class MinLengthValidator extends ConstraintValidator
             return true;
         }
 
-        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString()'))) {
+        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString'))) {
             throw new UnexpectedTypeException($value, 'string');
         }
 
-        $value = (string)$value;
+        $value = (string) $value;
 
         $length = function_exists('mb_strlen') ? mb_strlen($value, $constraint->charset) : strlen($value);
 

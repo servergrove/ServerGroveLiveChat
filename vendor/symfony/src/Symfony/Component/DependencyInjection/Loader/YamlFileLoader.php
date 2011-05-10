@@ -12,10 +12,8 @@
 namespace Symfony\Component\DependencyInjection\Loader;
 
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
-
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\InterfaceInjector;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -34,8 +32,8 @@ class YamlFileLoader extends FileLoader
     /**
      * Loads a Yaml file.
      *
-     * @param mixed $resource The resource
-     * @param string $type    The resource type
+     * @param mixed  $file The resource
+     * @param string $type The resource type
      */
     public function load($file, $type = null)
     {
@@ -63,9 +61,6 @@ class YamlFileLoader extends FileLoader
         // extensions
         $this->loadFromExtensions($content);
 
-        // interface injectors
-        $this->parseInterfaceInjectors($content, $file);
-
         // services
         $this->parseDefinitions($content, $file);
     }
@@ -86,67 +81,30 @@ class YamlFileLoader extends FileLoader
     /**
      * Parses all imports
      *
-     * @param array $content 
-     * @param string $file 
+     * @param array $content
+     * @param string $file
      * @return void
      */
-    protected function parseImports($content, $file)
+    private function parseImports($content, $file)
     {
         if (!isset($content['imports'])) {
             return;
         }
 
         foreach ($content['imports'] as $import) {
-            $this->currentDir = dirname($file);
-            $this->import($import['resource'], isset($import['ignore_errors']) ? (Boolean) $import['ignore_errors'] : false);
+            $this->setCurrentDir(dirname($file));
+            $this->import($import['resource'], null, isset($import['ignore_errors']) ? (Boolean) $import['ignore_errors'] : false, $file);
         }
-    }
-
-    /**
-     * Parses interface injectors.
-     *
-     * @param array $content 
-     * @param string $file 
-     * @return void
-     */
-    protected function parseInterfaceInjectors($content, $file)
-    {
-        if (!isset($content['interfaces'])) {
-            return;
-        }
-
-        foreach ($content['interfaces'] as $class => $interface) {
-            $this->parseInterfaceInjector($class, $interface, $file);
-        }
-    }
-
-    /**
-     * Parses an interface injector.
-     *
-     * @param string $class
-     * @param array $interface
-     * @param string $file
-     * @return void
-     */
-    protected function parseInterfaceInjector($class, $interface, $file)
-    {
-        $injector = new InterfaceInjector($class);
-        if (isset($interface['calls'])) {
-            foreach ($interface['calls'] as $call) {
-                $injector->addMethodCall($call[0], $this->resolveServices($call[1]));
-            }
-        }
-        $this->container->addInterfaceInjector($injector);
     }
 
     /**
      * Parses definitions
      *
-     * @param array $content 
-     * @param string $file 
+     * @param array $content
+     * @param string $file
      * @return void
      */
-    protected function parseDefinitions($content, $file)
+    private function parseDefinitions($content, $file)
     {
         if (!isset($content['services'])) {
             return;
@@ -160,12 +118,12 @@ class YamlFileLoader extends FileLoader
     /**
      * Parses a definition.
      *
-     * @param string $id 
-     * @param array $service 
-     * @param string $file 
+     * @param string $id
+     * @param array $service
+     * @param string $file
      * @return void
      */
-    protected function parseDefinition($id, $service, $file)
+    private function parseDefinition($id, $service, $file)
     {
         if (is_string($service) && 0 === strpos($service, '@')) {
             $this->container->setAlias($id, substr($service, 1));
@@ -224,6 +182,10 @@ class YamlFileLoader extends FileLoader
             $definition->setArguments($this->resolveServices($service['arguments']));
         }
 
+        if (isset($service['properties'])) {
+            $definition->setProperties($this->resolveServices($service['properties']));
+        }
+
         if (isset($service['configurator'])) {
             if (is_string($service['configurator'])) {
                 $definition->setConfigurator($service['configurator']);
@@ -261,10 +223,10 @@ class YamlFileLoader extends FileLoader
     /**
      * Loads a YAML file.
      *
-     * @param string $file 
+     * @param string $file
      * @return array The file content
      */
-    protected function loadFile($file)
+    private function loadFile($file)
     {
         return $this->validate(Yaml::load($file), $file);
     }
@@ -278,7 +240,7 @@ class YamlFileLoader extends FileLoader
      *
      * @throws \InvalidArgumentException When service file is not valid
      */
-    protected function validate($content, $file)
+    private function validate($content, $file)
     {
         if (null === $content) {
             return $content;
@@ -289,7 +251,7 @@ class YamlFileLoader extends FileLoader
         }
 
         foreach (array_keys($content) as $namespace) {
-            if (in_array($namespace, array('imports', 'parameters', 'services', 'interfaces'))) {
+            if (in_array($namespace, array('imports', 'parameters', 'services'))) {
                 continue;
             }
 
@@ -304,10 +266,10 @@ class YamlFileLoader extends FileLoader
     /**
      * Resolves services.
      *
-     * @param string $value 
+     * @param string $value
      * @return void
      */
-    protected function resolveServices($value)
+    private function resolveServices($value)
     {
         if (is_array($value)) {
             $value = array_map(array($this, 'resolveServices'), $value);
@@ -336,13 +298,13 @@ class YamlFileLoader extends FileLoader
     /**
      * Loads from Extensions
      *
-     * @param array $content 
+     * @param array $content
      * @return void
      */
-    protected function loadFromExtensions($content)
+    private function loadFromExtensions($content)
     {
         foreach ($content as $namespace => $values) {
-            if (in_array($namespace, array('imports', 'parameters', 'services', 'interfaces'))) {
+            if (in_array($namespace, array('imports', 'parameters', 'services'))) {
                 continue;
             }
 

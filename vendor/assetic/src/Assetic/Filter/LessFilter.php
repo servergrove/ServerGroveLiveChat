@@ -46,7 +46,7 @@ class LessFilter implements FilterInterface
 
     public function filterLoad(AssetInterface $asset)
     {
-        static $format = <<<JAVASCRIPT
+        static $format = <<<'EOF'
 var less = require('less');
 var sys  = require('sys');
 
@@ -65,16 +65,16 @@ new(less.Parser)(%s).parse(%s, function(e, tree) {
     }
 });
 
-JAVASCRIPT;
+EOF;
 
         $sourceUrl = $asset->getSourceUrl();
 
         // parser options
         $parserOptions = array();
         if ($sourceUrl && false === strpos($sourceUrl, '://')) {
-            $baseDir = self::isAbsolutePath($sourceUrl) ? '' : $this->baseDir;
+            $baseDir = self::isAbsolutePath($sourceUrl) ? '' : $this->baseDir.'/';
 
-            $parserOptions['paths'] = array($baseDir.'/'.dirname($sourceUrl));
+            $parserOptions['paths'] = array($baseDir.dirname($sourceUrl));
             $parserOptions['filename'] = basename($sourceUrl);
         }
 

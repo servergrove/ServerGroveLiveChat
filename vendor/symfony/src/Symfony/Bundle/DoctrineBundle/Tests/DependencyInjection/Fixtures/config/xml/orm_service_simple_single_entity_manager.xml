@@ -7,15 +7,20 @@
                         http://symfony.com/schema/dic/doctrine http://symfony.com/schema/dic/doctrine/doctrine-1.0.xsd">
 
     <config>
-        <dbal />
-        <orm>
-            <metadata-cache-driver type="memcache">
-                <class>Doctrine\Common\Cache\MemcacheCache</class>
-                <host>localhost</host>
-                <port>11211</port>
-                <instance-class>Memcache</instance-class>
-            </metadata-cache-driver>
-            <mapping name="YamlBundle" />
+        <dbal default-connection="default">
+            <connection name="default" dbname="db" />
+        </dbal>
+
+        <orm default-entity-manager="default">
+            <entity-manager name="default">
+                <metadata-cache-driver type="memcache">
+                    <class>Doctrine\Common\Cache\MemcacheCache</class>
+                    <host>localhost</host>
+                    <port>11211</port>
+                    <instance-class>Memcache</instance-class>
+                </metadata-cache-driver>
+                <mapping name="YamlBundle" />
+            </entity-manager>
         </orm>
     </config>
 </srv:container>

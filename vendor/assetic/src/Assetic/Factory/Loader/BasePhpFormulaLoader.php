@@ -101,47 +101,32 @@ abstract class BasePhpFormulaLoader implements FormulaLoaderInterface
 
     private function processCall($call, array $protoOptions = array())
     {
-        $code = implode("\n", array(
+        $tmp = tempnam(sys_get_temp_dir(), 'assetic');
+        file_put_contents($tmp, implode("\n", array(
+            '<?php',
             $this->registerSetupCode(),
             $call,
-            'var_export($_call);',
-        ));
-
-        $args = shell_exec(implode(' ', array_map('escapeshellarg', array('php', '-r', $code))));
-        $args = eval('return '.$args.';');
+            'echo serialize($_call);',
+        )));
+        $args = unserialize(shell_exec('php '.escapeshellarg($tmp)));
+        unlink($tmp);
 
         $inputs  = isset($args[0]) ? self::argumentToArray($args[0]) : array();
         $filters = isset($args[1]) ? self::argumentToArray($args[1]) : array();
         $options = isset($args[2]) ? $args[2] : array();
 
-        $output = isset($options['output']) ? $options['output'] : (isset($protoOptions['output']) ? $protoOptions['output'] : null);
-        $name   = isset($options['name']) ? $options['name'] : $this->factory->generateAssetName($inputs, $filters);
-        $debug  = isset($options['debug']) ? $options['debug'] : false;
-
-        $coll = $this->factory->createAsset($inputs, $filters, array(
-            'output' => $output,
-            'name'   => $name,
-            'debug'  => $debug,
-        ));
-
-        if (!$this->factory->isDebug()) {
-            return array($name => array($inputs, $filters, $options));
+        if (!is_array($options)) {
+            throw new \RuntimeException('The third argument must be omitted, null or an array.');
         }
 
-        $formulae = array();
-        foreach ($coll as $asset) {
-            $formulae[$name.'_'.count($formulae)] = array(
-                array($asset->getSourceUrl()),
-                $filters,
-                array(
-                    'output' => $asset->getTargetUrl(),
-                    'name'   => $name.'_'.count($formulae),
-                    'debug'  => $debug,
-                )
-            );
+        if (!isset($options['name'])) {
+            $options['name'] = $this->factory->generateAssetName($inputs, $filters, $options);
         }
 
-        return $formulae;
+        // apply the prototype options
+        $options += $protoOptions;
+
+        return array($options['name'] => array($inputs, $filters, $options));
     }
 
     /**

@@ -22,8 +22,7 @@ use Symfony\Component\DependencyInjection\Container;
  */
 abstract class Extension implements ExtensionInterface
 {
-    protected $classes = array();
-    protected $classMap = array();
+    private $classes = array();
 
     /**
      * Gets the classes to cache.
@@ -40,29 +39,9 @@ abstract class Extension implements ExtensionInterface
      *
      * @param array $classes An array of classes
      */
-    protected function addClassesToCompile(array $classes)
+    public function addClassesToCompile(array $classes)
     {
         $this->classes = array_merge($this->classes, $classes);
-    }
-
-    /**
-     * Gets the autoload class map.
-     *
-     * @return array An array of classes
-     */
-    public function getAutoloadClassMap()
-    {
-        return $this->classMap;
-    }
-
-    /**
-     * Adds classes to the autoload class map.
-     *
-     * @param array $classes An array of classes
-     */
-    public function addClassesToAutoloadMap(array $classes)
-    {
-        $this->classMap = array_merge($this->classMap, $classes);
     }
 
     /**
@@ -82,7 +61,7 @@ abstract class Extension implements ExtensionInterface
      */
     public function getNamespace()
     {
-        return false;
+        return 'http://example.org/schema/dic/'.$this->getAlias();
     }
 
     /**

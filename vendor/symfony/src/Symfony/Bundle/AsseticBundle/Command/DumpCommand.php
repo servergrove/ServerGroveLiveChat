@@ -18,15 +18,17 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Dumps assets to the filesystem.
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class DumpCommand extends Command
 {
+    private $basePath;
+    private $am;
+
     protected function configure()
     {
         $this
@@ -37,24 +39,29 @@ class DumpCommand extends Command
         ;
     }
 
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        $this->basePath = $input->getArgument('write_to') ?: $this->container->getParameter('assetic.write_to');
+        $this->am = $this->container->get('assetic.asset_manager');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (!$basePath = $input->getArgument('write_to')) {
-            $basePath = $this->container->getParameter('assetic.write_to');
+        if (!$input->getOption('watch')) {
+            foreach ($this->am->getNames() as $name) {
+                $this->dumpAsset($name, $output);
+            }
+
+            return;
         }
 
-        $am = $this->container->get('assetic.asset_manager');
-
-        // notify an event so custom stream wrappers can be registered lazily
-        $this->container->get('event_dispatcher')->notify(new Event(null, 'assetic.write', array('path' => $basePath)));
-
-        if ($input->getOption('watch')) {
-            return $this->watch($am, $basePath, $output, $this->container->getParameter('kernel.debug'));
+        if (!$this->am->isDebug()) {
+            throw new \RuntimeException('The --watch option is only available in debug mode.');
         }
 
-        foreach ($am->getNames() as $name) {
-            $this->dumpAsset($am->get($name), $basePath, $output);
-        }
+        $this->watch($output);
     }
 
     /**
@@ -63,22 +70,15 @@ class DumpCommand extends Command
      * This method includes an infinite loop the continuously polls the asset
      * manager for changes.
      *
-     * @param LazyAssetManager $am      The asset manager
-     * @param string           $basePath The base directory to write to
-     * @param OutputInterface  $output  The command output
-     * @param Boolean          $debug   Debug mode
+     * @param OutputInterface $output The command output
      */
-    protected function watch(LazyAssetManager $am, $basePath, OutputInterface $output, $debug = false)
+    private function watch(OutputInterface $output)
     {
-        if (!$debug) {
-            throw new \RuntimeException('The --watch option is only available in debug mode.');
-        }
-
         $refl = new \ReflectionClass('Assetic\\AssetManager');
         $prop = $refl->getProperty('assets');
         $prop->setAccessible(true);
 
-        $cache = sys_get_temp_dir().'/assetic_watch_'.substr(sha1($basePath), 0, 7);
+        $cache = sys_get_temp_dir().'/assetic_watch_'.substr(sha1($this->basePath), 0, 7);
         if (file_exists($cache)) {
             $previously = unserialize(file_get_contents($cache));
         } else {
@@ -88,15 +88,15 @@ class DumpCommand extends Command
         $error = '';
         while (true) {
             try {
-                foreach ($am->getNames() as $name) {
-                    if ($asset = $this->checkAsset($am, $name, $previously)) {
-                        $this->dumpAsset($asset, $basePath, $output);
+                foreach ($this->am->getNames() as $name) {
+                    if ($asset = $this->checkAsset($name, $previously)) {
+                        $this->dumpAsset($asset, $output);
                     }
                 }
 
                 // reset the asset manager
-                $prop->setValue($am, array());
-                $am->load();
+                $prop->setValue($this->am, array());
+                $this->am->load();
 
                 file_put_contents($cache, serialize($previously));
                 $error = '';
@@ -114,16 +114,15 @@ class DumpCommand extends Command
     /**
      * Checks if an asset should be dumped.
      *
-     * @param LazyAssetManager $am         The asset manager
-     * @param string           $name       The asset name
-     * @param array            $previously An array of previous visits
+     * @param string $name        The asset name
+     * @param array  &$previously An array of previous visits
      *
      * @return AssetInterface|Boolean The asset if it should be dumped
      */
-    protected function checkAsset(LazyAssetManager $am, $name, array &$previously)
+    private function checkAsset($name, array &$previously)
     {
-        $formula = $am->hasFormula($name) ? serialize($am->getFormula($name)) : null;
-        $asset = $am->get($name);
+        $formula = $this->am->hasFormula($name) ? serialize($this->am->getFormula($name)) : null;
+        $asset = $this->am->get($name);
         $mtime = $asset->getLastModified();
 
         if (isset($previously[$name])) {
@@ -140,18 +139,42 @@ class DumpCommand extends Command
     /**
      * Writes an asset.
      *
-     * @param AssetInterface  $asset   An asset
-     * @param string          $basePath The base directory to write to
-     * @param OutputInterface $output  The command output
+     * If the application or asset is in debug mode, each leaf asset will be
+     * dumped as well.
+     *
+     * @param string          $name   An asset name
+     * @param OutputInterface $output The command output
+     */
+    private function dumpAsset($name, OutputInterface $output)
+    {
+        $asset = $this->am->get($name);
+        $formula = $this->am->getFormula($name);
+
+        // start by dumping the main asset
+        $this->doDump($asset, $output);
+
+        // dump each leaf if debug
+        if (isset($formula[2]['debug']) ? $formula[2]['debug'] : $this->am->isDebug()) {
+            foreach ($asset as $leaf) {
+                $this->doDump($leaf, $output);
+            }
+        }
+    }
+
+    /**
+     * Performs the asset dump.
+     *
+     * @param AssetInterface  $asset  An asset
+     * @param OutputInterface $output The command output
      *
      * @throws RuntimeException If there is a problem writing the asset
      */
-    protected function dumpAsset(AssetInterface $asset, $basePath, OutputInterface $output)
+    private function doDump(AssetInterface $asset, OutputInterface $output)
     {
-        $target = rtrim($basePath, '/') . '/' . $asset->getTargetUrl();
+        $target = rtrim($this->basePath, '/').'/'.str_replace('_controller/', '', $asset->getTargetUrl());
         if (!is_dir($dir = dirname($target))) {
             $output->writeln('<info>[dir+]</info> '.$dir);
-            if (false === @mkdir($dir)) {
+            if (false === @mkdir($dir, 0777, true)) {
                 throw new \RuntimeException('Unable to create directory '.$dir);
             }
         }

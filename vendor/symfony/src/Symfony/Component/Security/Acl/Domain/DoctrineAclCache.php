@@ -26,16 +26,17 @@ class DoctrineAclCache implements AclCacheInterface
 {
     const PREFIX = 'sf2_acl_';
 
-    protected $cache;
-    protected $prefix;
-    protected $permissionGrantingStrategy;
+    private $cache;
+    private $prefix;
+    private $permissionGrantingStrategy;
 
     /**
      * Constructor
      *
-     * @param Cache $cache
+     * @param Cache                               $cache
      * @param PermissionGrantingStrategyInterface $permissionGrantingStrategy
-     * @param string $prefix
+     * @param string                              $prefix
+     *
      * @return void
      */
     public function __construct(Cache $cache, PermissionGrantingStrategyInterface $permissionGrantingStrategy, $prefix = self::PREFIX)
@@ -145,7 +146,7 @@ class DoctrineAclCache implements AclCacheInterface
      * @param string $serialized
      * @return AclInterface
      */
-    protected function unserializeAcl($serialized)
+    private function unserializeAcl($serialized)
     {
         $acl = unserialize($serialized);
 
@@ -203,7 +204,7 @@ class DoctrineAclCache implements AclCacheInterface
      * @param ObjectIdentityInterface $oid
      * @return string
      */
-    protected function getDataKeyByIdentity(ObjectIdentityInterface $oid)
+    private function getDataKeyByIdentity(ObjectIdentityInterface $oid)
     {
         return $this->prefix.md5($oid->getType()).sha1($oid->getType())
                .'_'.md5($oid->getIdentifier()).sha1($oid->getIdentifier());
@@ -215,7 +216,7 @@ class DoctrineAclCache implements AclCacheInterface
      * @param string $aclId
      * @return string
      */
-    protected function getAliasKeyForIdentity($aclId)
+    private function getAliasKeyForIdentity($aclId)
     {
         return $this->prefix.$aclId;
     }

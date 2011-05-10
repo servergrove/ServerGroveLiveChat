@@ -23,33 +23,12 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class ResolveInvalidReferencesPass implements CompilerPassInterface
 {
-    protected $container;
-    protected $exceptions;
-
-    /** 
-     * Constructor.
-     *
-     * @param array $exceptions An array of exceptions
-     */
-    public function __construct(array $exceptions = array('kernel', 'service_container', 'templating.loader.wrapped', 'pdo_connection'))
-    {
-        $this->exceptions = $exceptions;
-    }
-
-    /**
-     * Add an exception.
-     *
-     * @param string $id Exception identifier
-     */
-    public function addException($id)
-    {
-        $this->exceptions[] = $id;
-    }
+    private $container;
 
     /**
      * Process the ContainerBuilder to resolve invalid references.
      *
-     * @param ContainerBuilder $container 
+     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
@@ -72,6 +51,17 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
                 }
             }
             $definition->setMethodCalls($calls);
+
+            $properties = array();
+            foreach ($definition->getProperties() as $name => $value) {
+                try {
+                    $value = $this->processArguments(array($value), true);
+                    $properties[$name] = reset($value);
+                } catch (\RuntimeException $ignore) {
+                    // ignore property
+                }
+            }
+            $definition->setProperties($properties);
         }
     }
 
@@ -79,19 +69,15 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
      * Processes arguments to determine invalid references.
      *
      * @param array $arguments An array of Reference objects
-     * @param boolean $inMethodCall 
+     * @param Boolean $inMethodCall
      */
-    protected function processArguments(array $arguments, $inMethodCall = false)
+    private function processArguments(array $arguments, $inMethodCall = false)
     {
         foreach ($arguments as $k => $argument) {
             if (is_array($argument)) {
                 $arguments[$k] = $this->processArguments($argument, $inMethodCall);
             } else if ($argument instanceof Reference) {
                 $id = (string) $argument;
-
-                if (in_array($id, $this->exceptions, true)) {
-                    continue;
-                }
 
                 $invalidBehavior = $argument->getInvalidBehavior();
                 $exists = $this->container->has($id);

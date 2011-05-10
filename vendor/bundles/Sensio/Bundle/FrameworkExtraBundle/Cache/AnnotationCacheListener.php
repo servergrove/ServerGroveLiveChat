@@ -2,7 +2,7 @@
 
 namespace Sensio\Bundle\FrameworkExtraBundle\Cache;
 
-use Symfony\Component\EventDispatcher\EventInterface;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpFoundation\Response;
 
 /*
@@ -15,27 +15,28 @@ use Symfony\Component\HttpFoundation\Response;
  */
 
 /**
- * .
- *
- * The filter method must be connected to the core.response event.
+ * The AnnotationCacheListener class has the responsability to modify the
+ * Response object when a controller uses the @extra:Cache annotation.
  *
  * @author     Fabien Potencier <fabien@symfony.com>
  */
 class AnnotationCacheListener
 {
     /**
-     * 
+     * Modifies the response to apply HTTP expiration header fields.
      *
-     * @param Event $event An Event instance
+     * @param FilterResponseEvent $event The notified event
      */
-    public function filter(EventInterface $event, Response $response)
+    public function onCoreResponse(FilterResponseEvent $event)
     {
-        if (!$configuration = $event->get('request')->attributes->get('_cache')) {
-            return $response;
+        if (!$configuration = $event->getRequest()->attributes->get('_cache')) {
+            return;
         }
 
+        $response = $event->getResponse();
+
         if (!$response->isSuccessful()) {
-            return $response;
+            return;
         }
 
         if (null !== $configuration->getSMaxAge()) {
@@ -47,11 +48,14 @@ class AnnotationCacheListener
         }
 
         if (null !== $configuration->getExpires()) {
-            $date = \DateTime::create(\DateTime::createFromFormat('U', $configuration->getExpires(), new \DateTimeZone('UTC')));
-
-            $response->setLastModified($date);
+            $date = \DateTime::createFromFormat('U', strtotime($configuration->getExpires()), new \DateTimeZone('UTC'));
+            $response->setExpires($date);
         }
 
-        return $response;
+        if ($configuration->isPublic()) {
+            $response->setPublic();
+        }
+
+        $event->setResponse($response);
     }
 }

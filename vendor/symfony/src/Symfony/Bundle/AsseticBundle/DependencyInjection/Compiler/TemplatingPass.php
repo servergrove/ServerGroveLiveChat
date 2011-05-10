@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 /**
  * This pass removes services associated with unused templating engines.
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class TemplatingPass implements CompilerPassInterface
 {
@@ -27,18 +27,17 @@ class TemplatingPass implements CompilerPassInterface
             return;
         }
 
-        $am = $container->getDefinition('assetic.asset_manager');
         $engines = $container->getParameterBag()->resolveValue($container->getParameter('templating.engines'));
 
         if (!in_array('twig', $engines)) {
             foreach ($container->findTaggedServiceIds('assetic.templating.twig') as $id => $attr) {
-                $container->remove($id);
+                $container->removeDefinition($id);
             }
         }
 
         if (!in_array('php', $engines)) {
             foreach ($container->findTaggedServiceIds('assetic.templating.php') as $id => $attr) {
-                $container->remove($id);
+                $container->removeDefinition($id);
             }
         }
     }

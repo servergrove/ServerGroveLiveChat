@@ -14,7 +14,7 @@
  * Compiles a node to PHP code.
  *
  * @package    twig
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Twig_Compiler implements Twig_CompilerInterface
 {
@@ -74,8 +74,7 @@ class Twig_Compiler implements Twig_CompilerInterface
 
     public function subcompile(Twig_NodeInterface $node, $raw = true)
     {
-        if (false === $raw)
-        {
+        if (false === $raw) {
             $this->addIndentation();
         }
 

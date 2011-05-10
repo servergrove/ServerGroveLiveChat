@@ -18,19 +18,21 @@ namespace Symfony\Component\DependencyInjection;
  */
 class Definition
 {
-    protected $class;
-    protected $file;
-    protected $factoryClass;
-    protected $factoryMethod;
-    protected $factoryService;
-    protected $scope;
+    private $class;
+    private $file;
+    private $factoryClass;
+    private $factoryMethod;
+    private $factoryService;
+    private $scope;
+    private $properties;
+    private $calls;
+    private $configurator;
+    private $tags;
+    private $public;
+    private $synthetic;
+    private $abstract;
+
     protected $arguments;
-    protected $calls;
-    protected $configurator;
-    protected $tags;
-    protected $public;
-    protected $synthetic;
-    protected $abstract;
 
     /**
      * Constructor.
@@ -48,6 +50,7 @@ class Definition
         $this->public = true;
         $this->synthetic = false;
         $this->abstract = false;
+        $this->properties = array();
     }
 
     /**
@@ -161,6 +164,25 @@ class Definition
         return $this;
     }
 
+    public function setProperties(array $properties)
+    {
+        $this->properties = $properties;
+
+        return $this;
+    }
+
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    public function setProperty($name, $value)
+    {
+        $this->properties[$name] = $value;
+
+        return $this;
+    }
+
     /**
      * Adds an argument to pass to the service constructor/factory method.
      *
@@ -183,7 +205,7 @@ class Definition
      *
      * @return Definition The current instance
      */
-    public function setArgument($index, $argument)
+    public function replaceArgument($index, $argument)
     {
         if ($index < 0 || $index > count($this->arguments) - 1) {
             throw new \OutOfBoundsException(sprintf('The index "%d" is not in the range [0, %d].', $index, count($this->arguments) - 1));
@@ -202,6 +224,22 @@ class Definition
     public function getArguments()
     {
         return $this->arguments;
+    }
+
+    /**
+     * Gets an argument to pass to the service constructor/factory method.
+     *
+     * @param integer $index
+     *
+     * @return mixed The argument value
+     */
+    public function getArgument($index)
+    {
+        if ($index < 0 || $index > count($this->arguments) - 1) {
+            throw new \OutOfBoundsException(sprintf('The index "%d" is not in the range [0, %d].', $index, count($this->arguments) - 1));
+        }
+
+        return $this->arguments[$index];
     }
 
     /**
@@ -389,7 +427,7 @@ class Definition
     /**
      * Sets the scope of the service
      *
-     * @param  string $string Whether the service must be shared or not
+     * @param  string $scope Whether the service must be shared or not
      *
      * @return Definition The current instance
      */

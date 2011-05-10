@@ -485,6 +485,17 @@ class ClassMetadataInfo implements ClassMetadata
     public $reflClass;
 
     /**
+     * Is this entity marked as "read-only"?
+     *
+     * That means it is never considered for change-tracking in the UnitOfWork. It is a very helpful performance
+     * optimization for entities that are immutable, either in your domain or through the relation database
+     * (coming from a view, or a history table for example).
+     *
+     * @var bool
+     */
+    public $isReadOnly = false;
+
+    /**
      * Initializes a new ClassMetadata instance that will hold the object-relational mapping
      * metadata of the class with the given name.
      *
@@ -1617,6 +1628,7 @@ class ClassMetadataInfo implements ClassMetadata
             if (strpos($className, '\\') === false && strlen($this->namespace)) {
                 $className = $this->namespace . '\\' . $className;
             }
+            $className = ltrim($className, '\\');
             $this->discriminatorMap[$value] = $className;
             if ($this->name == $className) {
                 $this->discriminatorValue = $value;
@@ -1817,5 +1829,15 @@ class ClassMetadataInfo implements ClassMetadata
     public function setVersionField($versionField)
     {
         $this->versionField = $versionField;
+    }
+
+    /**
+     * Mark this class as read only, no change tracking is applied to it.
+     *
+     * @return void
+     */
+    public function markReadOnly()
+    {
+        $this->isReadOnly = true;
     }
 }

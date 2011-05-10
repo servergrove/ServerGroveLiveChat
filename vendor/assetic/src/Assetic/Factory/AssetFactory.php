@@ -28,7 +28,7 @@ class AssetFactory
 {
     private $baseDir;
     private $debug;
-    private $defaultOutput;
+    private $output;
     private $workers;
     private $am;
     private $fm;
@@ -36,15 +36,15 @@ class AssetFactory
     /**
      * Constructor.
      *
-     * @param string  $baseDir       Path to the base directory for relative URLs
-     * @param Boolean $debug         Filters prefixed with a "?" will be omitted in debug mode
-     * @param string  $defaultOutput The default output string
+     * @param string  $baseDir Path to the base directory for relative URLs
+     * @param string  $output  The default output string
+     * @param Boolean $debug   Filters prefixed with a "?" will be omitted in debug mode
      */
-    public function __construct($baseDir, $debug = false, $defaultOutput = 'assets/*')
+    public function __construct($baseDir, $debug = false)
     {
         $this->baseDir = rtrim($baseDir, '/').'/';
-        $this->debug = $debug;
-        $this->defaultOutput = $defaultOutput;
+        $this->debug   = $debug;
+        $this->output  = 'assetic/*';
         $this->workers = array();
     }
 
@@ -69,6 +69,16 @@ class AssetFactory
     }
 
     /**
+     * Sets the default output string.
+     *
+     * @param string $output The default output string
+     */
+    public function setDefaultOutput($output)
+    {
+        $this->output = $output;
+    }
+
+    /**
      * Adds a factory worker.
      *
      * @param WorkerInterface $worker A worker
@@ -79,6 +89,16 @@ class AssetFactory
     }
 
     /**
+     * Returns the current asset manager.
+     *
+     * @return AssetManager|null The asset manager
+     */
+    public function getAssetManager()
+    {
+        return $this->am;
+    }
+
+    /**
      * Sets the asset manager to use when creating asset references.
      *
      * @param AssetManager $am The asset manager
@@ -86,6 +106,16 @@ class AssetFactory
     public function setAssetManager(AssetManager $am)
     {
         $this->am = $am;
+    }
+
+    /**
+     * Returns the current filter manager.
+     *
+     * @return FilterManager|null The filter manager
+     */
+    public function getFilterManager()
+    {
+        return $this->fm;
     }
 
     /**
@@ -127,11 +157,11 @@ class AssetFactory
         }
 
         if (!isset($options['output'])) {
-            $options['output'] = $this->defaultOutput;
+            $options['output'] = $this->output;
         }
 
         if (!isset($options['name'])) {
-            $options['name'] = $this->generateAssetName($inputs, $filters);
+            $options['name'] = $this->generateAssetName($inputs, $filters, $options);
         }
 
         if (!isset($options['debug'])) {
@@ -139,10 +169,17 @@ class AssetFactory
         }
 
         $asset = $this->createAssetCollection();
+        $extensions = array();
 
         // inner assets
         foreach ($inputs as $input) {
-            $asset->add($this->parseInput($input));
+            if (is_array($input)) {
+                // nested formula
+                $asset->add(call_user_func_array(array($this, 'createAsset'), $input));
+            } else {
+                $asset->add($this->parseInput($input));
+                $extensions[pathinfo($input, PATHINFO_EXTENSION)] = true;
+            }
         }
 
         // filters
@@ -154,19 +191,27 @@ class AssetFactory
             }
         }
 
+        // append consensus extension if missing
+        if (1 == count($extensions) && !pathinfo($options['output'], PATHINFO_EXTENSION) && $extension = key($extensions)) {
+            $options['output'] .= '.'.$extension;
+        }
+
         // output --> target url
         $asset->setTargetUrl(str_replace('*', $options['name'], $options['output']));
 
         foreach ($this->workers as $worker) {
-            $worker->process($asset);
+            $asset = $worker->process($asset);
         }
 
         return $asset;
     }
 
-    public function generateAssetName($inputs, $filters)
+    public function generateAssetName($inputs, $filters, $options = array())
     {
-        return substr(sha1(serialize(array_merge($inputs, $filters))), 0, 7);
+        // ignore name
+        unset($options['name']);
+
+        return substr(sha1(serialize($inputs).serialize($filters).serialize($options)), 0, 7);
     }
 
     /**

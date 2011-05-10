@@ -4,7 +4,8 @@ namespace Sensio\Bundle\FrameworkExtraBundle\View;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\EventInterface;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -19,49 +20,43 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
  */
 
 /**
- * .
- *
- * The filterController method must be connected to the core.controller event.
- * The filterView method must be connected to the core.view event.
+ * The AnnotationTemplateListener class handles the @extra:Template annotation.
  *
  * @author     Fabien Potencier <fabien@symfony.com>
  */
 class AnnotationTemplateListener
 {
+    /**
+     * @var Symfony\Component\DependencyInjection\ContainerInterface
+     */
     protected $container;
 
+    /**
+     * Constructor.
+     *
+     * @param ContainerInterface $container The service container instance
+     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
     /**
-     * Registers a core.controller and core.view listener.
+     * Guesses the template name to render and its variables and adds them to 
+     * the request object.
      *
-     * @param EventDispatcher $dispatcher An EventDispatcher instance
-     * @param integer         $priority   The priority
+     * @param FilterControllerEvent $event A FilterControllerEvent instance
      */
-    public function register(EventDispatcherInterface $dispatcher, $priority = 0)
+    public function onCoreController(FilterControllerEvent $event)
     {
-        $dispatcher->connect('core.controller', array($this, 'filterController'), $priority);
-        $dispatcher->connect('core.view', array($this, 'filterView'), $priority);
-    }
-
-    /**
-     * 
-     *
-     * @param Event $event An Event instance
-     */
-    public function filterController(EventInterface $event, $controller)
-    {
-        if (!is_array($controller)) {
-            return $controller;
+        if (!is_array($controller = $event->getController())) {
+            return;
         }
 
-        $request = $event->get('request');
+        $request = $event->getRequest();
 
         if (!$configuration = $request->attributes->get('_template')) {
-            return $controller;
+            return;
         }
 
         if (!$configuration->getTemplate()) {
@@ -82,19 +77,18 @@ class AnnotationTemplateListener
 
             $request->attributes->set('_template_default_vars', $vars);
         }
-
-        return $controller;
     }
 
     /**
-     * 
+     * Renders the template and initializes a new response object with the 
+     * rendered template content.
      *
-     * @param Event $event An Event instance
+     * @param GetResponseForControllerResultEvent $event A GetResponseForControllerResultEvent instance
      */
-    public function filterView(EventInterface $event)
+    public function onCoreView(GetResponseForControllerResultEvent $event)
     {
-        $request = $event->get('request');
-        $parameters = $event->get('controller_value');
+        $request = $event->getRequest();
+        $parameters = $event->getControllerResult();
 
         if (null === $parameters) {
             if (!$vars = $request->attributes->get('_template_vars')) {
@@ -117,11 +111,17 @@ class AnnotationTemplateListener
             return $parameters;
         }
 
-        $event->setProcessed();
-
-        return new Response($this->container->get('templating')->render($template, $parameters));
+        $event->setResponse(new Response($this->container->get('templating')->render($template, $parameters)));
     }
 
+    /**
+     * Guesses and returns the template name to render based on the controller 
+     * and action names.
+     *
+     * @param array $controller An array storing the controller object and action method
+     * @param Request $request A Request instance
+     * @throws \InvalidArgumentException
+     */
     protected function guessTemplateName($controller, Request $request)
     {
         if (!preg_match('/Controller\\\(.*)Controller$/', get_class($controller[0]), $match)) {
@@ -135,6 +135,13 @@ class AnnotationTemplateListener
         return $bundle->getName().':'.$name.'.'.$request->getRequestFormat().'.twig';
     }
 
+    /**
+     * Returns the Bundle instance in which the given class name is located.
+     *
+     * @param string $class A fully qualified controller class name
+     * @param Bundle $bundle A Bundle instance
+     * @throws \InvalidArgumentException
+     */
     protected function getBundleForClass($class)
     {
         $namespace = strtr(dirname(strtr($class, '\\', '/')), '/', '\\');

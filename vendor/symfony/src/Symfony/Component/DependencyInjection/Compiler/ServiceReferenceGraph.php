@@ -21,7 +21,7 @@ namespace Symfony\Component\DependencyInjection\Compiler;
  */
 class ServiceReferenceGraph
 {
-    protected $nodes;
+    private $nodes;
 
     /**
      * Constructor.
@@ -46,7 +46,7 @@ class ServiceReferenceGraph
      *
      * @param string $id The id to retrieve
      * @return ServiceReferenceGraphNode The node matching the supplied identifier
-     * @throws \InvalidArgumentException 
+     * @throws \InvalidArgumentException
      */
     public function getNode($id)
     {
@@ -78,11 +78,11 @@ class ServiceReferenceGraph
     /**
      * Connects 2 nodes together in the Graph.
      *
-     * @param string $sourceId 
-     * @param string $sourceValue 
-     * @param string $destId 
-     * @param string $destValue 
-     * @param string $reference 
+     * @param string $sourceId
+     * @param string $sourceValue
+     * @param string $destId
+     * @param string $destValue
+     * @param string $reference
      */
     public function connect($sourceId, $sourceValue, $destId, $destValue = null, $reference = null)
     {
@@ -97,11 +97,11 @@ class ServiceReferenceGraph
     /**
      * Creates a graph node.
      *
-     * @param string $id 
-     * @param string $value 
+     * @param string $id
+     * @param string $value
      * @return ServiceReferenceGraphNode
      */
-    protected function createNode($id, $value)
+    private function createNode($id, $value)
     {
         if (isset($this->nodes[$id]) && $this->nodes[$id]->getValue() === $value) {
             return $this->nodes[$id];

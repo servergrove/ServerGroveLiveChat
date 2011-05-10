@@ -12,9 +12,8 @@
 namespace Symfony\Bundle\FrameworkBundle\CacheWarmer;
 
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmer;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Finder\Finder;
-use Symfony\Bundle\FrameworkBundle\Templating\TemplateNameParser;
+use Symfony\Bundle\FrameworkBundle\Templating\Loader\TemplateFinderInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\Loader\TemplateLocator;
 
 /**
  * Computes the association between template names and their paths on the disk.
@@ -23,24 +22,19 @@ use Symfony\Bundle\FrameworkBundle\Templating\TemplateNameParser;
  */
 class TemplatePathsCacheWarmer extends CacheWarmer
 {
-    const TEMPLATES_PATH_IN_BUNDLE = '/Resources/views';
-
-    protected $kernel;
-    protected $rootDir;
-    protected $parser;
+    protected $finder;
+    protected $locator;
 
     /**
      * Constructor.
      *
-     * @param KernelInterface      $kernel  A KernelInterface instance
-     * @param TemplateNameParser   $parser  A TemplateNameParser instance
-     * @param string               $rootDir The directory where global templates can be stored
+     * @param TemplateFinderInterface   $finder  A template finder
+     * @param TemplateLocator           $locator The template locator
      */
-    public function __construct(KernelInterface $kernel, TemplateNameParser $parser, $rootDir)
+    public function __construct(TemplateFinderInterface $finder, TemplateLocator $locator)
     {
-        $this->kernel = $kernel;
-        $this->parser = $parser;
-        $this->rootDir = $rootDir;
+        $this->finder = $finder;
+        $this->locator = $locator;
     }
 
     /**
@@ -49,14 +43,12 @@ class TemplatePathsCacheWarmer extends CacheWarmer
      * @param string $cacheDir The cache directory
      */
     public function warmUp($cacheDir)
-    {       
+    {
         $templates = array();
 
-        foreach ($this->kernel->getBundles() as $name => $bundle) {
-            $templates += $this->findTemplatesIn($bundle->getPath().self::TEMPLATES_PATH_IN_BUNDLE, $name);
+        foreach ($this->finder->findAllTemplates() as $template) {
+            $templates[$template->getSignature()] = $this->locator->locate($template);
         }
-
-        $templates += $this->findTemplatesIn($this->rootDir);
 
         $this->writeCacheFile($cacheDir.'/templates.php', sprintf('<?php return %s;', var_export($templates, true)));
     }
@@ -69,33 +61,5 @@ class TemplatePathsCacheWarmer extends CacheWarmer
     public function isOptional()
     {
         return false;
-    }
-
-    /**
-     * Find templates in the given directory
-     *
-     * @param string $dir       The folder where to look for templates
-     * @param string $bundle    The name of the bundle (null when out of a bundle)
-     *
-     * @return array An array of template paths
-     */
-    protected function findTemplatesIn($dir, $bundle = null)
-    {
-        $templates = array();
-
-        if (is_dir($dir)) {
-            $finder = new Finder();
-            foreach ($finder->files()->followLinks()->in($dir) as $file) {
-                $template = $this->parser->parseFromFilename($file->getRelativePathname());
-                if (false !== $template) {
-                    if (null !== $bundle) {
-                      $template->set('bundle', $bundle);
-                    }
-                    $templates[$template->getSignature()] = $file->getRealPath();
-                }
-            }
-        }
-
-        return $templates;
     }
 }

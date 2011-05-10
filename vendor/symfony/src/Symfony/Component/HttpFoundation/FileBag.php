@@ -21,12 +21,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class FileBag extends ParameterBag
 {
-    private $fileKeys = array('error', 'name', 'size', 'tmp_name', 'type');
+    static private $fileKeys = array('error', 'name', 'size', 'tmp_name', 'type');
 
     /**
      * Constructor.
      *
-     * @param array $headers An array of HTTP files
+     * @param array $parameters An array of HTTP files
      */
     public function __construct(array $parameters = array())
     {
@@ -77,24 +77,23 @@ class FileBag extends ParameterBag
         if ($file instanceof UploadedFile) {
             return $file;
         }
+
         $file = $this->fixPhpFilesArray($file);
         if (is_array($file)) {
             $keys = array_keys($file);
             sort($keys);
-            if ($keys == $this->fileKeys) {
-                $file['error'] = (int) $file['error'];
-            }
-            if ($keys != $this->fileKeys) {
-                $file = array_map(array($this, 'convertFileInformation'), $file);
-            } else {
-                if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+
+            if ($keys == self::$fileKeys) {
+                if (UPLOAD_ERR_NO_FILE == $file['error']) {
                     $file = null;
                 } else {
-                    $file = new UploadedFile($file['tmp_name'], $file['name'],
-                    $file['type'], $file['size'], $file['error']);
+                    $file = new UploadedFile($file['tmp_name'], $file['name'], $file['type'], $file['size'], $file['error']);
                 }
+            } else {
+                $file = array_map(array($this, 'convertFileInformation'), $file);
             }
         }
+
         return $file;
     }
 
@@ -115,27 +114,32 @@ class FileBag extends ParameterBag
      */
     protected function fixPhpFilesArray($data)
     {
-        if (! is_array($data)) {
+        if (!is_array($data)) {
             return $data;
         }
+
         $keys = array_keys($data);
         sort($keys);
-        if ($this->fileKeys != $keys || ! isset($data['name']) ||
-         ! is_array($data['name'])) {
+
+        if (self::$fileKeys != $keys || !isset($data['name']) || !is_array($data['name'])) {
             return $data;
         }
+
         $files = $data;
-        foreach ($this->fileKeys as $k) {
+        foreach (self::$fileKeys as $k) {
             unset($files[$k]);
         }
+
         foreach (array_keys($data['name']) as $key) {
             $files[$key] = $this->fixPhpFilesArray(array(
                 'error'    => $data['error'][$key],
-                'name'     => $data['name'][$key], 'type' => $data['type'][$key],
+                'name'     => $data['name'][$key], 
+                'type'     => $data['type'][$key],
                 'tmp_name' => $data['tmp_name'][$key],
                 'size'     => $data['size'][$key]
             ));
         }
+
         return $files;
     }
 }

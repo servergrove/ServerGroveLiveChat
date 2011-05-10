@@ -28,13 +28,18 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
  */
 class Serializer implements SerializerInterface
 {
-    protected $normalizers = array();
-    protected $encoders = array();
+    private $normalizers = array();
+    private $encoders = array();
     protected $normalizerCache = array();
+    protected $denormalizerCache = array();
 
-    public function isStructuredType($val)
+    /**
+     * @param mixed $value value to test
+     * @return Boolean whether the type is a structured type (array + objects)
+     */
+    public function isStructuredType($value)
     {
-        return null !== $val && !is_scalar($val);
+        return null !== $value && !is_scalar($value);
     }
 
     /**
@@ -42,7 +47,14 @@ class Serializer implements SerializerInterface
      */
     public function serialize($data, $format)
     {
-        return $this->encode($data, $format);
+        return $this->encode($this->normalize($data, $format), $format);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deserialize($data, $type, $format) {
+        return $this->denormalize($this->decode($data, $format), $type, $format);
     }
 
     /**
@@ -57,9 +69,8 @@ class Serializer implements SerializerInterface
         if (isset($this->normalizerCache[$class][$format])) {
             return $this->normalizerCache[$class][$format]->normalize($object, $format, $properties);
         }
-        $reflClass = new \ReflectionClass($class);
         foreach ($this->normalizers as $normalizer) {
-            if ($normalizer->supports($reflClass, $format)) {
+            if ($normalizer->supportsNormalization($object, $class, $format)) {
                 $this->normalizerCache[$class][$format] = $normalizer;
                 return $normalizer->normalize($object, $format, $properties);
             }
@@ -75,13 +86,12 @@ class Serializer implements SerializerInterface
         if (!$this->normalizers) {
             throw new \LogicException('You must register at least one normalizer to be able to denormalize objects.');
         }
-        if (isset($this->normalizerCache[$class][$format])) {
-            return $this->normalizerCache[$class][$format]->denormalize($data, $format);
+        if (isset($this->denormalizerCache[$class][$format])) {
+            return $this->denormalizerCache[$class][$format]->denormalize($data, $class, $format);
         }
-        $reflClass = new \ReflectionClass($class);
         foreach ($this->normalizers as $normalizer) {
-            if ($normalizer->supports($reflClass, $format)) {
-                $this->normalizerCache[$class][$format] = $normalizer;
+            if ($normalizer->supportsDenormalization($class, $format)) {
+                $this->denormalizerCache[$class][$format] = $normalizer;
                 return $normalizer->denormalize($data, $class, $format);
             }
         }
@@ -91,18 +101,36 @@ class Serializer implements SerializerInterface
     /**
      * {@inheritdoc}
      */
-    public function normalize($data, $format)
+    public function normalize($data, $format = null)
     {
-        if (is_array($data)) {
-            foreach ($data as $key => $val) {
-                $data[$key] = $this->isStructuredType($val) ? $this->normalize($val, $format) : $val;
-            }
+        if (!$this->isStructuredType($data)) {
             return $data;
+        }
+        if ($data instanceof Traversable) {
+            $normalized = array();
+            foreach ($data as $key => $val) {
+                $normalized[$key] = $this->normalize($val, $format);
+            }
+            return $normalized;
         }
         if (is_object($data)) {
             return $this->normalizeObject($data, $format);
         }
+        if (is_array($data)) {
+            foreach ($data as $key => $val) {
+                $data[$key] = $this->normalize($val, $format);
+            }
+            return $data;
+        }
         throw new \UnexpectedValueException('An unexpected value could not be normalized: '.var_export($data, true));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function denormalize($data, $type, $format = null)
+    {
+        return $this->denormalizeObject($data, $type, $format);
     }
 
     /**
@@ -127,17 +155,26 @@ class Serializer implements SerializerInterface
         return $this->encoders[$format]->decode($data, $format);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function addNormalizer(NormalizerInterface $normalizer)
     {
         $this->normalizers[] = $normalizer;
         $normalizer->setSerializer($this);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getNormalizers()
     {
         return $this->normalizers;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function removeNormalizer(NormalizerInterface $normalizer)
     {
         unset($this->normalizers[array_search($normalizer, $this->normalizers, true)]);

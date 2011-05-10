@@ -30,8 +30,12 @@ class TwigFormulaLoader implements FormulaLoaderInterface
 
     public function load(ResourceInterface $resource)
     {
-        $tokens = $this->twig->tokenize($resource->getContent());
-        $nodes  = $this->twig->parse($tokens);
+        try {
+            $tokens = $this->twig->tokenize($resource->getContent());
+            $nodes  = $this->twig->parse($tokens);
+        } catch (\Exception $e) {
+            return array();
+        }
 
         return $this->loadNode($nodes);
     }
@@ -43,26 +47,46 @@ class TwigFormulaLoader implements FormulaLoaderInterface
      */
     private function loadNode(\Twig_Node $node)
     {
-        $assets = array();
+        $formulae = array();
 
         if ($node instanceof AsseticNode) {
-            $assets[$node->getAttribute('asset_name')] = array(
-                $node->getAttribute('source_urls'),
-                $node->getAttribute('filter_names'),
+            $formulae[$node->getAttribute('name')] = array(
+                $node->getAttribute('inputs'),
+                $node->getAttribute('filters'),
                 array(
-                    'output' => $node->getAttribute('target_url'),
-                    'name'   => $node->getAttribute('asset_name'),
+                    'output' => $node->getAttribute('asset')->getTargetUrl(),
+                    'name'   => $node->getAttribute('name'),
                     'debug'  => $node->getAttribute('debug'),
                 ),
             );
+        } elseif ($node instanceof \Twig_Node_Expression_Function) {
+            $name = $node->getNode('name')->getAttribute('name');
+            if ($this->twig->getFunction($name) instanceof AsseticFilterFunction) {
+                $arguments = array();
+                foreach ($node->getNode('arguments') as $argument) {
+                    $arguments[] = eval('return '.$this->twig->compile($argument).';');
+                }
+
+                $invoker = $this->twig->getExtension('assetic')->getFilterInvoker($name);
+
+                $inputs  = isset($arguments[0]) ? (array) $arguments[0] : array();
+                $filters = $invoker->getFilters();
+                $options = array_replace($invoker->getOptions(), isset($arguments[1]) ? $arguments[1] : array());
+
+                if (!isset($options['name'])) {
+                    $options['name'] = $invoker->getFactory()->generateAssetName($inputs, $filters, $options);
+                }
+
+                $formulae[$options['name']] = array($inputs, $filters, $options);
+            }
         }
 
         foreach ($node as $child) {
             if ($child instanceof \Twig_Node) {
-                $assets += $this->loadNode($child);
+                $formulae += $this->loadNode($child);
             }
         }
 
-        return $assets;
+        return $formulae;
     }
 }

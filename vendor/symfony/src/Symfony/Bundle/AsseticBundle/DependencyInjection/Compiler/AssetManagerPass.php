@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 /**
  * Adds services tagged as assets to the asset manager.
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class AssetManagerPass implements CompilerPassInterface
 {
@@ -48,7 +48,7 @@ class AssetManagerPass implements CompilerPassInterface
                 }
             }
         }
-        $am->setArgument(1, $loaders);
+        $am->replaceArgument(1, $loaders);
 
         // add resources
         foreach ($container->findTaggedServiceIds('assetic.formula_resource') as $id => $attributes) {

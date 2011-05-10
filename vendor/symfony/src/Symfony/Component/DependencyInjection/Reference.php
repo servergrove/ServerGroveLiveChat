@@ -18,9 +18,9 @@ namespace Symfony\Component\DependencyInjection;
  */
 class Reference
 {
-    protected $id;
-    protected $invalidBehavior;
-    protected $strict;
+    private $id;
+    private $invalidBehavior;
+    private $strict;
 
     /**
      * Constructor.
@@ -61,7 +61,7 @@ class Reference
     /**
      * Returns true when this Reference is strict
      *
-     * @return boolean
+     * @return Boolean
      */
     public function isStrict()
     {

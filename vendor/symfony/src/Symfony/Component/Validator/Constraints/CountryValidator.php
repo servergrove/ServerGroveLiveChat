@@ -28,11 +28,11 @@ class CountryValidator extends ConstraintValidator
             return true;
         }
 
-        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString()'))) {
+        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString'))) {
             throw new UnexpectedTypeException($value, 'string');
         }
 
-        $value = (string)$value;
+        $value = (string) $value;
 
         if (!in_array($value, \Symfony\Component\Locale\Locale::getCountries())) {
             $this->setMessage($constraint->message, array('{{ value }}' => $value));

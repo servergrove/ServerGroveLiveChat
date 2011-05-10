@@ -41,9 +41,7 @@ class FormatterHelper extends Helper
      */
     public function formatBlock($messages, $style, $large = false)
     {
-        if (!is_array($messages)) {
-            $messages = array($messages);
-        }
+        $messages = (array) $messages;
 
         $len = 0;
         $lines = array();
@@ -74,7 +72,7 @@ class FormatterHelper extends Helper
      *
      * @return integer The length of the string
      */
-    protected function strlen($string)
+    private function strlen($string)
     {
         return function_exists('mb_strlen') ? mb_strlen($string) : strlen($string);
     }

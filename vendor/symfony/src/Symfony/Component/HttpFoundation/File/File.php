@@ -16,14 +16,15 @@ use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesser;
 
 /**
- * A file in the file system
+ * A file in the file system.
  *
  * @author Bernhard Schussek <bernhard.schussek@symfony.com>
  */
 class File
 {
     /**
-     * Assignment of mime types to their default extensions
+     * A map of mime types and their default extensions.
+     *
      * @var array
      */
     static protected $defaultExtensions = array(
@@ -440,46 +441,18 @@ class File
     );
 
     /**
-     * Stores the absolute path to the document root directory
-     * @var string
-     */
-    static protected $documentRoot;
-
-    /**
-     * The absolute path to the file without dots
+     * The absolute path to the file without dots.
+     *
      * @var string
      */
     protected $path;
 
     /**
-     * Sets the path t the document root directory
-     *
-     * @param string $documentRoot
-     */
-    static public function setDocumentRoot($documentRoot)
-    {
-        if (!is_dir($documentRoot)) {
-            throw new \LogicException($documentRoot . ' is no directory');
-        }
-
-        self::$documentRoot = realpath($documentRoot);
-    }
-
-    /**
-     * Returns the path to the document root directory
-     *
-     * @return string
-     */
-    static public function getDocumentRoot()
-    {
-        return self::$documentRoot;
-    }
-
-    /**
      * Constructs a new file from the given path.
      *
-     * @param  string $path           The path to the file
-     * @throws FileNotFoundException  If the given path is no file
+     * @param string $path The path to the file
+     *
+     * @throws FileNotFoundException If the given path is not a file
      */
     public function __construct($path)
     {
@@ -491,17 +464,17 @@ class File
     }
 
     /**
-     * Alias for getPath()
+     * Alias for getPath().
      *
      * @return string
      */
     public function __toString()
     {
-        return null === $this->path ? '' : $this->path;
+        return (string) $this->path;
     }
 
     /**
-     * Returns the file name
+     * Returns the file name.
      *
      * @return string
      */
@@ -511,39 +484,39 @@ class File
     }
 
     /**
-     * Returns the file extension (with dot)
+     * Returns the file extension (with dot).
      *
      * @return string
      */
     public function getExtension()
     {
-        if ($ext = pathinfo($this->getName(), \PATHINFO_EXTENSION)) {
-            return '.' . $ext;
+        if ($ext = pathinfo($this->getName(), PATHINFO_EXTENSION)) {
+            return '.'.$ext;
         }
 
         return '';
     }
 
     /**
-     * Returns the extension based on the mime type (with dot)
+     * Returns the extension based on the mime type (with dot).
      *
-     * If the mime type is unknown, the actual extension is returned instead.
+     * If the mime type is unknown, returns null.
      *
-     * @return string
+     * @return string|null The guessed extension or null if it cannot be guessed
      */
-    public function getDefaultExtension()
+    public function guessExtension()
     {
         $type = $this->getMimeType();
 
         if (isset(self::$defaultExtensions[$type])) {
-            return '.' . self::$defaultExtensions[$type];
+            return '.'.self::$defaultExtensions[$type];
         }
 
-        return $this->getExtension();
+        return null;
     }
 
     /**
-     * Returns the directory of the file
+     * Returns the directory of the file.
      *
      * @return string
      */
@@ -553,33 +526,13 @@ class File
     }
 
     /**
-     * Returns the absolute file path without dots
+     * Returns the absolute file path, without dots.
      *
-     * @returns string  The file path
+     * @return string
      */
     public function getPath()
     {
         return $this->path;
-    }
-
-    /**
-     * Returns the path relative to the document root
-     *
-     * You can set the document root using the static method setDocumentRoot().
-     * If the file is outside of the document root, this method returns an
-     * empty string.
-     *
-     * @return string  The relative file path
-     */
-    public function getWebPath()
-    {
-        $root = self::$documentRoot;
-
-        if (strpos($this->path, $root) === false) {
-            return '';
-        }
-
-        return str_replace(array($root, DIRECTORY_SEPARATOR), array('', '/'), $this->path);
     }
 
     /**
@@ -589,7 +542,7 @@ class File
      * and the system binary "file" (in this order), depending on which of those
      * is available on the current operating system.
      *
-     * @returns string  The guessed mime type, e.g. "application/pdf"
+     * @return string The guessed mime type (i.e. "application/pdf")
      */
     public function getMimeType()
     {
@@ -599,59 +552,35 @@ class File
     }
 
     /**
-     * Returns the size of this file
+     * Returns the size of this file.
      *
-     * @return integer  The file size in bytes
+     * @return integer The file size in bytes
      */
-    public function size()
+    public function getSize()
     {
-        if (false === ($size = @filesize($this->getPath()))) {
-            throw new FileException(sprintf('Could not read file size of %s', $this->getPath()));
+        if (false === $size = @filesize($this->getPath())) {
+            $error = error_get_last();
+            throw new FileException(sprintf('Could not read file size of %s (%s)', $this->getPath(), strip_tags($error['message'])));
         }
 
         return $size;
     }
 
     /**
-     * Moves the file to a new directory and gives it a new filename
-     *
-     * @param  string $directory   The new directory
-     * @param  string $filename    The new file name
-     * @throws FileException       When the file could not be moved
-     */
-    protected function doMove($directory, $filename)
-    {
-        $newPath = $directory . DIRECTORY_SEPARATOR . $filename;
-
-        if (!@rename($this->getPath(), $newPath)) {
-            throw new FileException(sprintf('Could not move file %s to %s', $this->getPath(), $newPath));
-        }
-
-        $this->path = realpath($newPath);
-    }
-
-    /**
      * Moves the file to a new location.
      *
-     * @param string $directory   The destination folder
-     * @param string $name        The new file name
+     * @param string $directory The destination folder
+     * @param string $name      The new file name
      */
     public function move($directory, $name = null)
     {
-        $this->doMove($directory, $this->getName());
+        $newPath = $directory.DIRECTORY_SEPARATOR.(null === $name ? $this->getName() : $name);
 
-        if (null !== $name) {
-            $this->rename($name);
+        if (!@rename($this->getPath(), $newPath)) {
+            $error = error_get_last();
+            throw new FileException(sprintf('Could not move file %s to %s (%s)', $this->getPath(), $newPath, strip_tags($error['message'])));
         }
-    }
 
-    /**
-     * Renames the file
-     *
-     * @param string $name  The new file name
-     */
-    public function rename($name)
-    {
-        $this->doMove($this->getDirectory(), $name);
+        $this->path = realpath($newPath);
     }
 }

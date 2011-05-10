@@ -26,12 +26,12 @@ namespace Symfony\Component\DependencyInjection;
  */
 class Variable
 {
-    protected $name;
+    private $name;
 
     /**
      * Constructor
      *
-     * @param string $name 
+     * @param string $name
      */
     public function __construct($name)
     {

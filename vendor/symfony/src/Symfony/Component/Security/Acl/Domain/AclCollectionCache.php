@@ -22,15 +22,15 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityRetrievalStrategyInterf
  */
 class AclCollectionCache
 {
-    protected $aclProvider;
-    protected $objectIdentityRetrievalStrategy;
-    protected $securityIdentityRetrievalStrategy;
+    private $aclProvider;
+    private $objectIdentityRetrievalStrategy;
+    private $securityIdentityRetrievalStrategy;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param AclProviderInterface $aclProvider
-     * @param ObjectIdentityRetrievalStrategy $oidRetrievalStrategy
+     * @param AclProviderInterface              $aclProvider
+     * @param ObjectIdentityRetrievalStrategy   $oidRetrievalStrategy
      * @param SecurityIdentityRetrievalStrategy $sidRetrievalStrategy
      * @return void
      */

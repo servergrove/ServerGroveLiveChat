@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 /**
  * Adds services tagged as filters to the filter manager.
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class FilterManagerPass implements CompilerPassInterface
 {
@@ -39,6 +39,6 @@ class FilterManagerPass implements CompilerPassInterface
 
         $container
             ->getDefinition('assetic.filter_manager')
-            ->setArgument(1, $mapping);
+            ->replaceArgument(1, $mapping);
     }
 }

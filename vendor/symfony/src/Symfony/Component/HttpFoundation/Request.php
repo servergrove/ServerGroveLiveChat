@@ -12,7 +12,6 @@
 namespace Symfony\Component\HttpFoundation;
 
 use Symfony\Component\HttpFoundation\SessionStorage\NativeSessionStorage;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * Request represents an HTTP request.
@@ -126,7 +125,7 @@ class Request
      *
      * @return Request A new request
      */
-    static public function createfromGlobals()
+    static public function createFromGlobals()
     {
         return new static($_GET, $_POST, array(), $_COOKIE, $_FILES, $_SERVER);
     }
@@ -309,9 +308,26 @@ class Request
         return $this->session;
     }
 
+    /**
+     * Whether the request contains a Session which was started in one of the
+     * previous requests.
+     *
+     * @return boolean
+     */
+    public function hasPreviousSession()
+    {
+        // the check for $this->session avoids malicious users trying to fake a session cookie with proper name
+        return $this->cookies->has(session_name()) && null !== $this->session;
+    }
+
+    /**
+     * Whether the request contains a Session object.
+     *
+     * @return boolean
+     */
     public function hasSession()
     {
-        return $this->cookies->has(session_name());
+        return null !== $this->session;
     }
 
     public function setSession(Session $session)
@@ -408,12 +424,12 @@ class Request
 
     public function getScheme()
     {
-        return ($this->server->get('HTTPS') == 'on') ? 'https' : 'http';
+        return $this->isSecure() ? 'https' : 'http';
     }
 
     public function getPort()
     {
-        return $this->server->get('SERVER_PORT');
+        return $this->headers->get('X-Forwarded-Port') ?: $this->server->get('SERVER_PORT');
     }
 
     /**
@@ -501,8 +517,8 @@ class Request
                 $parts[] = $segment;
                 $order[] = $segment;
             } else {
-                $tmp = explode('=', urldecode($segment), 2);
-                $parts[] = urlencode($tmp[0]).'='.urlencode($tmp[1]);
+                $tmp = explode('=', rawurldecode($segment), 2);
+                $parts[] = rawurlencode($tmp[0]).'='.rawurlencode($tmp[1]);
                 $order[] = $tmp[0];
             }
         }
@@ -542,9 +558,9 @@ class Request
         }
 
         // Remove port number from host
-        $elements = explode(':', $host);
+        $host = preg_replace('/:\d+$/', '', $host);
 
-        return trim($elements[0]);
+        return trim($host);
     }
 
     public function setMethod($method)
@@ -630,14 +646,16 @@ class Request
      *
      *  * format defined by the user (with setRequestFormat())
      *  * _format request parameter
-     *  * null
+     *  * $default
+     *
+     * @param string  $default     The default format
      *
      * @return string The request format
      */
-    public function getRequestFormat()
+    public function getRequestFormat($default = 'html')
     {
         if (null === $this->format) {
-            $this->format = $this->get('_format', 'html');
+            $this->format = $this->get('_format', $default);
         }
 
         return $this->format;
@@ -725,7 +743,8 @@ class Request
         }
 
         $languages = $this->splitHttpAcceptHeader($this->headers->get('Accept-Language'));
-        foreach ($languages as $lang) {
+        $this->languages = array();
+        foreach ($languages as $lang => $q) {
             if (strstr($lang, '-')) {
                 $codes = explode('-', $lang);
                 if ($codes[0] == 'i') {
@@ -763,7 +782,7 @@ class Request
             return $this->charsets;
         }
 
-        return $this->charsets = $this->splitHttpAcceptHeader($this->headers->get('Accept-Charset'));
+        return $this->charsets = array_keys($this->splitHttpAcceptHeader($this->headers->get('Accept-Charset')));
     }
 
     /**
@@ -777,7 +796,7 @@ class Request
             return $this->acceptableContentTypes;
         }
 
-        return $this->acceptableContentTypes = $this->splitHttpAcceptHeader($this->headers->get('Accept'));
+        return $this->acceptableContentTypes = array_keys($this->splitHttpAcceptHeader($this->headers->get('Accept')));
     }
 
     /**
@@ -820,8 +839,9 @@ class Request
         }
 
         arsort($values);
+        reset($values);
 
-        return array_keys($values);
+        return $values;
     }
 
     /*
@@ -970,6 +990,7 @@ class Request
     static protected function initializeFormats()
     {
         static::$formats = array(
+            'html' => array('text/html', 'application/xhtml+xml'),
             'txt'  => array('text/plain'),
             'js'   => array('application/javascript', 'application/x-javascript', 'text/javascript'),
             'css'  => array('text/css'),

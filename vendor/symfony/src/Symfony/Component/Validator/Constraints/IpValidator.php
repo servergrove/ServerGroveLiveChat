@@ -31,11 +31,11 @@ class IpValidator extends ConstraintValidator
             return true;
         }
 
-        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString()'))) {
+        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString'))) {
             throw new UnexpectedTypeException($value, 'string');
         }
 
-        $value = (string)$value;
+        $value = (string) $value;
         $valid = false;
 
         if ($constraint->version == Ip::V4 || $constraint->version == Ip::ALL) {

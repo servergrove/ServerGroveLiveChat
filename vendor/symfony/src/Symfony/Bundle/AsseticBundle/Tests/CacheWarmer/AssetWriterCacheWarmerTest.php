@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\AsseticBundle\Tests\CacheWarmer;
 
 use Symfony\Bundle\AsseticBundle\CacheWarmer\AssetWriterCacheWarmer;
-use Symfony\Component\EventDispatcher\Event;
 
 class AssetWriterCacheWarmerTest extends \PHPUnit_Framework_TestCase
 {
@@ -26,21 +25,33 @@ class AssetWriterCacheWarmerTest extends \PHPUnit_Framework_TestCase
     public function testWarmUp()
     {
         $am = $this->getMock('Assetic\\AssetManager');
-        $writer = $this->getMockBuilder('Assetic\\AssetWriter')
+        
+        $writer = $this
+            ->getMockBuilder('Assetic\\AssetWriter')
             ->disableOriginalConstructor()
-            ->getMock();
-        $dispatcher = $this->getMock('Symfony\\Component\\EventDispatcher\\EventDispatcher');
+            ->getMock()
+        ;
 
-        $event = new Event(null, 'assetic.write');
-
-        $dispatcher->expects($this->once())
-            ->method('notify')
-            ->with($event);
-        $writer->expects($this->once())
+        $writer
+            ->expects($this->once())
             ->method('writeManagerAssets')
-            ->with($am);
+            ->with($am)
+        ;
+        
+        $container = $this
+            ->getMockBuilder('Symfony\\Component\\DependencyInjection\\Container')
+            ->setConstructorArgs(array())
+            ->getMock()
+        ;
+        
+        $container
+            ->expects($this->once())
+            ->method('get')
+            ->with('assetic.asset_manager')
+            ->will($this->returnValue($am))
+        ;        
 
-        $warmer = new AssetWriterCacheWarmer($am, $writer, $dispatcher);
+        $warmer = new AssetWriterCacheWarmer($container, $writer);
         $warmer->warmUp('/path/to/cache');
     }
 }

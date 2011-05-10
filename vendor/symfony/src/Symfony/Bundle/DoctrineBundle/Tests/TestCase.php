@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -62,7 +63,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 'connections' => array(
                     'default' => array(
                         'driver' => 'pdo_mysql',
-                        'charset' => 'UTF-8',
+                        'charset' => 'UTF8',
                         'platform-service' => 'my.platform',
                     )
                 ),
@@ -71,14 +72,23 @@ class TestCase extends \PHPUnit_Framework_TestCase
                     'test' => 'Symfony\Bundle\DoctrineBundle\Tests\DependencyInjection\TestType',
                 ),
             ), 'orm' => array(
-                'mappings' => array('YamlBundle' => array(
-                    'type' => 'yml',
-                    'dir' => __DIR__ . "/DependencyInjection/Fixtures/Bundles/YamlBundle/Resources/config/doctrine/metadata/orm",
-                    'prefix' => 'Fixtures\Bundles\YamlBundle',
+                'default_entity_manager' => 'default',
+                'entity_managers' => array (
+                    'default' => array(
+                    'mappings' => array('YamlBundle' => array(
+                        'type' => 'yml',
+                        'dir' => __DIR__ . "/DependencyInjection/Fixtures/Bundles/YamlBundle/Resources/config/doctrine",
+                        'prefix' => 'Fixtures\Bundles\YamlBundle',
+                    )
+                )
             )))
         )), $container);
 
         $container->setDefinition('my.platform', new \Symfony\Component\DependencyInjection\Definition('Doctrine\DBAL\Platforms\MySqlPlatform'));
+
+        $container->getCompilerPassConfig()->setOptimizationPasses(array(new ResolveDefinitionTemplatesPass()));
+        $container->getCompilerPassConfig()->setRemovingPasses(array());
+        $container->compile();
 
         return $container;
     }

@@ -22,11 +22,11 @@ use Symfony\Component\Security\Acl\Model\ObjectIdentityInterface;
  */
 class ObjectIdentity implements ObjectIdentityInterface
 {
-    protected $identifier;
-    protected $type;
+    private $identifier;
+    private $type;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $identifier
      * @param string $type

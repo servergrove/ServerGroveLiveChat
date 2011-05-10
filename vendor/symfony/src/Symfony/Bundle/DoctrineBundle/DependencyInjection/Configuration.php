@@ -3,7 +3,7 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
+ * (c) Fabien Potencier <fabien@symfony.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,8 +11,9 @@
 
 namespace Symfony\Bundle\DoctrineBundle\DependencyInjection;
 
-use Symfony\Component\Config\Definition\Builder\NodeBuilder;
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * This class contains the configuration information for the bundle
@@ -22,166 +23,231 @@ use Symfony\Component\Config\Definition\Builder\TreeBuilder;
  *
  * @author Christophe Coevoet <stof@notk.org>
  */
-class Configuration
+class Configuration implements ConfigurationInterface
 {
-    private $kernelDebug;
+    private $debug;
 
     /**
-     * Generates the configuration tree.
+     * Constructor
      *
-     * @param Boolean $kernelDebug
-     * @return \Symfony\Component\Config\Definition\NodeInterface
+     * @param Boolean $debug Whether to use the debug mode
      */
-    public function getConfigTree($kernelDebug)
+    public function  __construct($debug)
     {
-        $this->kernelDebug = (bool) $kernelDebug;
+        $this->debug = (Boolean) $debug;
+    }
 
+    /**
+     * Generates the configuration tree builder.
+     *
+     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
+     */
+    public function getConfigTreeBuilder()
+    {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('doctrine', 'array');
+        $rootNode = $treeBuilder->root('doctrine');
 
         $this->addDbalSection($rootNode);
         $this->addOrmSection($rootNode);
 
-        return $treeBuilder->buildTree();
+        return $treeBuilder;
     }
 
-    private function addDbalSection(NodeBuilder $node)
+    private function addDbalSection(ArrayNodeDefinition $node)
     {
         $node
+            ->children()
             ->arrayNode('dbal')
                 ->beforeNormalization()
-                    ->ifNull()
-                    ->then(function($v) { return array (); }) // Let use the default values with the subsequent closure.
-                ->end()
-                ->beforeNormalization()
-                    ->ifTrue(function($v){ return is_array($v) && !array_key_exists('connections', $v) && !array_key_exists('connection', $v); })
-                    ->then(function($v) {
-                        $connection = array ();
-                        $keys = array ('dbname', 'host', 'port', 'user', 'password', 'driver', 'driver_class', 'options', 'path', 'memory', 'unix_socket', 'wrapper_class', 'platform_service', 'charset', 'logging');
-                        foreach ($keys as $key) {
+                    ->ifTrue(function ($v) { return is_array($v) && !array_key_exists('connections', $v) && !array_key_exists('connection', $v); })
+                    ->then(function ($v) {
+                        $connection = array();
+                        foreach (array(
+                            'dbname',
+                            'host',
+                            'port',
+                            'user',
+                            'password',
+                            'driver',
+                            'driver_class',
+                            'options',
+                            'path',
+                            'memory',
+                            'unix_socket',
+                            'wrapper_class',
+                            'platform_service',
+                            'charset',
+                            'logging'
+                        ) as $key) {
                             if (array_key_exists($key, $v)) {
                                 $connection[$key] = $v[$key];
                                 unset($v[$key]);
                             }
                         }
-                        $defaultConnection = isset($v['default_connection']) ? (string) $v['default_connection'] : 'default';
-                        $v['connections'] = array ($defaultConnection => $connection);
-                        $v['default_connection'] = $defaultConnection;
+                        $v['default_connection'] = isset($v['default_connection']) ? (string) $v['default_connection'] : 'default';
+                        $v['connections'] = array($v['default_connection'] => $connection);
+
                         return $v;
                     })
                 ->end()
-                ->scalarNode('default_connection')->isRequired()->cannotBeEmpty()->end()
+                ->children()
+                    ->scalarNode('default_connection')->end()
+                ->end()
                 ->fixXmlConfig('type')
-                ->arrayNode('types')
-                    ->useAttributeAsKey('name')
-                    ->prototype('scalar')
-                        ->beforeNormalization()
-                            ->ifTrue(function($v) { return is_array($v) && isset($v['class']); })
-                            ->then(function($v) { return $v['class']; })
-                        ->end()
+                ->children()
+                    ->arrayNode('types')
+                        ->useAttributeAsKey('name')
+                        ->prototype('scalar')->end()
                     ->end()
                 ->end()
                 ->fixXmlConfig('connection')
-                ->builder($this->getDbalConnectionsNode())
+                ->append($this->getDbalConnectionsNode())
             ->end()
         ;
     }
 
     private function getDbalConnectionsNode()
     {
-        $node = new NodeBuilder('connections', 'array');
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('connections');
+
         $node
             ->requiresAtLeastOneElement()
             ->useAttributeAsKey('name')
             ->prototype('array')
-                ->scalarNode('dbname')->end()
-                ->scalarNode('host')->defaultValue('localhost')->end()
-                ->scalarNode('port')->defaultNull()->end()
-                ->scalarNode('user')->defaultValue('root')->end()
-                ->scalarNode('password')->defaultNull()->end()
-                ->scalarNode('driver')->defaultValue('pdo_mysql')->end()
-                ->fixXmlConfig('driver_class', 'driverClass')
-                ->scalarNode('driver_class')->end()
-                ->fixXmlConfig('options', 'driverOptions')
-                ->arrayNode('driverOptions')
-                    ->useAttributeAsKey('key')
-                    ->prototype('scalar')->end()
+                ->children()
+                    ->scalarNode('dbname')->end()
+                    ->scalarNode('host')->defaultValue('localhost')->end()
+                    ->scalarNode('port')->defaultNull()->end()
+                    ->scalarNode('user')->defaultValue('root')->end()
+                    ->scalarNode('password')->defaultNull()->end()
+                    ->scalarNode('driver')->defaultValue('pdo_mysql')->end()
+                    ->scalarNode('path')->end()
+                    ->booleanNode('memory')->end()
+                    ->scalarNode('unix_socket')->end()
+                    ->scalarNode('platform_service')->end()
+                    ->scalarNode('charset')->end()
+                    ->booleanNode('logging')->defaultValue($this->debug)->end()
+                    ->scalarNode('driver_class')->end()
+                    ->scalarNode('wrapper_class')->end()
+                    ->arrayNode('options')
+                        ->useAttributeAsKey('key')
+                        ->prototype('scalar')->end()
+                    ->end()
                 ->end()
-                ->scalarNode('path')->end()
-                ->booleanNode('memory')->end()
-                ->scalarNode('unix_socket')->end()
-                ->fixXmlConfig('wrapper_class', 'wrapperClass')
-                ->scalarNode('wrapper_class')->end()
-                ->scalarNode('platform_service')->end()
-                ->scalarNode('charset')->end()
-                ->booleanNode('logging')->defaultValue($this->kernelDebug)->end()
             ->end()
         ;
 
         return $node;
     }
 
-    private function addOrmSection(NodeBuilder $node)
+    private function addOrmSection(ArrayNodeDefinition $node)
     {
         $node
-            ->arrayNode('orm')
-                ->beforeNormalization()
-                    ->ifTrue(function($v){ return is_array($v) && !array_key_exists('entity_managers', $v) && !array_key_exists('entity_manager', $v); })
-                    ->then(function($v) {
-                        $entityManager = array ();
-                        $keys = array ('result_cache_driver', 'result-cache-driver', 'metadata_cache_driver', 'metadata-cache-driver', 'query_cache_driver', 'query-cache-driver', 'mappings', 'mapping', 'connection');
-                        foreach ($keys as $key) {
-                            if (array_key_exists($key, $v)) {
-                                $entityManager[$key] = $v[$key];
-                                unset($v[$key]);
+            ->children()
+                ->arrayNode('orm')
+                    ->beforeNormalization()
+                        ->ifTrue(function ($v) { return null === $v || (is_array($v) && !array_key_exists('entity_managers', $v) && !array_key_exists('entity_manager', $v)); })
+                        ->then(function ($v) {
+                            $v = (array) $v;
+                            $entityManager = array();
+                            foreach (array(
+                                'result_cache_driver', 'result-cache-driver',
+                                'metadata_cache_driver', 'metadata-cache-driver',
+                                'query_cache_driver', 'query-cache-driver',
+                                'auto_mapping', 'auto-mapping',
+                                'mappings', 'mapping',
+                                'connection'
+                            ) as $key) {
+                                if (array_key_exists($key, $v)) {
+                                    $entityManager[$key] = $v[$key];
+                                    unset($v[$key]);
+                                }
                             }
-                        }
-                        $defaultEntityManager = isset($v['default_entity_manager']) ? (string) $v['default_entity_manager'] : 'default';
-                        $v['entity_managers'] = array ($defaultEntityManager => $entityManager);
-                        $v['default_entity_manager'] = $defaultEntityManager;
-                        return $v;
-                    })
+                            $v['default_entity_manager'] = isset($v['default_entity_manager']) ? (string) $v['default_entity_manager'] : 'default';
+                            $v['entity_managers'] = array($v['default_entity_manager'] => $entityManager);
+
+                            return $v;
+                        })
+                    ->end()
+                    ->children()
+                        ->scalarNode('default_entity_manager')->end()
+                        ->booleanNode('auto_generate_proxy_classes')->defaultFalse()->end()
+                        ->scalarNode('proxy_dir')->defaultValue('%kernel.cache_dir%/doctrine/orm/Proxies')->end()
+                        ->scalarNode('proxy_namespace')->defaultValue('Proxies')->end()
+                    ->end()
+                    ->fixXmlConfig('entity_manager')
+                    ->append($this->getOrmEntityManagersNode())
                 ->end()
-                ->scalarNode('default_entity_manager')->isRequired()->cannotBeEmpty()->end()
-                ->booleanNode('auto_generate_proxy_classes')->defaultFalse()->end()
-                ->scalarNode('proxy_dir')->defaultValue('%kernel.cache_dir%/doctrine/orm/Proxies')->end()
-                ->scalarNode('proxy_namespace')->defaultValue('Proxies')->end()
-                ->fixXmlConfig('entity_manager')
-                ->builder($this->getOrmEntityManagersNode())
             ->end()
         ;
     }
 
     private function getOrmEntityManagersNode()
     {
-        $node = new NodeBuilder('entity_managers', 'array');
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root('entity_managers');
+
         $node
             ->requiresAtLeastOneElement()
             ->useAttributeAsKey('name')
             ->prototype('array')
                 ->addDefaultsIfNotSet()
-                ->builder($this->getOrmCacheDriverNode('query_cache_driver'))
-                ->builder($this->getOrmCacheDriverNode('metadata_cache_driver'))
-                ->builder($this->getOrmCacheDriverNode('result_cache_driver'))
-                ->scalarNode('connection')->end()
-                ->scalarNode('class_metadata_factory_name')->defaultValue('%doctrine.orm.class_metadata_factory_name%')->end()
+                ->append($this->getOrmCacheDriverNode('query_cache_driver'))
+                ->append($this->getOrmCacheDriverNode('metadata_cache_driver'))
+                ->append($this->getOrmCacheDriverNode('result_cache_driver'))
+                ->children()
+                    ->scalarNode('connection')->end()
+                    ->scalarNode('class_metadata_factory_name')->defaultValue('Doctrine\ORM\Mapping\ClassMetadataFactory')->end()
+                    ->scalarNode('auto_mapping')->defaultFalse()->end()
+                ->end()
+                ->fixXmlConfig('hydrator')
+                ->children()
+                    ->arrayNode('hydrators')
+                        ->useAttributeAsKey('name')
+                        ->prototype('scalar')->end()
+                    ->end()
+                ->end()
                 ->fixXmlConfig('mapping')
-                ->arrayNode('mappings')
-                    ->isRequired()
-                    ->requiresAtLeastOneElement()
-                    ->useAttributeAsKey('name')
-                    ->prototype('array')
-                        ->beforeNormalization()
-                            ->ifString()
-                            ->then(function($v) { return array ('type' => $v); })
+                ->children()
+                    ->arrayNode('mappings')
+                        ->useAttributeAsKey('name')
+                        ->prototype('array')
+                            ->beforeNormalization()
+                                ->ifString()
+                                ->then(function($v) { return array('type' => $v); })
+                            ->end()
+                            ->treatNullLike(array())
+                            ->treatFalseLike(array('mapping' => false))
+                            ->performNoDeepMerging()
+                            ->children()
+                                ->scalarNode('mapping')->defaultValue(true)->end()
+                                ->scalarNode('type')->end()
+                                ->scalarNode('dir')->end()
+                                ->scalarNode('alias')->end()
+                                ->scalarNode('prefix')->end()
+                                ->booleanNode('is_bundle')->end()
+                            ->end()
                         ->end()
-                        ->treatNullLike(array ())
-                        ->scalarNode('type')->end()
-                        ->scalarNode('dir')->end()
-                        ->scalarNode('alias')->end()
-                        ->scalarNode('prefix')->end()
-                        ->booleanNode('is_bundle')->end()
-                        ->performNoDeepMerging()
+                    ->end()
+                    ->arrayNode('dql')
+                        ->fixXmlConfig('string_function')
+                        ->fixXmlConfig('numeric_function')
+                        ->fixXmlConfig('datetime_function')
+                        ->children()
+                            ->arrayNode('string_functions')
+                                ->useAttributeAsKey('name')
+                                ->prototype('scalar')->end()
+                            ->end()
+                            ->arrayNode('numeric_functions')
+                                ->useAttributeAsKey('name')
+                                ->prototype('scalar')->end()
+                            ->end()
+                            ->arrayNode('datetime_functions')
+                                ->useAttributeAsKey('name')
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
                     ->end()
                 ->end()
             ->end()
@@ -192,18 +258,22 @@ class Configuration
 
     private function getOrmCacheDriverNode($name)
     {
-        $node = new NodeBuilder($name, 'array');
+        $treeBuilder = new TreeBuilder();
+        $node = $treeBuilder->root($name);
+
         $node
             ->addDefaultsIfNotSet()
             ->beforeNormalization()
                 ->ifString()
-                ->then(function($v) { return array ('type' => $v); })
+                ->then(function($v) { return array('type' => $v); })
             ->end()
-            ->scalarNode('type')->defaultValue('array')->isRequired()->end()
-            ->scalarNode('host')->end()
-            ->scalarNode('port')->end()
-            ->scalarNode('instance_class')->end()
-            ->scalarNode('class')->end()
+            ->children()
+                ->scalarNode('type')->defaultValue('array')->isRequired()->end()
+                ->scalarNode('host')->end()
+                ->scalarNode('port')->end()
+                ->scalarNode('instance_class')->end()
+                ->scalarNode('class')->end()
+            ->end()
         ;
 
         return $node;

@@ -14,7 +14,7 @@
  * Default parser implementation.
  *
  * @package twig
- * @author  Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author  Fabien Potencier <fabien@symfony.com>
  */
 class Twig_Parser implements Twig_ParserInterface
 {
@@ -30,6 +30,7 @@ class Twig_Parser implements Twig_ParserInterface
     protected $reservedMacroNames;
     protected $importedFunctions;
     protected $tmpVarCount;
+    protected $traits;
 
     /**
      * Constructor.
@@ -72,6 +73,7 @@ class Twig_Parser implements Twig_ParserInterface
         $this->parent = null;
         $this->blocks = array();
         $this->macros = array();
+        $this->traits = array();
         $this->blockStack = array();
         $this->importedFunctions = array(array());
 
@@ -89,7 +91,7 @@ class Twig_Parser implements Twig_ParserInterface
             throw $e;
         }
 
-        $node = new Twig_Node_Module($body, $this->parent, new Twig_Node($this->blocks), new Twig_Node($this->macros), $this->stream->getFilename());
+        $node = new Twig_Node_Module($body, $this->parent, new Twig_Node($this->blocks), new Twig_Node($this->macros), new Twig_Node($this->traits), $this->stream->getFilename());
 
         $traverser = new Twig_NodeTraverser($this->env, $this->visitors);
 
@@ -221,6 +223,11 @@ class Twig_Parser implements Twig_ParserInterface
         $this->macros[$name] = $node;
     }
 
+    public function addTrait($trait)
+    {
+        $this->traits[] = $trait;
+    }
+
     public function addImportedFunction($alias, $name, Twig_Node_Expression $node)
     {
         $this->importedFunctions[0][$alias] = array('name' => $name, 'node' => $node);
@@ -288,8 +295,7 @@ class Twig_Parser implements Twig_ParserInterface
     protected function checkBodyNodes($body)
     {
         // check that the body does not contain non-empty output nodes
-        foreach ($body as $node)
-        {
+        foreach ($body as $node) {
             if (
                 ($node instanceof Twig_Node_Text && !ctype_space($node->getAttribute('data')))
                 ||

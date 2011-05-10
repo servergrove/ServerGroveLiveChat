@@ -11,8 +11,10 @@
 
 namespace Symfony\Bundle\TwigBundle\CacheWarmer;
 
-use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmer;
+use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
+use Symfony\Bundle\FrameworkBundle\CacheWarmer\TemplatePathsCacheWarmer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\Loader\TemplateFinder;
 
 /**
  * Generates the Twig cache for all templates.
@@ -22,17 +24,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class TemplateCacheCacheWarmer extends CacheWarmer
+class TemplateCacheCacheWarmer implements CacheWarmerInterface
 {
     protected $container;
+    protected $warmer;
 
-    public function __construct(ContainerInterface $container)
+    /**
+     * Constructor.
+     *
+     * @param ContainerInterface        $container The dependency injection container
+     * @param TemplatePathsCacheWarmer  $warmer    The template paths cache warmer
+     */
+    public function __construct(ContainerInterface $container, TemplateFinder $finder)
     {
-        // we don't inject the Twig environment directly as it needs
-        // the loader, which is a cached one, and the cache is not
-        // yet available when this instance is created (the
-        // TemplateCacheCacheWarmer has not been run yet).
+        // We don't inject the Twig environment directly as it depends on the
+        // template locator (via the loader) which might be a cached one.
+        // The cached template locator is available once the TemplatePathsCacheWarmer
+        // has been warmed up
         $this->container = $container;
+        $this->finder = $finder;
     }
 
     /**
@@ -42,11 +52,12 @@ class TemplateCacheCacheWarmer extends CacheWarmer
      */
     public function warmUp($cacheDir)
     {
-        $templates = include $cacheDir.'/templates.php';
-
         $twig = $this->container->get('twig');
-        foreach (array_keys($templates) as $template) {
-            $twig->loadTemplate($template);
+
+        foreach ($this->finder->findAllTemplates() as $template) {
+            if ('twig' === $template->get('engine')) {
+                $twig->loadTemplate($template);
+            }
         }
     }
 

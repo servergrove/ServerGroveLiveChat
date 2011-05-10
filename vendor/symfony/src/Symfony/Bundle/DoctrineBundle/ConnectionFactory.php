@@ -26,7 +26,8 @@ class ConnectionFactory
     private $initialized = false;
 
     /**
-     * @param ContainerInterface $container
+     * Construct.
+     *
      * @param array $typesConfig
      */
     public function __construct(array $typesConfig)
@@ -36,8 +37,11 @@ class ConnectionFactory
 
     /**
      * Create a connection by name.
-     * 
-     * @param  string $connectionName
+     *
+     * @param string        $connectionName
+     * @param Configuration $config
+     * @param EventManager  $eventManager
+     *
      * @return Doctrine\DBAL\Connection
      */
     public function createConnection(array $params, Configuration $config = null, EventManager $eventManager = null)

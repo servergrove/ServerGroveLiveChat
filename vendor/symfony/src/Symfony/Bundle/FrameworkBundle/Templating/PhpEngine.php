@@ -32,12 +32,17 @@ class PhpEngine extends BasePhpEngine implements EngineInterface
      * @param TemplateNameParserInterface $parser    A TemplateNameParserInterface instance
      * @param ContainerInterface          $container The DI container
      * @param LoaderInterface             $loader    A loader instance
+     * @param GlobalVariables|null        $globals   A GlobalVariables instance or null
      */
-    public function __construct(TemplateNameParserInterface $parser, ContainerInterface $container, LoaderInterface $loader)
+    public function __construct(TemplateNameParserInterface $parser, ContainerInterface $container, LoaderInterface $loader, GlobalVariables $globals = null)
     {
         $this->container = $container;
 
         parent::__construct($parser, $loader);
+
+        if (null !== $globals) {
+            $this->addGlobal('app', $globals);
+        }
     }
 
     /**

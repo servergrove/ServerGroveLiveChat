@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Exception\NonExistentServiceException;
+use Symfony\Component\DependencyInjection\Exception\CircularReferenceException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
@@ -72,11 +74,11 @@ class Container implements ContainerInterface
     {
         $this->parameterBag = null === $parameterBag ? new ParameterBag() : $parameterBag;
 
-        $this->services =
-        $this->scopes =
-        $this->scopeChildren =
-        $this->scopedServices =
-        $this->scopeStacks = array();
+        $this->services       = array();
+        $this->scopes         = array();
+        $this->scopeChildren  = array();
+        $this->scopedServices = array();
+        $this->scopeStacks    = array();
 
         $this->set('service_container', $this);
     }
@@ -145,8 +147,8 @@ class Container implements ContainerInterface
     /**
      * Sets a parameter.
      *
-     * @param string $name       The parameter name
-     * @param mixed  $parameters The parameter value
+     * @param string $name  The parameter name
+     * @param mixed  $value The parameter value
      */
     public function setParameter($name, $value)
     {
@@ -199,8 +201,8 @@ class Container implements ContainerInterface
      * If a service is both defined through a set() method and
      * with a set*Service() method, the former has always precedence.
      *
-     * @param  string $id              The service identifier
-     * @param  int    $invalidBehavior The behavior when the service does not exist
+     * @param  string  $id              The service identifier
+     * @param  integer $invalidBehavior The behavior when the service does not exist
      *
      * @return object The associated service
      *
@@ -217,13 +219,18 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->loading[$id])) {
-            throw new \LogicException(sprintf('Circular reference detected for service "%s" (services currently loading: %s).', $id, implode(', ', array_keys($this->loading))));
+            throw new CircularReferenceException($id, array_keys($this->loading));
         }
 
         if (method_exists($this, $method = 'get'.strtr($id, array('_' => '', '.' => '_')).'Service')) {
             $this->loading[$id] = true;
 
-            $service = $this->$method();
+            try {
+                $service = $this->$method();
+            } catch (\Exception $e) {
+                unset($this->loading[$id]);
+                throw $e;
+            }
 
             unset($this->loading[$id]);
 
@@ -231,7 +238,7 @@ class Container implements ContainerInterface
         }
 
         if (self::EXCEPTION_ON_INVALID_REFERENCE === $invalidBehavior) {
-            throw new \InvalidArgumentException(sprintf('The service "%s" does not exist.', $id));
+            throw new NonExistentServiceException($id);
         }
     }
 
@@ -250,7 +257,7 @@ class Container implements ContainerInterface
             }
         }
 
-        return array_merge($ids, array_keys($this->services));
+        return array_unique(array_merge($ids, array_keys($this->services)));
     }
 
     /**
@@ -293,6 +300,22 @@ class Container implements ContainerInterface
         }
 
         $this->scopedServices[$name] = array();
+    }
+
+
+    /**
+     * Returns the current stacked service scope for the given name
+     *
+     * @param string $name The service name
+     * @return array The service scope
+     */
+    public function getCurrentScopedStack($name)
+    {
+        if (!isset($this->scopeStacks[$name]) || 0 === $this->scopeStacks[$name]->count()) {
+            return null;
+        }
+
+        return $this->scopeStacks[$name]->top();
     }
 
     /**
