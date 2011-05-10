@@ -13,7 +13,7 @@
             e-mail
         </div>
         <div class="inputbox">
-            {{ form_field(form.email) }}
+            {{ form_widget(form.email) }}
         </div>
         <p>
         </p>
@@ -21,10 +21,10 @@
             Password
         </div>
         <div class="inputbox">
-            {{ form_field(form.passwd) }}
+            {{ form_widget(form.passwd) }}
         </div>
         <p>
-            {{ form_hidden(form) }}
+            {{ form_rest(form) }}
         </p>
         <input type="submit" value="Login" />
     </div>

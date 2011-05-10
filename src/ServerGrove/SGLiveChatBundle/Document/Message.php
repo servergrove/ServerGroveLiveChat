@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Doctrine\ODM\MongoDB\Mapping\Date;
+
 /**
  * Description of Message
  *
@@ -9,8 +11,6 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * @mongodb:EmbeddedDocument
  * @mongodb:HasLifecycleCallbacks
  */
-use Doctrine\ODM\MongoDB\Mapping\Date;
-
 class Message
 {
 

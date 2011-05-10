@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
+use ServerGrove\SGLiveChatBundle\Form\OperatorLoginType;
+
 use ServerGrove\SGLiveChatBundle\Admin\OperatorLogin;
 use ServerGrove\SGLiveChatBundle\Controller\BaseController;
 use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
@@ -30,12 +32,11 @@ class AdminController extends BaseController
 {
 
     /**
-     * @param ServerGrove\SGLiveChatBundle\Admin\OperatorLogin $login
      * @return Symfony\Component\Form\Form
      */
-    private function createLoginForm(OperatorLogin $login)
+    private function createLoginForm()
     {
-        return OperatorLoginForm::create($this->get('form.context'), 'login');
+        return $this->get('form.factory')->create(new OperatorLoginType());
     }
 
     private function isLogged()
@@ -65,15 +66,16 @@ class AdminController extends BaseController
      */
     public function checkLoginAction()
     {
-        $operatorLogin = new OperatorLogin();
         /* @var $form Form */
-        $form = $this->createLoginForm($operatorLogin);
-        $form->bind($this->getRequest(), $operatorLogin);
+        $form = $this->createLoginForm();
+        $form->bindRequest($this->getRequest());
 
         try {
             if (!$form->isValid()) {
                 throw new FormException('Invalid data');
             }
+
+            $operatorLogin = $form->getData();
 
             $email = $operatorLogin->getEmail();
             $passwd = $operatorLogin->getPasswd();
@@ -92,11 +94,13 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array(
+                'e' => __LINE__)));
         } catch (FormException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array(
+                'e' => __LINE__)));
         }
 
         return new RedirectResponse($this->generateUrl("sglc_admin_index"));
@@ -117,12 +121,11 @@ class AdminController extends BaseController
         if (!empty($errorMsg)) {
             $this->getResponse()->setStatusCode(401);
         }
-        $form = $this->createLoginForm(new OperatorLogin());
+        $form = $this->createLoginForm();
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:login.html.twig', array(
-            'form' => $form,
-            'errorMsg' => $errorMsg)
-        );
+            'form' => $form->createView(),
+            'errorMsg' => $errorMsg));
     }
 
     public function logoutAction()

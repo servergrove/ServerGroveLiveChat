@@ -2,8 +2,9 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
-use Symfony\Component\Security\Core\User\AccountInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
 
 /**
@@ -19,7 +20,7 @@ use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
  * @mongodb:DiscriminatorMap({"admin"="Administrator", "operator"="Operator"})
  * @mongodb:HasLifecycleCallbacks
  */
-class Operator extends User implements AccountInterface, PasswordEncoderInterface
+class Operator extends User implements UserInterface, PasswordEncoderInterface
 {
 
     /**
@@ -144,7 +145,7 @@ class Operator extends User implements AccountInterface, PasswordEncoderInterfac
      * @param AccountInterface $account
      * @return boolean
      */
-    public function equals(AccountInterface $account)
+    public function equals(UserInterface $account)
     {
         return $account instanceof Operator && $account->getId() == $this->getId();
     }

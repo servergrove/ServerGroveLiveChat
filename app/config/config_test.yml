@@ -8,10 +8,3 @@ framework:
 web_profiler:
     toolbar: false
     intercept_redirects: false
-
-zend:
-    logger:
-        priority: debug
-        
-doctrine_mongo_db:
-  default_database: livechat_test

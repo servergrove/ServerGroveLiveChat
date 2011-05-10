@@ -11,7 +11,9 @@
 
     {% for message in messages %}
 	{% set sender = message.getSender() %}
-    <p style="padding: 3px 5px; margin: 0;"><span class="name"><strong>{{sender.getKind()}}:</strong></span> <span class="messageContent">{{message.getContent()}}</span></p>
+    <p style="padding: 3px 5px; margin: 0;">
+		<span class="name"><strong>{{sender.getName()}}:</strong></span> <span class="messageContent">{{message.getContent()}}</span>
+	</p>
     {% endfor %}
 
     <p>

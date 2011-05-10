@@ -12,7 +12,7 @@
             Name
         </div>
         <div class="inputbox">
-        	{{form_field(form.name, {'style': 'width: 400px'})}}
+        	{{form_widget(form.name, {'attr': {'style': 'width: 400px'}})}}
         </div>
         <p></p>
         <div class="inputname">
@@ -20,7 +20,7 @@
             Email
         </div>
         <div class="inputbox">
-        	{{form_field(form.email, {'style': 'width: 400px'})}}
+        	{{form_widget(form.email, {'attr': {'style': 'width: 400px'}})}}
         </div>
         <p></p>
         <div class="inputname">
@@ -28,9 +28,9 @@
             Question
         </div>
         <div class="inputbox">
-        	{{form_field(form.question, {'style': 'width: 400px; height: 170px'})}}
+        	{{form_widget(form.question, {'attr': {'style': 'width: 400px; height: 170px'}})}}
         </div>
-        <p>{{ form_hidden(form) }}</p>
+        <p>{{ form_rest(form) }}</p>
         <input type="submit" value="Start Chat" />
     </form>
 	<h3 class="error">{{errorMsg}}{{ form_errors(form) }}</h3>

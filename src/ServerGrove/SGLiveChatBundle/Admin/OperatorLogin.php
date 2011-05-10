@@ -13,16 +13,16 @@ class OperatorLogin
 
     /**
      * @var string
-     * @validation:Email
-     * @validation:NotBlank
+     * @assert:Email
+     * @assert:NotBlank
      */
     private $email;
 
     /**
      * @var string
-     * @validation:MaxLength(20)
-     * @validation:MinLength(6)
-     * @validation:NotBlank
+     * @assert:MaxLength(20)
+     * @assert:MinLength(6)
+     * @assert:NotBlank
      */
     private $passwd;
 

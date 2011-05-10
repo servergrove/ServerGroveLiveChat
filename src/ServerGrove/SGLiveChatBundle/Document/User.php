@@ -8,7 +8,6 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:MappedSuperclass
  * @mongodb:InheritanceType("COLLECTION_PER_CLASS")
- * @mongodb:HasLifecycleCallbacks
  */
 abstract class User
 {

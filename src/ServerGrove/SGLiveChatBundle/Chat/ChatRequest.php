@@ -12,22 +12,22 @@ class ChatRequest
 
     /**
      * @var string
-     * @validation:MaxLength(150)
-     * @validation:MinLength(6)
-     * @validation:NotBlank
+     * @assert:MaxLength(150)
+     * @assert:MinLength(6)
+     * @assert:NotBlank
      */
     private $name;
 
     /**
      * @var string
-     * @validation:Email
-     * @validation:NotBlank
+     * @assert:Email
+     * @assert:NotBlank
      */
     private $email;
 
     /**
      * @var string
-     * @validation:NotBlank
+     * @assert:NotBlank
      */
     private $question;
 

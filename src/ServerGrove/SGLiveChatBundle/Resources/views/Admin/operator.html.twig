@@ -17,7 +17,7 @@
             name
         </div>
         <div class="inputbox">
-            {{ form_field(form.name) }}
+            {{ form_widget(form.name) }}
         </div>
         <p>
         </p>
@@ -25,7 +25,7 @@
             e-mail
         </div>
         <div class="inputbox">
-            {{ form_field(form.email.first) }} &nbsp; {{ form_field(form.email.second) }}
+            {{ form_widget(form.email.first) }} &nbsp; {{ form_widget(form.email.second) }}
         </div>
         <p>
         </p>
@@ -33,16 +33,16 @@
             Password
         </div>
         <div class="inputbox">
-            {{ form_field(form.passwd.first, {'autocomplete': 'off'}) }} &nbsp; {{ form_field(form.passwd.second, {'autocomplete': 'off'}) }}
+            {{ form_widget(form.passwd.first, {'attr': {'autocomplete': 'off'}}) }} &nbsp; {{ form_widget(form.passwd.second, {'attr': {'autocomplete': 'off'}}) }}
         </div>
         <p>
-            {{ form_field(form.isActive) }}
+            {{ form_widget(form.isActive) }}
             <label for="{{form.getName()}}_isActive">
                 Active
             </label>
         </p>
         <p>
-            {{ form_hidden(form) }}
+            {{ form_rest(form) }}
         </p>
         <input type="submit" value="Submit" />
     </div>

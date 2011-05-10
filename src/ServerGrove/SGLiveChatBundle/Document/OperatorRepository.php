@@ -2,6 +2,7 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Symfony\Component\Security\Core\User\UserInterface;
 
 use Symfony\Component\Security\Core\User\AccountInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -57,6 +58,16 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
     public function supportsClass($class)
     {
         return $class == 'Operator';
+    }
+
+    /* (non-PHPdoc)
+     * @see Symfony\Component\Security\Core\User.UserProviderInterface::loadUser()
+     */
+    public function loadUser(UserInterface $user)
+    {
+        // TODO Auto-generated method stub
+
+
     }
 
 }
