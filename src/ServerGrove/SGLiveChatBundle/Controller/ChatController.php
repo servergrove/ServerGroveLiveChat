@@ -336,7 +336,6 @@ class ChatController extends PublicController
         }
         $this->getSessionStorage()->set('lastMessage', count($messages));
 
-
         if ($last) {
             $messages = $messages->slice($last);
         }
@@ -354,6 +353,14 @@ class ChatController extends PublicController
             if ($this->theOtherMemberIsTyping($chatSession)) {
                 $user = $this->getUserForSession($chatSession);
                 $json['action'] = $chatSession->getOtherMember($user)->getKind() . ' is typing';
+            }
+
+            $user = $this->getUserForSession($chatSession);
+
+            if ($user->getKind() == 'Operator') {
+                try {
+                    $json['current_hit'] = $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()->getUrl();
+                } catch (Exception $e) {}
             }
 
             $this->getResponse()->setContent(json_encode($json));

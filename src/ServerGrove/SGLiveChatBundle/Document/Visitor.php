@@ -43,6 +43,11 @@ class Visitor extends User
     private $visits = array();
 
     /**
+     * @mongodb:ReferenceOne(targetDocument="Visit", mappedBy="visitor", sort={"createdAt"="desc"})
+     */
+    private $lastVisit;
+
+    /**
      * @return the $agent
      */
     public function getAgent()
@@ -114,6 +119,10 @@ class Visitor extends User
     public function addVisit(Visit $visit)
     {
         $this->visits[] = $visit;
+    }
+
+    public function getLastVisit() {
+        return $this->lastVisit;
     }
 
     public function getKind()

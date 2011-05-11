@@ -19,7 +19,7 @@ class Visit
     private $id;
 
     /**
-     * @mongodb:ReferenceOne(targetDocument="Visitor")
+     * @mongodb:ReferenceOne(targetDocument="Visitor", inversedBy="visits")
      */
     private $visitor;
 
@@ -66,6 +66,10 @@ class Visit
     public function addHit(VisitHit $hit)
     {
         $this->hits[] = $hit;
+    }
+
+    public function getLastHit() {
+        return $this->getHits()->last();
     }
 
     /**

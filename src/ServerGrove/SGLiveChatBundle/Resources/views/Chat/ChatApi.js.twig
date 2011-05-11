@@ -21,6 +21,7 @@ Chat.prototype = {
     cmdAppendCanned: null,
     cboCanned: null,
     txtMessage: null,
+    lastHit: null,
     initialize: function(){
         this.cmdSend = document.getElementById("btnSend");
         this.cmdClear = document.getElementById("btnClear");
@@ -110,6 +111,11 @@ Chat.prototype = {
                     } else {
                         Chat.get().removeAction();
                     }
+
+                    if (typeof(json.current_hit) != 'undefined' && json.current_hit != null) {
+	                    Chat.get().displayCurrentHit(json.current_hit);
+					}
+
 					Chat.get().scrollMessagesContainer();
                     if (typeof(json.messages) != 'undefined') {
                         jQuery.each(json.messages, function(i, item){
@@ -133,6 +139,22 @@ Chat.prototype = {
                 }
             }
         });
+    },
+    displayCurrentHit: function(hit){
+        if (this.lastHit != hit) {
+            this.lastHit = hit;
+            if (!jQuery('#chat .hspacer').find('.last-hit').length > 0) {
+                jQuery('#chat .hspacer').append(jQuery(document.createElement('div')).addClass('last-hit'));
+            }        
+        
+            jQuery('#chat .hspacer .last-hit').fadeOut('normal', function(){
+                jQuery(this).empty().append(
+                    jQuery(document.createElement('span')).html('Visitor\'s last hit: ')
+                ).append(
+                    jQuery(document.createElement('a')).attr({href: hit, target: '_blank'}).html(hit)
+                ).fadeIn();
+            });
+        }
     },
     displayAction: function(item){
         jQuery('#messages #action').html(item);
