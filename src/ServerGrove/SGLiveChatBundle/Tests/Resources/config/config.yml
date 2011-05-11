@@ -1,12 +1,12 @@
 imports:
     - { resource: parameters.ini }
+    - { resource: security.yml }
 
 framework:
+    secret:        %secret%
     charset:       UTF-8
-    error_handler: null
     csrf_protection:
         enabled: true
-        secret: %csrf_secret%
     router:        { resource: "%kernel.root_dir%/config/routing.yml" }
     validation:    { enabled: true, annotations: true }
     templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
@@ -23,18 +23,28 @@ twig:
 assetic:
     debug:          %kernel.debug%
     use_controller: false
+    filters:
+        cssrewrite: ~
+        # closure:
+        #     jar: %kernel.root_dir%/java/compiler.jar
+        # yui_css:
+        #     jar: %kernel.root_dir%/java/yuicompressor-2.4.2.jar
 
 # Doctrine Configuration
-doctrine_mongo_db:
-  server: mongodb://localhost:27017
-  default_database: livechat
-  options:
-    connect: true
-  metadata_cache_driver: array # array, apc, xcache, memcache
+doctrine_mongodb:
+  connections:
+    default:
+      server: mongodb://localhost:27017
+      options:
+        connect: true
+  default_database: livechat_test
   auto_generate_hydrator_classes: true
   auto_generate_proxy_classes: true
-  mappings:
-    SGLiveChatBundle: ~
+  document_managers:
+    default:
+      mappings:
+        SGLiveChatBundle: ~
+      metadata_cache_driver: array # array, apc, xcache, memcache
 
 # Swiftmailer Configuration
 swiftmailer: ~
