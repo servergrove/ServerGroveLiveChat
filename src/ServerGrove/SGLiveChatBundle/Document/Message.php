@@ -22,7 +22,13 @@ class Message
 
     /**
      * @var User
-     * @mongodb:ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\User")
+     * @mongodb:ReferenceOne(
+     * 	discriminatorMap={
+     * 		"operator"="Operator",
+     * 		"visitor"="Visitor",
+     * 		"admin"="Administrator"
+     * 	}
+     * )
      */
     private $sender;
 
