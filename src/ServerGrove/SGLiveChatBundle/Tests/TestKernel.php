@@ -2,17 +2,19 @@
 
 namespace ServerGrove\SGLiveChatBundle\Tests;
 
-use Symfony\Bundle\TwigBundle\TwigBundle;
-
-use ServerGrove\SGLiveChatBundle\SGLiveChatBundle;
 use Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle;
-use Symfony\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle;
-use Symfony\Bundle\ZendBundle\ZendBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Bundle\MonologBundle\MonologBundle;
+use Symfony\Bundle\AsseticBundle\AsseticBundle;
+use JMS\SecurityExtraBundle\JMSSecurityExtraBundle;
+use ServerGrove\SGLiveChatBundle\SGLiveChatBundle;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Bundle\AsseticBundle\AsseticBundle;
+
+date_default_timezone_set('UTC');
 
 class TestKernel extends Kernel
 {
@@ -21,12 +23,13 @@ class TestKernel extends Kernel
     {
         $bundles = array(
             new FrameworkBundle(),
-            new ZendBundle(),
+            new SecurityBundle(),
             new TwigBundle(),
-            new AsseticBundle(),
+            new MonologBundle(),
             new SwiftmailerBundle(),
-            new DoctrineBundle(),
             new DoctrineMongoDBBundle(),
+            new AsseticBundle(),
+            new JMSSecurityExtraBundle(),
             new SGLiveChatBundle());
 
         return $bundles;
