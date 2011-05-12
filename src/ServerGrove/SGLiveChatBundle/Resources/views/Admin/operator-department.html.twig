@@ -15,13 +15,13 @@
             {{ form_errors(form) }}
         </div>
         <div class="inputname">
-            name
+            {{ form_label(form.name) }}
         </div>
         <div class="inputbox">
             {{ form_widget(form.name) }}
         </div>
         <p>
-            {{ form_widget(form.isActive) }}<label for="{{form.getName()}}_isActive">Active</label>
+            {{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}
         </p>
         <p>
             {{ form_rest(form) }}

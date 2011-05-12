@@ -47,10 +47,10 @@
             <td>
                 {{operator.getEmail()}}
             </td>
-            <td>
+            <td style="width: 90px; text-align: center;">
                 {{operator.getCreatedAt().format('Y-m-d H:i:s')}}
             </td>
-            <td>
+            <td style="width: 60px; text-align: center;">
                 {% if operator.isActive() %}
                 Yes
                 {% else %}
@@ -58,12 +58,9 @@
                 {% endif %}
             </td>
             <td>
-                <a href="">{% if operator.isActive() %}
-                    Deactivate
-                    {% else %}
-                    Activate
-                    {% endif %}</a>
-                &nbsp;<a href="{{path('sglc_admin_operator_edit', {'id': operator.getId()})}}">Edit</a>
+                <!--<a href="#">{% if operator.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
+                &nbsp;-->
+                <a href="{{path('sglc_admin_operator_edit', {'id': operator.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}

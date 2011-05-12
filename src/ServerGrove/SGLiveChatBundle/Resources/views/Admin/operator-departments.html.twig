@@ -38,7 +38,7 @@
             <td>
                 {{department.getName()}}
             </td>
-            <td>
+            <td style="width: 60px; text-align: center;">
                 {% if department.isActive() %}
                 Yes
                 {% else %}
@@ -46,12 +46,9 @@
                 {% endif %}
             </td>
             <td>
-                <a href="">{% if department.isActive() %}
-                    Deactivate
-                    {% else %}
-                    Activate
-                    {% endif %}</a>
-                &nbsp;<a href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
+                <!--<a href="#">{% if department.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
+                &nbsp;-->
+                <a href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}

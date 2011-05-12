@@ -200,13 +200,13 @@ var SessionToolkit = {
             draw: function(item) {
                 var row = document.createElement('tr');
                 jQuery(row)
-				.append('<td>' + item.id + ' - ' + item.status.name + '</td>')
-				.append('<td>' + item.visitor.id + ' - ' + item.visitor.name + '</td>')
-				.append('<td>' + item.visitor.email + '</td>')
-				.append('<td>' + item.question + '</td>')
-				.append('<td>' + item.time + '</td>')
-				.append('<td>' + item.duration + '</td>')
-				.append('<td>' + item.operator.name + '</td>');
+                .append('<td>' + item.id + ' - ' + item.status.name + '</td>')
+                .append('<td>' + item.visitor.id + ' - ' + item.visitor.name + '</td>')
+                .append('<td>' + item.visitor.email + '</td>')
+                .append('<td>' + item.question + '</td>')
+                .append('<td>' + item.time + '</td>')
+                .append('<td>' + item.duration + '</td>')
+                .append('<td>' + (typeof(item.operator) != 'undefined' && typeof(item.operator.name) != 'undefined' ? item.operator.name : '-' ) + '</td>');
 				
                 var actionsCell = document.createElement('td');
                 var newWindowAttributes = 'width=700,height=600,toolbar=no,location=no';

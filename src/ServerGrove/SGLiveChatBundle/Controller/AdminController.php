@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
+use ServerGrove\SGLiveChatBundle\Form\OperatorType;
+use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentType;
 use ServerGrove\SGLiveChatBundle\Form\OperatorLoginType;
 
 use ServerGrove\SGLiveChatBundle\Admin\OperatorLogin;
@@ -9,9 +11,6 @@ use ServerGrove\SGLiveChatBundle\Controller\BaseController;
 use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
 use ServerGrove\SGLiveChatBundle\Document\Operator;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
-use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentForm;
-use ServerGrove\SGLiveChatBundle\Form\OperatorForm;
-use ServerGrove\SGLiveChatBundle\Form\OperatorLoginForm;
 
 use Symfony\Component\Form\Exception\FormException;
 use Doctrine\ODM\MongoDB\Mapping\Document;
@@ -288,22 +287,21 @@ class AdminController extends BaseController
             $department = new Department();
         }
 
-        $form = new OperatorDepartmentForm('department', $department, $this->get('validator'));
+        $form = $this->get('form.factory')->create(new OperatorDepartmentType());
+        $form->setData($department);
 
         switch ($this->getRequest()->getMethod()) {
             case 'POST':
             case 'PUT':
-                $params = $this->getRequest()->request->get($form->getName());
-                if (!empty($params['name'])) {
-                    $department->setName($params['name']);
-                    $department->setIsActive(isset($params['isActive']) && $params['isActive']);
+                $form->bindRequest($this->getRequest());
+                if ($form->isValid()) {
                     $this->getDocumentManager()->persist($department);
                     $this->getDocumentManager()->flush();
                     $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
 
                     return new RedirectResponse($this->generateUrl('sglc_admin_operator_departments'));
                 }
-                //}
+                
                 break;
             case 'DELETE':
                 break;
@@ -311,7 +309,7 @@ class AdminController extends BaseController
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator-department.html.twig', array(
             'department' => $department,
-            'form' => $form));
+            'form' => $form->createView()));
     }
 
     public function operatorDepartmentsAction()
@@ -343,24 +341,23 @@ class AdminController extends BaseController
             $operator = new Operator();
         }
 
-        $form = new OperatorForm('operator', $operator, $this->get('validator'));
+        $form = $this->get('form.factory')->create(new OperatorType());
+        $form->setData($operator);
 
         switch ($this->getRequest()->getMethod()) {
             case 'POST':
             case 'PUT':
-                $params = $this->getRequest()->request->get($form->getName());
-                if (!empty($params['name']) && !empty($params['email']['first']) && !empty($params['passwd']['first'])) {
-                    $operator->setName($params['name']);
-                    $operator->setEmail($params['email']['first']);
-                    $operator->setPasswd($params['passwd']['first']);
-                    $operator->setIsActive(isset($params['isActive']) && $params['isActive']);
+                $form->bindRequest($this->getRequest());
+                
+                if ($form->isValid()) {
+                    
                     $this->getDocumentManager()->persist($operator);
                     $this->getDocumentManager()->flush();
                     $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
 
                     return new RedirectResponse($this->generateUrl('sglc_admin_operators'));
                 }
-                //}
+
                 break;
             case 'DELETE':
                 break;
@@ -368,7 +365,7 @@ class AdminController extends BaseController
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
             'operator' => $operator,
-            'form' => $form));
+            'form' => $form->createView()));
     }
 
 }

@@ -14,7 +14,7 @@
             {{ form_errors(form) }}
         </div>
         <div class="inputname">
-            name
+            {{ form_label(form.name) }}
         </div>
         <div class="inputbox">
             {{ form_widget(form.name) }}
@@ -22,7 +22,7 @@
         <p>
         </p>
         <div class="inputname">
-            e-mail
+            {{ form_label(form.email) }}
         </div>
         <div class="inputbox">
             {{ form_widget(form.email.first) }} &nbsp; {{ form_widget(form.email.second) }}
@@ -30,16 +30,14 @@
         <p>
         </p>
         <div class="inputname">
-            Password
+            {{ form_label(form.passwd) }}
         </div>
         <div class="inputbox">
             {{ form_widget(form.passwd.first, {'attr': {'autocomplete': 'off'}}) }} &nbsp; {{ form_widget(form.passwd.second, {'attr': {'autocomplete': 'off'}}) }}
         </div>
         <p>
             {{ form_widget(form.isActive) }}
-            <label for="{{form.getName()}}_isActive">
-                Active
-            </label>
+            {{ form_label(form.isActive) }}
         </p>
         <p>
             {{ form_rest(form) }}
