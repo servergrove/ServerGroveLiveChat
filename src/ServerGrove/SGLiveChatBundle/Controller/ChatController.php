@@ -11,7 +11,6 @@ use ServerGrove\SGLiveChatBundle\Document\Visitor;
 use ServerGrove\SGLiveChatBundle\Document\Session;
 use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
 use ServerGrove\SGLiveChatBundle\Form\ChatRequestType;
-
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -359,7 +358,9 @@ class ChatController extends PublicController
 
             if ($user->getKind() == 'Operator') {
                 try {
-                    $json['current_hit'] = $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()->getUrl();
+                    if ($chatSession->getOtherMember($user)->getLastVisit() && $chatSession->getOtherMember($user)->getLastVisit()->getLastHit() && $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()) {
+                        $json['current_hit'] = $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()->getUrl();
+                    }
                 } catch (Exception $e) {}
             }
 
