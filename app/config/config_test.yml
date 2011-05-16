@@ -2,7 +2,9 @@ imports:
     - { resource: config_dev.yml }
 
 framework:
-    test: ~
+  test: ~
+  session:
+    storage_id: session.storage.filesystem
 
 web_profiler:
     toolbar: false
