@@ -2,6 +2,10 @@
 
 namespace ServerGrove\SGLiveChatBundle\Tests;
 
+use Symfony\Component\ClassLoader\DebugUniversalClassLoader;
+
+use Symfony\Component\HttpKernel\Debug\ErrorHandler;
+
 use Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle;
 use Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -35,9 +39,17 @@ class TestKernel extends Kernel
         return $bundles;
     }
 
-    public function registerRootDir()
+    public function init()
     {
-        return sys_get_temp_dir();
+        if ($this->debug) {
+            ini_set('display_errors', 1);
+            error_reporting(-1);
+
+            DebugUniversalClassLoader::enable();
+            ErrorHandler::register();
+        } else {
+            ini_set('display_errors', 0);
+        }
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
