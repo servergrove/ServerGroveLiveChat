@@ -9,3 +9,6 @@ framework:
 web_profiler:
     toolbar: false
     intercept_redirects: false
+
+doctrine_mongodb:
+  default_database: livechat_%kernel.environment%
