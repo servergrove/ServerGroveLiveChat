@@ -27,7 +27,7 @@ class Department
      * @var boolean
      * @mongodb:Field(type="boolean")
      */
-    private $isActive;
+    private $isActive = true;
     /**
      * @var \ServerGrove\SGLiveChatBundle\Document\Operator[]
      * @mongodb:ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
