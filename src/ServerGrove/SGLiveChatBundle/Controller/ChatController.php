@@ -249,7 +249,7 @@ class ChatController extends PublicController
     public function loadAction($id)
     {
         $operator = $this->getOperator();
-        if (!($chatSession = $this->getChatSessionForCurrentUser())) {
+        if (!($chatSession = $this->getChatSession($id))) {
             $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
             return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
