@@ -33,7 +33,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      * @var boolean
      * @mongodb:Field(type="boolean")
      */
-    private $isActive;
+    private $isActive = true;
 
     /**
      * @var string
