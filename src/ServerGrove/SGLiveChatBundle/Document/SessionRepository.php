@@ -2,7 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
 use MongoDate;
 
 /**
@@ -36,14 +35,17 @@ class SessionRepository extends DocumentRepository
                         'visitor' => array(
                             'id' => $chat->getVisitor()->getId(),
                             'name' => $chat->getVisitor()->getName(),
-                            'email' => $chat->getVisitor()->getEmail()),
+                            'email' => $chat->getVisitor()->getEmail()
+                        ),
                         'question' => $chat->getQuestion(),
                         'time' => $chat->getCreatedAt()->format('Y-m-d H:i:s'),
                         'duration' => $chat->getUpdatedAt()->format('U') - $chat->getCreatedAt()->format('U'),
                         'operator' => $operator,
                         'status' => array(
                             'id' => $chat->getStatusId(),
-                            'name' => $chat->getStatus()));
+                            'name' => $chat->getStatus()
+                        )
+                    );
                 }, $this->getRequestedChats()->toArray());
     }
 

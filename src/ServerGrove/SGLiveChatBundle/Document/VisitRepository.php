@@ -2,7 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
 use MongoDate;
 
 /**
@@ -34,8 +33,7 @@ class VisitRepository extends DocumentRepository
     {
         $visit = null;
         if (!is_null($key)) {
-            $visit = $this->findOneBy(array(
-                'key' => $key));
+            $visit = $this->findOneBy(array('key' => $key));
         }
 
         if (!$visit) {
@@ -67,24 +65,27 @@ class VisitRepository extends DocumentRepository
                     'languages' => $visit->getVisitor()->getLanguages(),
                     'agent' => $visit->getVisitor()->getAgent(),
                     'currentPage' => $visit->getHits()->last()->getVisitLink()->getUrl(),
-                    'referer' => $hits->last()->getReferer()),
+                    'referer' => $hits->last()->getReferer()
+                ),
                 'hits' => array_map(
-                function (VisitHit $hit)
-                {
-                    return array(
-                        'id' => $hit->getId(),
-                        'createdAt' => $hit->getCreatedAt()->format('Y-m-d H:i:s'),
-                        'duration' => 0,
-                        'link' => $hit->getVisitLink()->getUrl(),
-                        'referer' => $hit->getReferer());
-                }, $hits->toArray(true)),
+                        function (VisitHit $hit) {
+                            return array(
+                                'id' => $hit->getId(),
+                                'createdAt' => $hit->getCreatedAt()->format('Y-m-d H:i:s'),
+                                'duration' => 0,
+                                'link' => $hit->getVisitLink()->getUrl(),
+                                'referer' => $hit->getReferer()
+                            );
+                        }, $hits->toArray(true)
+                ),
                 'localtime' => date('r', (int) $visit->getLocalTime()),
                 'hostname' => /* gethostbyaddr($visit->getRemoteAddr()) */'Unknown',
                 'remoteAddr' => $visit->getRemoteAddr(),
                 'country' => 'unknown',
                 'createdAt' => $visit->getCreatedAt()->format('Y-m-d H:i:s'),
                 'lastHit' => 'lasthit',
-                'duration' => time() - $visit->getCreatedAt()->format('U'));
+                'duration' => time() - $visit->getCreatedAt()->format('U')
+            );
         }
 
         return $array;

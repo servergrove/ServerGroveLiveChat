@@ -3,12 +3,10 @@
 namespace ServerGrove\SGLiveChatBundle\Document;
 
 use Symfony\Component\Security\Core\User\UserInterface;
-
 use Symfony\Component\Security\Core\User\AccountInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Doctrine\ODM\MongoDB\DocumentRepository;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use ServerGrove\SGLiveChatBundle\Document\Operator;
 use MongoDate;
 
 /**
@@ -37,7 +35,7 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
     public function loadUserByUsername($username)
     {
         $operator = $this->findOneBy(array(
-            'email' => $username));
+                    'email' => $username));
         if (!$operator) {
             throw new UsernameNotFoundException('Invalid username');
         }
@@ -63,11 +61,11 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
     /* (non-PHPdoc)
      * @see Symfony\Component\Security\Core\User.UserProviderInterface::loadUser()
      */
+
     public function loadUser(UserInterface $user)
     {
-        // TODO Auto-generated method stub
-
-
+        // TODO
     }
+
 
 }

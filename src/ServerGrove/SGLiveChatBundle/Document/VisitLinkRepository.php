@@ -2,8 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
-
 /**
  * @author ismael
  */

@@ -2,8 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
-
 /**
  * Description of VisitRepository
  *
@@ -11,7 +9,6 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class VisitorRepository extends DocumentRepository
 {
-
     const REPOSITORY_NAME = 'SGLiveChatBundle:Visitor';
 
     public function create(array $args)
@@ -20,9 +17,7 @@ class VisitorRepository extends DocumentRepository
         foreach ($args as $k => $v) {
             $methodName = 'set' . ucfirst($k);
             if (method_exists($visitor, $methodName)) {
-                call_user_func(array(
-                    $visitor,
-                    $methodName), $v);
+                call_user_func(array($visitor, $methodName), $v);
             }
         }
         $visitor->setKey(md5(time() . $visitor->getAgent() . rand(0, 100)));
@@ -43,8 +38,7 @@ class VisitorRepository extends DocumentRepository
     {
         $visitor = null;
         if (!is_null($key)) {
-            $visitor = $this->findOneBy(array(
-                'key' => $key));
+            $visitor = $this->findOneBy(array('key' => $key));
         }
         return $visitor;
     }

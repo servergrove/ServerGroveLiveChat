@@ -2,8 +2,6 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
-
 /**
  * Description of CannedMessageRepository
  *
@@ -11,10 +9,5 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class CannedMessageRepository extends DocumentRepository
 {
-
-    public function findSlice($offset, $length)
-    {
-        return $this->createQueryBuilder()->skip($offset)->limit($length)->getQuery()->execute();
-    }
 
 }

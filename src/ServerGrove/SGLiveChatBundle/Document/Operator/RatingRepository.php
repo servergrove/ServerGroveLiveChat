@@ -2,7 +2,7 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
+use ServerGrove\SGLiveChatBundle\Document\DocumentRepository;
 use ServerGrove\SGLiveChatBundle\Document\Operator;
 
 /**
