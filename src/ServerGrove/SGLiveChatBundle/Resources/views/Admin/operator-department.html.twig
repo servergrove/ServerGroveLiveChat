@@ -11,7 +11,7 @@
 {% set vars = department.getId() ? {'id': department.getId()} : {} %}
 <script type="text/javascript">
     jQuery(document).ready(function(){
-        jQuery(':text').focus();
+        jQuery(':text:first').focus();
     });
 </script>
 <form action="{{ path(route, vars) }}" method="post">
