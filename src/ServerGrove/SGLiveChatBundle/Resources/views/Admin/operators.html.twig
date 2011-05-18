@@ -36,6 +36,11 @@
     </thead>
     <tfoot>
         <tr>
+            <td colspan="6" style="text-align: right;">
+            {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_operators'} %}
+            </td>
+        </tr>
+        <tr>
             <td colspan="6">
                 <a href="{{path('sglc_admin_operator')}}">New</a>
             </td>

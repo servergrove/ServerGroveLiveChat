@@ -29,6 +29,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class AdminController extends BaseController
 {
+    
+    const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
     public function cannedMessageAction($id = null)
     {
@@ -71,12 +73,15 @@ class AdminController extends BaseController
 
     public function cannedMessagesAction($page)
     {
-        $length = 30;
+        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
         $offset = ($page - 1) * $length;
+
+        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findAll()->count() / $length);
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:canned-messages.html.twig', array(
             'cannedMessages' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findSlice($offset, $length),
-            'msg' => $this->getSessionStorage()->getFlash('msg', '')
+            'msg' => $this->getSessionStorage()->getFlash('msg', ''),
+            'pages' => $pages
         ));
     }
 
@@ -236,16 +241,22 @@ class AdminController extends BaseController
         ));
     }
 
-    public function operatorDepartmentsAction()
+    public function operatorDepartmentsAction($page)
     {
         $this->checkLogin();
 
-        $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll();
+        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
+        $offset = ($page - 1) * $length;
+
+        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll()->count() / $length);
+
+        $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findSlice($offset, $length);
         $msg = $this->getSessionStorage()->getFlash('msg', '');
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator-departments.html.twig', array(
             'departments' => $departments,
-            'msg' => $msg
+            'msg' => $msg,
+            'pages' => $pages
         ));
     }
 
@@ -294,17 +305,23 @@ class AdminController extends BaseController
         ));
     }
 
-    public function operatorsAction()
+    public function operatorsAction($page)
     {
         if (!is_null($response = $this->checkLogin())) {
             return $response;
         }
 
-        $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll();
+        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
+        $offset = ($page - 1) * $length;
+
+        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll()->count() / $length);
+
+        $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findSlice($offset, $length);
         $msg = $this->getSessionStorage()->getFlash('msg', '');
         return $this->renderTemplate('SGLiveChatBundle:Admin:operators.html.twig', array(
             'operators' => $operators,
-            'msg' => $msg
+            'msg' => $msg,
+            'pages' => $pages
         ));
     }
 

@@ -109,8 +109,8 @@ sglc_admin_operator:
   defaults: { _controller: SGLiveChatBundle:Admin:operator }
 
 sglc_admin_operator_departments:
-  pattern: /admin/sglivechat/operator/departments
-  defaults: { _controller: SGLiveChatBundle:Admin:operatorDepartments }
+  pattern: /admin/sglivechat/operator/departments/{page}
+  defaults: { _controller: SGLiveChatBundle:Admin:operatorDepartments, page: 1 }
 
 sglc_admin_operator_department:
   pattern: /admin/sglivechat/operator/department
@@ -126,8 +126,9 @@ sglc_admin_operator_edit:
   defaults: { _controller: SGLiveChatBundle:Admin:operator }
 
 sglc_admin_operators:
-  pattern: /admin/sglivechat/operators
-  defaults: { _controller: SGLiveChatBundle:Admin:operators }
+  pattern: /admin/sglivechat/operators/{page}
+  defaults: { _controller: SGLiveChatBundle:Admin:operators, page: 1 }
+  requirements: { page: \d+ }
 
 sglc_admin_canned_message:
   pattern: /admin/sglivechat/canned-message
@@ -140,7 +141,7 @@ sglc_admin_canned_message_edit:
 sglc_admin_canned_messages:
   pattern: /admin/sglivechat/canned-messages/{page}
   defaults: { _controller: SGLiveChatBundle:Admin:cannedMessages, page: 1}
-  requirements: { page: \+d }
+  requirements: { page: \d+ }
 
 sglc_admin_console_sessions:
   pattern: /admin/sglivechat/console/sessions

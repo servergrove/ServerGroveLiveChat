@@ -1,0 +1,9 @@
+{% if pages > 1 %}
+<ul class="pager">
+    <li><a href="{{path(route, {'page': 1})}}">First</a></li>
+    {% for i in 1..pages %}
+    <li><a href="{{path(route, {'page': i})}}">{{i}}</a></li>
+    {% endfor %}
+    <li><a href="{{path(route, {'page': pages})}}">Last</a></li>
+</ul>
+{% endif %}
