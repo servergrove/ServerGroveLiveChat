@@ -8,7 +8,10 @@ use ServerGrove\SGLiveChatBundle\Document\Operator;
  * Description of Department
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="operator_department")
+ * @mongodb:Document(
+ *  collection="operator_department",
+ *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\Operator\DepartmentRepository"
+ * )
  */
 class Department
 {
