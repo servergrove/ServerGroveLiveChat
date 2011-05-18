@@ -2,13 +2,11 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
-use Doctrine\ODM\MongoDB\DocumentRepository;
-
 /**
  * Description of CacheRepository
  *
  */
-class CacheRepository extends DocumentRepository
+class CacheRepository extends \Doctrine\ODM\MongoDB\DocumentRepository
 {
     public function getByKey($key)
     {
