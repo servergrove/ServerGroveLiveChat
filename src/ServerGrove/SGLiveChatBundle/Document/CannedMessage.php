@@ -6,7 +6,7 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * Description of CannedMessage
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="canned_message")
+ * @mongodb:Document(collection="canned_message",repositoryClass="ServerGrove\SGLiveChatBundle\Document\CannedMessageRepository")
  */
 class CannedMessage
 {
