@@ -1,6 +1,13 @@
 {% extends "SGLiveChatBundle::admin-layout.html.twig" %}
 {% block content %}
 {% include "SGLiveChatBundle:Admin:header.html.twig" %}
+
+{% if operator.getId() %}
+<h1>Edit operator "{{operator.getName()}}"</h1>
+{% else %}
+<h1>Add new operator</h1>
+{% endif %}
+
 {% set route = operator.getId() ? 'sglc_admin_operator_edit' : 'sglc_admin_operator' %}
 {% set vars = operator.getId() ? {'id': operator.getId()} : {} %}
 <script type="text/javascript">

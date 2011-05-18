@@ -2,6 +2,11 @@
 
 {% block content %}
 {% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% if department.getId() %}
+<h1>Edit department "{{department.getName()}}"</h1>
+{% else %}
+<h1>Add new department</h1>
+{% endif %}
 {% set route = department.getId() ? 'sglc_admin_operator_department_edit' : 'sglc_admin_operator_department' %}
 {% set vars = department.getId() ? {'id': department.getId()} : {} %}
 <script type="text/javascript">
