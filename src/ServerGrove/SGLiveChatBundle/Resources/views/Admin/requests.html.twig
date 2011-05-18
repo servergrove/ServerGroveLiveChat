@@ -5,6 +5,7 @@
 
 {% block content %}
 {% include "SGLiveChatBundle:Admin:header.html.twig" %}
+<h1>Active sessions</h1>
 {% if chats %}
 {% render "SGLiveChatBundle:Admin:sessionsApi" with {'_format' : 'html'} %}
 {% include "SGLiveChatBundle:Admin:requestedChats.html.twig" with {'chats': chats} only %}
