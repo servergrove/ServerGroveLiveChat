@@ -5,7 +5,10 @@
 <h2>{{msg}}</h2>
 <table cellpadding="3" cellspacing="3" border="0" width="100%">
     <colgroup>
-        <col width="10%"><col><col><col width="115px"><col width="75px"><col width="100px">
+        <col width="150px">
+        <col>
+        <col width="75px">
+        <col width="75px">
     </colgroup>
     <thead>
         <tr class="header">
@@ -40,7 +43,7 @@
             <td>
                 {{department.getName()}}
             </td>
-            <td style="width: 60px; text-align: center;">
+            <td style="text-align: center;">
                 {% if department.isActive() %}
                 Yes
                 {% else %}
