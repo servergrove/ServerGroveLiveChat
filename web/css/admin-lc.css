@@ -110,3 +110,21 @@ h3.error {
 .operator {
     color: #084B8A;
 }
+
+ul#header-menu {
+	background-color: #C2C2C2;
+	border: solid 1px #888;
+}
+
+ul#header-menu li {
+	padding: 5px;
+}
+
+ul#header-menu li a {
+	text-decoration: none;
+	color: #00F;
+}
+
+ul#header-menu li a:hover {
+	text-decoration: underline;
+}
