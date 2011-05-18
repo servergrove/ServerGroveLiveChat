@@ -1,0 +1,41 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+
+{% if cannedMessage.getId() %}
+<h1>Edit canned message "{{cannedMessage.getTitle()}}"</h1>
+{% else %}
+<h1>Add new canned message</h1>
+{% endif %}
+
+{% set route = cannedMessage.getId() ? 'sglc_admin_canned_message_edit' : 'sglc_admin_canned_message' %}
+{% set vars = cannedMessage.getId() ? {'id': cannedMessage.getId()} : {} %}
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text:first').focus();
+    });
+</script>
+<form action="{{ path(route, vars) }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <div>
+            {{ form_errors(form) }}
+        </div>
+        <div class="inputname">
+            {{ form_errors(form.title) }}{{ form_label(form.title) }}
+        </div>
+        <div class="inputbox">
+            {{ form_widget(form.title) }}
+        </div>
+        <p></p>
+        <div class="inputname">
+            {{ form_errors(form.content) }}{{ form_label(form.content) }}
+        </div>
+        <div class="inputbox">
+            {{ form_widget(form.content) }}
+        </div>
+        <p>
+            {{ form_rest(form) }}
+        </p>
+        <input type="submit" value="Submit" />
+    </div>
+</form> {% endblock %}

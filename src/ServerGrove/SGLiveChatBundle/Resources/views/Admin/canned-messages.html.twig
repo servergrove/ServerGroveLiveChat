@@ -1,0 +1,50 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+<h1>Canned Messages list</h1>
+<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="150px">
+        <col>
+        <col width="75px">
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Title
+            </th>
+            <th>
+                &nbsp;
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="3">
+                <a href="{{path('sglc_admin_canned_message')}}">New</a>
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if cannedMessages %}
+        {% for cannedMessage in cannedMessages %}
+        <tr>
+            <td>
+                {{cannedMessage.getId()}}
+            </td>
+            <td>
+                {{cannedMessage.getTitle()}}
+            </td>
+            <td>
+                <a href="{{path('sglc_admin_canned_message_edit', {'id': cannedMessage.getId()})}}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

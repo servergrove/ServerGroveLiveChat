@@ -2,16 +2,16 @@
 
 namespace ServerGrove\SGLiveChatBundle\Controller;
 
+use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
+use ServerGrove\SGLiveChatBundle\Form\CannedMessageType;
 use ServerGrove\SGLiveChatBundle\Form\OperatorType;
 use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentType;
 use ServerGrove\SGLiveChatBundle\Form\OperatorLoginType;
-
 use ServerGrove\SGLiveChatBundle\Admin\OperatorLogin;
 use ServerGrove\SGLiveChatBundle\Controller\BaseController;
 use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
 use ServerGrove\SGLiveChatBundle\Document\Operator;
 use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
-
 use Symfony\Component\Form\Exception\FormException;
 use Doctrine\ODM\MongoDB\Mapping\Document;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
@@ -30,34 +30,54 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class AdminController extends BaseController
 {
 
-    /**
-     * @return Symfony\Component\Form\Form
-     */
-    private function createLoginForm()
+    public function cannedMessageAction($id = null)
     {
-        return $this->get('form.factory')->create(new OperatorLoginType());
-    }
-
-    private function isLogged()
-    {
-        return $this->getSessionStorage()->get('_operator');
-    }
-
-    private function checkLogin()
-    {
-        if (!$this->isLogged()) {
-            return $this->forward('SGLiveChatBundle:Admin:login');
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
         }
 
-        $operator = $this->getOperator();
-        if (!$operator) {
-            return $this->forward('SGLiveChatBundle:Admin:logout');
+        if ($id) {
+            $cannedMessage = $this->getDocumentManager()->find('SGLiveChatBundle:CannedMessage', $id);
+        } else {
+            $cannedMessage = new CannedMessage();
         }
-        $operator->setIsOnline(true);
-        $this->getDocumentManager()->persist($operator);
-        $this->getDocumentManager()->flush();
 
-        return null;
+        /* @var $form Symfony\Component\Form\Form */
+        $form = $this->get('form.factory')->create(new CannedMessageType());
+        $form->setData($cannedMessage);
+
+        switch ($this->getRequest()->getMethod()) {
+            case 'POST':
+            case 'PUT':
+                $form->bindRequest($this->getRequest());
+                if ($form->isValid()) {
+                    $this->getDocumentManager()->persist($cannedMessage);
+                    $this->getDocumentManager()->flush();
+                    $this->getSessionStorage()->setFlash('msg', 'The canned message has been successfully updated');
+
+                    return new RedirectResponse($this->generateUrl('sglc_admin_canned_messages'));
+                }
+
+                break;
+            case 'DELETE':
+                break;
+        }
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:canned-message.html.twig', array(
+            'cannedMessage' => $cannedMessage,
+            'form' => $form->createView()
+        ));
+    }
+
+    public function cannedMessagesAction($page)
+    {
+        $length = 30;
+        $offset = ($page - 1) * $length;
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:canned-messages.html.twig', array(
+            'cannedMessages' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findSlice($offset, $length),
+            'msg' => $this->getSessionStorage()->getFlash('msg', '')
+        ));
     }
 
     /**
@@ -93,16 +113,45 @@ class AdminController extends BaseController
         } catch (UsernameNotFoundException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return new RedirectResponse($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
         } catch (FormException $e) {
             $this->getSessionStorage()->setFlash('_error', $e->getMessage());
 
-            return new RedirectResponse($this->generateUrl("_security_login", array(
-                'e' => __LINE__)));
+            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
         }
 
         return new RedirectResponse($this->generateUrl("sglc_admin_index"));
+    }
+
+    public function closeChatAction($id)
+    {
+        if (($chat = $this->getChatSession($id)) !== false) {
+            $chat->close();
+            $this->getDocumentManager()->persist($chat);
+            $this->getDocumentManager()->flush();
+        }
+
+        return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
+    }
+
+    public function currentVisitsAction($_format)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            $this->getResponse()->setStatusCode(401);
+            $this->getResponse()->setContent('');
+            return $this->getResponse();
+        }
+
+        if ($_format == 'json') {
+            $visits = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->getLastVisitsArray();
+            $this->getResponse()->setContent(json_encode($visits));
+
+            return $this->getResponse();
+        }
+
+        throw new NotFoundHttpException('Not supported format');
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array('visits' => $visits));
     }
 
     public function indexAction()
@@ -124,7 +173,8 @@ class AdminController extends BaseController
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:login.html.twig', array(
             'form' => $form->createView(),
-            'errorMsg' => $errorMsg));
+            'errorMsg' => $errorMsg
+        ));
     }
 
     public function logoutAction()
@@ -146,14 +196,138 @@ class AdminController extends BaseController
         return new RedirectResponse($this->generateUrl("_security_login"));
     }
 
-    private function getRequestedChats()
+    public function operatorDepartmentAction($id = null)
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChats();
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        $message = null;
+
+        if ($id) {
+            $department = $this->getDocumentManager()->find('SGLiveChatBundle:Operator\Department', $id);
+        } else {
+            $department = new Department();
+        }
+
+        $form = $this->get('form.factory')->create(new OperatorDepartmentType());
+        $form->setData($department);
+
+        switch ($this->getRequest()->getMethod()) {
+            case 'POST':
+            case 'PUT':
+                $form->bindRequest($this->getRequest());
+                if ($form->isValid()) {
+                    $this->getDocumentManager()->persist($department);
+                    $this->getDocumentManager()->flush();
+                    $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
+
+                    return new RedirectResponse($this->generateUrl('sglc_admin_operator_departments'));
+                }
+
+                break;
+            case 'DELETE':
+                break;
+        }
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-department.html.twig', array(
+            'department' => $department,
+            'form' => $form->createView()
+        ));
     }
 
-    private function getRequestedChatsArray()
+    public function operatorDepartmentsAction()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChatsArray();
+        $this->checkLogin();
+
+        $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll();
+        $msg = $this->getSessionStorage()->getFlash('msg', '');
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-departments.html.twig', array(
+            'departments' => $departments,
+            'msg' => $msg
+        ));
+    }
+
+    /**
+     *
+     */
+    public function operatorAction($id = null)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        $message = null;
+
+        if ($id) {
+            $operator = $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $id);
+        } else {
+            $operator = new Operator();
+        }
+
+        $form = $this->get('form.factory')->create(new OperatorType());
+        $form->setData($operator);
+
+        switch ($this->getRequest()->getMethod()) {
+            case 'POST':
+            case 'PUT':
+                $form->bindRequest($this->getRequest());
+
+                if ($form->isValid()) {
+
+                    $this->getDocumentManager()->persist($operator);
+                    $this->getDocumentManager()->flush();
+                    $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
+
+                    return new RedirectResponse($this->generateUrl('sglc_admin_operators'));
+                }
+
+                break;
+            case 'DELETE':
+                break;
+        }
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
+            'operator' => $operator,
+            'form' => $form->createView()
+        ));
+    }
+
+    public function operatorsAction()
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll();
+        $msg = $this->getSessionStorage()->getFlash('msg', '');
+        return $this->renderTemplate('SGLiveChatBundle:Admin:operators.html.twig', array(
+            'operators' => $operators,
+            'msg' => $msg
+        ));
+    }
+
+    public function requestedChatsAction($_format)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            $this->getResponse()->setStatusCode(401);
+            $this->getResponse()->setContent('');
+            return $this->getResponse();
+        }
+
+        $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
+
+        if ($_format == 'json') {
+            $this->getResponse()->headers->set('Content-type', 'application/json');
+            $this->getResponse()->setContent(json_encode($this->getRequestedChatsArray()));
+
+            return $this->getResponse();
+        }
+
+        $chats = $this->getRequestedChats();
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array('chats' => $chats));
     }
 
     public function sessionsAction()
@@ -164,8 +338,7 @@ class AdminController extends BaseController
 
         $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:requests.html.twig', array(
-            'chats' => $this->getRequestedChats()));
+        return $this->renderTemplate('SGLiveChatBundle:Admin:requests.html.twig', array('chats' => $this->getRequestedChats()));
     }
 
     public function sessionsApiAction($_format)
@@ -197,48 +370,32 @@ class AdminController extends BaseController
         return $this->getResponse();
     }
 
-    public function requestedChatsAction($_format)
+    /**
+     * @return Symfony\Component\HttpFoundation\Response
+     */
+    private function checkLogin()
     {
-        if (!is_null($response = $this->checkLogin())) {
-            $this->getResponse()->setStatusCode(401);
-            $this->getResponse()->setContent('');
-            return $this->getResponse();
+        if (!$this->isLogged()) {
+            return $this->forward('SGLiveChatBundle:Admin:login');
         }
 
-        $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
-
-        if ($_format == 'json') {
-            $this->getResponse()->headers->set('Content-type', 'application/json');
-            $this->getResponse()->setContent(json_encode($this->getRequestedChatsArray()));
-
-            return $this->getResponse();
+        $operator = $this->getOperator();
+        if (!$operator) {
+            return $this->forward('SGLiveChatBundle:Admin:logout');
         }
+        $operator->setIsOnline(true);
+        $this->getDocumentManager()->persist($operator);
+        $this->getDocumentManager()->flush();
 
-        $chats = $this->getRequestedChats();
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array(
-            'chats' => $chats));
+        return null;
     }
 
-    public function currentVisitsAction($_format)
+    /**
+     * @return Symfony\Component\Form\Form
+     */
+    private function createLoginForm()
     {
-        if (!is_null($response = $this->checkLogin())) {
-            $this->getResponse()->setStatusCode(401);
-            $this->getResponse()->setContent('');
-            return $this->getResponse();
-        }
-
-        if ($_format == 'json') {
-            $visits = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->getLastVisitsArray();
-            $this->getResponse()->setContent(json_encode($visits));
-
-            return $this->getResponse();
-        }
-
-        throw new NotFoundHttpException('Not supported format');
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array(
-            'visits' => $visits));
+        return $this->get('form.factory')->create(new OperatorLoginType());
     }
 
     /**
@@ -249,123 +406,28 @@ class AdminController extends BaseController
         return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->find($id);
     }
 
-    public function closeChatAction($id)
+    /**
+     * @return Doctrine\ODM\MongoDB\LoggableCursor
+     */
+    private function getRequestedChats()
     {
-        if (($chat = $this->getChatSession($id)) !== false) {
-            $chat->close();
-            $this->getDocumentManager()->persist($chat);
-            $this->getDocumentManager()->flush();
-        }
-
-        return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
-    }
-
-    public function operatorsAction()
-    {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
-        }
-
-        $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll();
-        $msg = $this->getSessionStorage()->getFlash('msg', '');
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operators.html.twig', array(
-            'operators' => $operators,
-            'msg' => $msg));
-    }
-
-    public function operatorDepartmentAction($id = null)
-    {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
-        }
-
-        $message = null;
-
-        if ($id) {
-            $department = $this->getDocumentManager()->find('SGLiveChatBundle:Operator\Department', $id);
-        } else {
-            $department = new Department();
-        }
-
-        $form = $this->get('form.factory')->create(new OperatorDepartmentType());
-        $form->setData($department);
-
-        switch ($this->getRequest()->getMethod()) {
-            case 'POST':
-            case 'PUT':
-                $form->bindRequest($this->getRequest());
-                if ($form->isValid()) {
-                    $this->getDocumentManager()->persist($department);
-                    $this->getDocumentManager()->flush();
-                    $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
-
-                    return new RedirectResponse($this->generateUrl('sglc_admin_operator_departments'));
-                }
-                
-                break;
-            case 'DELETE':
-                break;
-        }
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-department.html.twig', array(
-            'department' => $department,
-            'form' => $form->createView()));
-    }
-
-    public function operatorDepartmentsAction()
-    {
-        $this->checkLogin();
-
-        $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll();
-        $msg = $this->getSessionStorage()->getFlash('msg', '');
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-departments.html.twig', array(
-            'departments' => $departments,
-            'msg' => $msg));
+        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChats();
     }
 
     /**
-     *
+     * @return array
      */
-    public function operatorAction($id = null)
+    private function getRequestedChatsArray()
     {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
-        }
+        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChatsArray();
+    }
 
-        $message = null;
-
-        if ($id) {
-            $operator = $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $id);
-        } else {
-            $operator = new Operator();
-        }
-
-        $form = $this->get('form.factory')->create(new OperatorType());
-        $form->setData($operator);
-
-        switch ($this->getRequest()->getMethod()) {
-            case 'POST':
-            case 'PUT':
-                $form->bindRequest($this->getRequest());
-                
-                if ($form->isValid()) {
-                    
-                    $this->getDocumentManager()->persist($operator);
-                    $this->getDocumentManager()->flush();
-                    $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
-
-                    return new RedirectResponse($this->generateUrl('sglc_admin_operators'));
-                }
-
-                break;
-            case 'DELETE':
-                break;
-        }
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
-            'operator' => $operator,
-            'form' => $form->createView()));
+    /**
+     * @return boolean
+     */
+    private function isLogged()
+    {
+        return $this->getSessionStorage()->get('_operator');
     }
 
 }
