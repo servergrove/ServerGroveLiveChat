@@ -12,6 +12,11 @@ use MongoDate;
 class VisitRepository extends DocumentRepository
 {
 
+    public function findSlice($offset, $length)
+    {
+        return $this->createQueryBuilder()->skip($offset)->limit($length)->sort('createdAt', 'desc')->getQuery()->execute();
+    }
+
     /**
      * @return ServerGrove\SGLiveChatBundle\Document\Visit
      */

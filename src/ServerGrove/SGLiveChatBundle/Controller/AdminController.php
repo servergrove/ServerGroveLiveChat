@@ -29,7 +29,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
  */
 class AdminController extends BaseController
 {
-    
     const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
     public function cannedMessageAction($id = null)
@@ -73,16 +72,7 @@ class AdminController extends BaseController
 
     public function cannedMessagesAction($page)
     {
-        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
-        $offset = ($page - 1) * $length;
-
-        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findAll()->count() / $length);
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:canned-messages.html.twig', array(
-            'cannedMessages' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findSlice($offset, $length),
-            'msg' => $this->getSessionStorage()->getFlash('msg', ''),
-            'pages' => $pages
-        ));
+        return $this->simpleListAction($page, 'SGLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
     }
 
     /**
@@ -243,21 +233,7 @@ class AdminController extends BaseController
 
     public function operatorDepartmentsAction($page)
     {
-        $this->checkLogin();
-
-        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
-        $offset = ($page - 1) * $length;
-
-        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findAll()->count() / $length);
-
-        $departments = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator\Department')->findSlice($offset, $length);
-        $msg = $this->getSessionStorage()->getFlash('msg', '');
-
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-departments.html.twig', array(
-            'departments' => $departments,
-            'msg' => $msg,
-            'pages' => $pages
-        ));
+        return $this->simpleListAction($page, 'SGLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
     }
 
     /**
@@ -307,22 +283,7 @@ class AdminController extends BaseController
 
     public function operatorsAction($page)
     {
-        if (!is_null($response = $this->checkLogin())) {
-            return $response;
-        }
-
-        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
-        $offset = ($page - 1) * $length;
-
-        $pages = floor($this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findAll()->count() / $length);
-
-        $operators = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->findSlice($offset, $length);
-        $msg = $this->getSessionStorage()->getFlash('msg', '');
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operators.html.twig', array(
-            'operators' => $operators,
-            'msg' => $msg,
-            'pages' => $pages
-        ));
+        return $this->simpleListAction($page, 'SGLiveChatBundle:Operator', 'operators');
     }
 
     public function requestedChatsAction($_format)
@@ -385,6 +346,43 @@ class AdminController extends BaseController
         $this->getResponse()->setContent(json_encode($json));
 
         return $this->getResponse();
+    }
+
+    public function visitorsAction($page)
+    {
+        return $this->simpleListAction($page, 'SGLiveChatBundle:Visitor', 'visitors');
+    }
+
+    public function visitsAction($page)
+    {
+        return $this->simpleListAction($page, 'SGLiveChatBundle:Visit', 'visits');
+    }
+
+    private function simpleListAction($page, $documentName, $documentTemplateKey, $template = null)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        if (is_null($template)) {
+            $template = $documentTemplateKey;
+        }
+
+        $template = 'SGLiveChatBundle:Admin:' . $template . '.html.twig';
+
+        $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
+        $offset = ($page - 1) * $length;
+
+        $pages = ceil($this->getDocumentManager()->getRepository($documentName)->findAll()->count() / $length);
+
+        $documents = $this->getDocumentManager()->getRepository($documentName)->findSlice($offset, $length);
+
+        $msg = $this->getSessionStorage()->getFlash('msg', '');
+        return $this->renderTemplate($template, array(
+            $documentTemplateKey => $documents,
+            'msg' => $msg,
+            'pages' => $pages
+        ));
     }
 
     /**

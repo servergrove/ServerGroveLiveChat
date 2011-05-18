@@ -1,0 +1,72 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+<h1>Visits list</h1>
+<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="150px">
+        <col width="120px">
+        <col width="160px">
+        <col width="150px">
+        <col>
+        <col>
+        <col>
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Created At
+            </th>
+            <th>
+                Visit Key
+            </th>
+            <th>
+                Visitor
+            </th>
+            <th>
+                Remote Addr
+            </th>
+            <th>
+                Local Time
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="6" style="text-align: right;">
+            {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_visits'} %}
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if visits %}
+        {% for visit in visits %}
+        <tr>
+            <td>
+                {{visit.getId()}}
+            </td>
+            <td style="text-align: center;">
+                {{visit.getCreatedAt().format('Y-m-d H:i:s')}}
+            </td>
+            <td>
+                {{visit.getKey()}}
+            </td>
+            <td>
+                {{visit.getVisitor().getId()}}
+            </td>
+            <td>
+                {{visit.getRemoteAddr()}}
+            </td>
+            <td>
+                {{visit.getLocalTime()}}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

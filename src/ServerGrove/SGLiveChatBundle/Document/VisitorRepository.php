@@ -11,6 +11,11 @@ class VisitorRepository extends DocumentRepository
 {
     const REPOSITORY_NAME = 'SGLiveChatBundle:Visitor';
 
+    public function findSlice($offset, $length)
+    {
+        return $this->createQueryBuilder()->skip($offset)->limit($length)->sort('createdAt', 'desc')->getQuery()->execute();
+    }
+
     public function create(array $args)
     {
         $visitor = new Visitor();

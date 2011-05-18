@@ -147,6 +147,16 @@ sglc_admin_console_sessions:
   pattern: /admin/sglivechat/console/sessions
   defaults: { _controller: SGLiveChatBundle:Admin:sessions }
 
+sglc_admin_visitors:
+  pattern: /admin/sglivechat/visitors/{page}
+  defaults: { _controller: SGLiveChatBundle:Admin:visitors, page: 1}
+  requirements: { page: \d+ }
+
+sglc_admin_visits:
+  pattern: /admin/sglivechat/visits/{page}
+  defaults: { _controller: SGLiveChatBundle:Admin:visits, page: 1}
+  requirements: { page: \d+ }
+
 sglc_admin_console_requested_chats:
   pattern: /admin/sglivechat/console/requested-chats.{_format}
   defaults: { _controller: SGLiveChatBundle:Admin:requestedChats, _format: html }

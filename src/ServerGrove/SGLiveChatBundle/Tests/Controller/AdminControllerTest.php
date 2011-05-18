@@ -359,6 +359,40 @@ class AdminControllerTest extends WebTestCase
         unset($client, $crawler);
     }
 
+    public function testVisitors()
+    {
+        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
+        $client = $this->createClient();
+
+        $this->login($client);
+
+        $crawler = $client->request('GET', '/admin/sglivechat/visitors');
+
+        $this->assertGetSuccessful($client);
+        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visitors list")')->count());
+
+        $this->logout($client);
+
+        unset($client, $crawler);
+    }
+
+    public function testVisits()
+    {
+        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
+        $client = $this->createClient();
+
+        $this->login($client);
+
+        $crawler = $client->request('GET', '/admin/sglivechat/visits');
+
+        $this->assertGetSuccessful($client);
+        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visits list")')->count());
+
+        $this->logout($client);
+
+        unset($client, $crawler);
+    }
+
     protected function setUp()
     {
         parent::setUp();

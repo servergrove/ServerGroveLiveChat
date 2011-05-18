@@ -9,6 +9,7 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  * collection="visitor",
  * repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitorRepository"
  * )
+ * @mongodb:HasLifecycleCallbacks
  */
 class Visitor extends User
 {
