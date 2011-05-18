@@ -111,20 +111,24 @@ h3.error {
     color: #084B8A;
 }
 
-ul#header-menu {
-	background-color: #C2C2C2;
-	border: solid 1px #888;
+ul#header-menu, ul.pager  {
+    background-color: #C2C2C2;
+    border: solid 1px #888;
 }
 
 ul#header-menu li {
-	padding: 5px;
+    padding: 5px;
 }
 
-ul#header-menu li a {
-	text-decoration: none;
-	color: #00F;
+ul.pager li {
+    padding: 2px;
 }
 
-ul#header-menu li a:hover {
-	text-decoration: underline;
+ul#header-menu li a, ul.pager li a {
+    text-decoration: none;
+    color: #00F;
+}
+
+ul#header-menu li a:hover, ul.pager li a:hover {
+    text-decoration: underline;
 }

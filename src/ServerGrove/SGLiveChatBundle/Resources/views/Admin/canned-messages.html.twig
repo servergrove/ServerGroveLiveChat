@@ -24,6 +24,11 @@
     </thead>
     <tfoot>
         <tr>
+            <td colspan="3" style="text-align: right;">
+            {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_canned_messages'} %}
+            </td>
+        </tr>
+        <tr>
             <td colspan="3">
                 <a href="{{path('sglc_admin_canned_message')}}">New</a>
             </td>
