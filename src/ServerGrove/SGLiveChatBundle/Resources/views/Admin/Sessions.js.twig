@@ -7,7 +7,7 @@ var SessionToolkit = {
             SessionToolkit.Visit._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Visit._timeOut);
                 SessionToolkit.Global.refresh();
-            }, 10000);
+            }, 5000);
         },
         refresh: function() {
             jQuery.ajax({
@@ -47,7 +47,7 @@ var SessionToolkit = {
             SessionToolkit.Visit._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Visit._timeOut);
                 SessionToolkit.Visit.refreshCurrentVisits();
-            }, 10000);
+            }, 5000);
         },
         refreshCurrentVisits: function() {
             jQuery('#currentVisits table tbody').html('');
@@ -82,17 +82,19 @@ var SessionToolkit = {
                 jQuery(document.createElement('td')).html(item.localtime).appendTo(row);
                 jQuery(document.createElement('td')).html(item.hostname).appendTo(row);
                 jQuery(document.createElement('td')).html(item.createdAt).appendTo(row);
-                jQuery(document.createElement('td')).html(item.duration).appendTo(row);
+                jQuery(document.createElement('td')).html(item.currentPageDuration + " ago / " + item.duration + " ago").appendTo(row);
                 jQuery(document.createElement('td')).html(item.visitor.languages).appendTo(row);
                 jQuery(document.createElement('td')).html(item.visitor.agent).appendTo(row);
                 jQuery(document.createElement('td')).append(
 					jQuery(document.createElement('a')).attr({
-                    	href: item.visitor.currentPage
+                    	href: item.visitor.currentPage,
+                    	target: '_blank'
                 	}).html(item.visitor.currentPage)
 				).appendTo(row);
                 jQuery(document.createElement('td')).append(
 					jQuery(document.createElement('a')).attr({
-                    	href: item.visitor.currentPage
+                    	href: item.visitor.currentPage,
+                    	target: '_blank'
                 	}).html(item.visitor.referer)
 				).appendTo(row);
                 jQuery('#currentVisits table:first tbody:first').append(row);
@@ -102,8 +104,7 @@ var SessionToolkit = {
                 var row = document.createElement('tr');
                 jQuery(row).attr({
                     valign: 'top'
-                });
-                
+                });                
                 
                 jQuery(document.createElement('td')).append(
 					jQuery(document.createElement('a')).attr({
@@ -168,7 +169,7 @@ var SessionToolkit = {
             SessionToolkit.Request._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Request._timeOut);
                 SessionToolkit.Request.refreshRequestedChats();
-            }, 10000);
+            }, 5000);
         },
         refreshRequestedChats: function() {
             jQuery.ajax({

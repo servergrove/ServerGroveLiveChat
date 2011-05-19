@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use \DateTime;
+
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @mongodb:Document(
@@ -102,6 +104,11 @@ class Visit
     public function getDuration()
     {
         return $this->getUpdatedAt()->format('U') - $this->getCreatedAt()->format('U');
+    }
+
+    public function getCurrentPageDuration()
+    {
+        return time() - $this->getLastHit()->getCreatedAt()->format('U');
     }
 
     public function getHostname()

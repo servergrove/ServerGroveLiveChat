@@ -2,6 +2,7 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use ServerGrove\SGLiveChatBundle\Util\DateTool;
 use MongoDate;
 
 /**
@@ -84,12 +85,13 @@ class VisitRepository extends DocumentRepository
                         }, $hits->toArray(true)
                 ),
                 'localtime' => $visit->getLocalTime(),
-                'hostname' =>  gethostbyaddr($visit->getRemoteAddr()),
+                'hostname' => gethostbyaddr($visit->getRemoteAddr()),
                 'remoteAddr' => $visit->getRemoteAddr(),
                 'country' => 'unknown',
                 'createdAt' => $visit->getCreatedAt()->format('Y-m-d H:i:s'),
                 'lastHit' => 'lasthit',
-                'duration' => $visit->getDuration()
+                'duration' => DateTool::ezDate($visit->getDuration()),
+                'currentPageDuration' => DateTool::ezDate($visit->getCurrentPageDuration())
             );
         }
 
