@@ -83,16 +83,18 @@ if (typeof(SGChatTracker) == 'undefined') {
             var _data = null;
             var _type = 'GET';
   
+            var _date = new Date();
+
             if (typeof(first) != 'undefined' && first != null && first) {
                 _data = {
-                    lt: escape(new Date().getTime()),
+                    lt: _date.toString(),
                     tz: SGChatTracker._getTimeZone(),
                     r: encodeURIComponent(document.referrer)
                 };
                 _type = 'POST';
             } else {
                 _data = {
-                    lt: escape(new Date().getTime())
+                    lt: _date.toString()
                 };
             }
             jQuery.ajax({

@@ -17,46 +17,45 @@ class Visit
      * @mongodb:Id
      */
     private $id;
-
     /**
      * @mongodb:ReferenceOne(targetDocument="Visitor", inversedBy="visits")
      */
     private $visitor;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $key;
-
     /**
      * @var string
      * @mongodb:String
      */
     private $remoteAddr;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $createdAt;
-
     /**
      * @var string
      * @mongodb:Date
      */
     private $updatedAt;
-
     /**
-     * @var int
-     * @mongodb:Number
+     * @var string
+     * @mongodb:String
      */
     private $localTime;
-
+    /**
+     * @var int
+     * @mongodb:Int
+     */
+    private $localTimeZone;
     /**
      * @mongodb:EmbedMany(targetDocument="VisitHit")
      */
     private $hits;
+
 
     public function getHits()
     {
@@ -68,8 +67,49 @@ class Visit
         $this->hits[] = $hit;
     }
 
-    public function getLastHit() {
+    /**
+     * @return VisitHit
+     */
+    public function getLastHit()
+    {
         return $this->getHits()->last();
+    }
+
+    /**
+     * @return VisitHit
+     */
+    public function getFirstHit()
+    {
+        return $this->getHits()->first();
+    }
+
+    /**
+     * @return string
+     */
+    public function getSource()
+    {
+        return $this->getFirstHit()->getReferer();
+    }
+
+    /**
+     * @return VisitLink
+     */
+    public function getCurrentPage()
+    {
+        return $this->getLastHit()->getVisitLink();
+    }
+
+    public function getDuration()
+    {
+        return $this->getUpdatedAt()->format('U') - $this->getCreatedAt()->format('U');
+    }
+
+    public function getHostname()
+    {
+        $ip = $this->getRemoteAddr();
+        $record = gethostbyaddr($ip);
+
+        return $record;
     }
 
     /**
@@ -122,7 +162,7 @@ class Visit
     }
 
     /**
-     * @return string $createdAt
+     * @return DateTime
      */
     public function getCreatedAt()
     {
@@ -130,7 +170,7 @@ class Visit
     }
 
     /**
-     * @return string $updatedAt
+     * @return DateTime
      */
     public function getUpdatedAt()
     {
@@ -138,11 +178,19 @@ class Visit
     }
 
     /**
-     * @return int $localTime
+     * @return string $localTime
      */
     public function getLocalTime()
     {
         return $this->localTime;
+    }
+
+    /**
+     * @return int $localTimeZone
+     */
+    public function getLocalTimeZone()
+    {
+        return $this->localTimeZone;
     }
 
     /**
@@ -192,12 +240,21 @@ class Visit
     }
 
     /**
-     * @param int $localTime
+     * @param string $localTime
      * @return void
      */
     public function setLocalTime($localTime)
     {
         $this->localTime = $localTime;
+    }
+
+    /**
+     * @param int $localTimeZone
+     * @return void
+     */
+    public function setLocalTimeZone($localTimeZone)
+    {
+        $this->localTimeZone = $localTimeZone;
     }
 
 }

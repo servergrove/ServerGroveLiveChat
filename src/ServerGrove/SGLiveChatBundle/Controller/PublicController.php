@@ -63,7 +63,7 @@ abstract class PublicController extends BaseController
         $visit = $this->getVisitRepository()->getByKey($key, $visitor);
 
         if (!$visit) {
-            throw new \Exception("Failed to get visit");
+            $visit = $this->createVisit($visitor);
         }
 
         if (!$this->getRequest()->cookies->has('vsid') || $key != $visit->getKey()) {
@@ -76,12 +76,31 @@ abstract class PublicController extends BaseController
     /**
      * @return ServerGrove\SGLiveChatBundle\Document\Visitor
      */
+    protected function createVisit(Visitor $visitor)
+    {
+        if ('POST' == $this->getRequest()->getMethod()) {
+            $lt = $this->getRequest()->request->get('lt');
+            $tz = $this->getRequest()->request->get('tz');
+        } else {
+            $lt = $this->getRequest()->query->get('lt');
+            $tz = $this->getRequest()->query->get('tz');
+        }
+
+        return $this->getVisitRepository()->create($visitor, $this->getRequest()->getClientIp(), $lt, $tz);
+    }
+
+    /**
+     * @return ServerGrove\SGLiveChatBundle\Document\Visitor
+     */
     protected function createVisitor()
     {
         return $this->getVisitorRepository()->create(
                 array(
                     'agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'),
                     'remoteAddr' => $this->getRequest()->getClientIp(),
-                    'languages' => implode(';', $this->getRequest()->getLanguages())));
+                    'languages' => implode(';', $this->getRequest()->getLanguages())
+                )
+        );
     }
+
 }

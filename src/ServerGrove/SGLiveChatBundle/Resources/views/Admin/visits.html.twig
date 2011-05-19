@@ -11,7 +11,7 @@
         <col width="150px">
         <col>
         <col>
-        <col>
+        <col width="50px">
     </colgroup>
     <thead>
         <tr class="header">
@@ -33,11 +33,14 @@
             <th>
                 Local Time
             </th>
+            <th>
+                Hits
+            </th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <td colspan="6" style="text-align: right;">
+            <td colspan="7" style="text-align: right;">
             {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_visits'} %}
             </td>
         </tr>
@@ -63,6 +66,9 @@
             </td>
             <td>
                 {{visit.getLocalTime()}}
+            </td>
+            <td style="text-align: center;">
+                {{visit.getHits().count()}}
             </td>
         </tr>
         {% endfor %}

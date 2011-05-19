@@ -20,13 +20,19 @@ class VisitRepository extends DocumentRepository
     /**
      * @return ServerGrove\SGLiveChatBundle\Document\Visit
      */
-    public function create(Visitor $visitor)
+    public function create(Visitor $visitor, $remoteAddr, $localTime, $timeZone, $visitKey = null)
     {
         $visit = new Visit();
         $visit->setVisitor($visitor);
-        $visit->setKey(md5(time() . $visitor->getAgent() . $visitor->getId()));
-        #$visit->setLocalTime($localTime);
 
+        if (is_null($visitKey)) {
+            $visitKey = md5(time() . $visitor->getAgent() . $visitor->getId());
+        }
+
+        $visit->setKey($visitKey);
+        $visit->setRemoteAddr($remoteAddr);
+        $visit->setLocalTime($localTime);
+        $visit->setLocalTimeZone($timeZone);
 
         return $visit;
     }
@@ -39,12 +45,6 @@ class VisitRepository extends DocumentRepository
         $visit = null;
         if (!is_null($key)) {
             $visit = $this->findOneBy(array('key' => $key));
-        }
-
-        if (!$visit) {
-            $visit = $this->create($visitor);
-            $this->getDocumentManager()->persist($visit);
-            $this->getDocumentManager()->flush();
         }
 
         return $visit;
@@ -83,13 +83,13 @@ class VisitRepository extends DocumentRepository
                             );
                         }, $hits->toArray(true)
                 ),
-                'localtime' => date('r', (int) $visit->getLocalTime()),
-                'hostname' => /* gethostbyaddr($visit->getRemoteAddr()) */'Unknown',
+                'localtime' => $visit->getLocalTime(),
+                'hostname' =>  gethostbyaddr($visit->getRemoteAddr()),
                 'remoteAddr' => $visit->getRemoteAddr(),
                 'country' => 'unknown',
                 'createdAt' => $visit->getCreatedAt()->format('Y-m-d H:i:s'),
                 'lastHit' => 'lasthit',
-                'duration' => time() - $visit->getCreatedAt()->format('U')
+                'duration' => $visit->getDuration()
             );
         }
 

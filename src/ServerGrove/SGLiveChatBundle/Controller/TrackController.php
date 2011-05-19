@@ -32,8 +32,15 @@ class TrackController extends PublicController
         $visit = $this->getVisitByKey($visitor);
 
         $visit->setUpdatedAt(new MongoDate(time()));
-        if ($this->getRequest()->query->has('lt')) {
-            $visit->setLocalTime($this->getRequest()->query->get('lt'));
+
+        if ('POST' == $this->getRequest()->getMethod()) {
+            if ($this->getRequest()->request->has('lt')) {
+                $visit->setLocalTime($this->getRequest()->request->get('lt'));
+            }
+        } else {
+            if ($this->getRequest()->query->has('lt')) {
+                $visit->setLocalTime($this->getRequest()->query->get('lt'));
+            }
         }
 
         $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->closeOldLogins();
@@ -60,7 +67,7 @@ class TrackController extends PublicController
         if ($chats->count() > 0) {
             /* @var $chat \ServerGrove\SGLiveChatBundle\Document\Session */
             $chat = $chats->getSingleResult();
-                        
+
 
             if (!$this->getSessionStorage()->get('chat_invite', null)) {
                 $this->getSessionStorage()->set('chat_invite', $chat->getId());
