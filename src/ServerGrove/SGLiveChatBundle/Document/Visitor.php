@@ -87,6 +87,14 @@ class Visitor extends User
     {
         return $this->remoteAddr;
     }
+    
+    /**
+     * @return the $remoteAddr
+     */
+    public function getHostname()
+    {
+        return gethostbyaddr($this->remoteAddr);
+    }
 
     /**
      * @param string $remoteAddr

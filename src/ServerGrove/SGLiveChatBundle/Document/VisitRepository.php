@@ -58,8 +58,12 @@ class VisitRepository extends DocumentRepository
 
     public function getLastVisitsArray()
     {
+        return $this->toArray($this->getLastVisits());
+    }
+
+    public function toArray($visits) {
         $array = array();
-        $visits = $this->getLastVisits();
+
         /* @var $visit Visit */
         foreach ($visits as $visit) {
             $hits = $visit->getHits();
@@ -97,5 +101,5 @@ class VisitRepository extends DocumentRepository
 
         return $array;
     }
-
+    
 }

@@ -7,7 +7,7 @@ var SessionToolkit = {
             SessionToolkit.Visit._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Visit._timeOut);
                 SessionToolkit.Global.refresh();
-            }, 5000);
+            }, 10000);
         },
         refresh: function() {
             jQuery.ajax({
@@ -43,14 +43,25 @@ var SessionToolkit = {
     },
     Visit: {
         _timeOut: null,
+        _listContainer: '#currentVisits',
+        _inviteChat: true,
+        disableChatInvitation: function() {
+            SessionToolkit.Visit._inviteChat = false;
+        },
+        enableChatInvitation: function() {
+            SessionToolkit.Visit._inviteChat = true;
+        },
+        setListContainer: function(listContainer) {
+            SessionToolkit.Visit._listContainer = listContainer;
+        },
         loadTimeout: function() {
             SessionToolkit.Visit._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Visit._timeOut);
                 SessionToolkit.Visit.refreshCurrentVisits();
-            }, 5000);
+            }, 10000);
         },
         refreshCurrentVisits: function() {
-            jQuery('#currentVisits table tbody').html('');
+            jQuery(SessionToolkit.Visit._listContainer + ' table tbody').html('');
             jQuery.ajax({
                 type: "GET",
                 url: "{{ path('sglc_admin_console_current_visits', {'_format': 'json'})}}",
@@ -71,14 +82,21 @@ var SessionToolkit = {
         },
         Item: {
             drawAll: function(json) {
-                jQuery('#currentVisits table:first tbody:first').html('');
+                jQuery(SessionToolkit.Visit._listContainer + ' table:first tbody').remove();
                 jQuery.each(json, function(i, item) {
                     SessionToolkit.Visit.Item.draw(item);
                 });
+                jQuery(SessionToolkit.Visit._listContainer + ' > table:first > tbody').removeClass('even');
+                jQuery(SessionToolkit.Visit._listContainer + ' > table:first > tbody:even').addClass('even');
             },
             draw: function(item) {
                 var row = document.createElement('tr');
-                jQuery(document.createElement('td')).html(item.visitor.id + '(' + item.visitor.visits + ')').appendTo(row);
+                jQuery(document.createElement('td')).append(
+                    jQuery(document.createElement('a')).attr({
+                        href: "{{ path('sglc_admin_visitor', {'id': '__ID__'})}}".replace("__ID__", item.visitor.id),
+                        target: '_blank'
+                    }).html(item.visitor.id)
+                ).append(document.createTextNode('(' + item.visitor.visits + ')')).appendTo(row);
                 jQuery(document.createElement('td')).html(item.localtime).appendTo(row);
                 jQuery(document.createElement('td')).html(item.hostname).appendTo(row);
                 jQuery(document.createElement('td')).html(item.createdAt).appendTo(row);
@@ -97,7 +115,7 @@ var SessionToolkit = {
                     	target: '_blank'
                 	}).html(item.visitor.referer)
 				).appendTo(row);
-                jQuery('#currentVisits table:first tbody:first').append(row);
+				jQuery(document.createElement('tbody')).append(row).appendTo(SessionToolkit.Visit._listContainer + ' table:first');
                 SessionToolkit.Visit.Item.drawHits(item);
             },
             drawHits: function(item) {
@@ -118,10 +136,11 @@ var SessionToolkit = {
                 jQuery(document.createElement('td')).attr({
                     colspan: 8
                 }).append(
+                    SessionToolkit.Visit._inviteChat ?
 					jQuery(document.createElement('a')).attr({href: '#'}).html('Invite Chat').click(function(){
 						window.open('{{path("sglc_chat_invite", {"sessId": "__chatId__"})}}'.replace('__chatId__', item.id), 'livechat' + item.id, 'width=700,height=600,toolbar=no,location=no');
 						return false;
-					})
+					}) : ''
 				).append(
 					jQuery(document.createElement('div')).attr({ // Div created
 	                    id: 'visit_' + item.id
@@ -158,7 +177,7 @@ var SessionToolkit = {
 					).appendTo(jQuery(row).find('#visit_' + item.id + ' table'));
                 });
                 
-                jQuery('#currentVisits table:first tbody:first').append(row);
+                jQuery(SessionToolkit.Visit._listContainer + ' table:first tbody:last').append(row);
                 jQuery('#visit_' + item.id).toggle();
             }
         }
@@ -169,7 +188,7 @@ var SessionToolkit = {
             SessionToolkit.Request._timeOut = window.setTimeout(function() {
                 window.clearTimeout(SessionToolkit.Request._timeOut);
                 SessionToolkit.Request.refreshRequestedChats();
-            }, 5000);
+            }, 10000);
         },
         refreshRequestedChats: function() {
             jQuery.ajax({
@@ -249,9 +268,3 @@ var SessionToolkit = {
         }
     }
 };
-jQuery('#currentVisits').ready(function() {
-    SessionToolkit.Global.refresh();
-});
-jQuery(document).ready(function() {
-    SessionToolkit.Global.loadTimeout();
-});

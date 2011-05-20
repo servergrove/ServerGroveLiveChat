@@ -132,3 +132,15 @@ ul#header-menu li a, ul.pager li a {
 ul#header-menu li a:hover, ul.pager li a:hover {
     text-decoration: underline;
 }
+
+div.visitsList table {
+    border-collapse: collapse;
+}
+
+div.visitsList table tbody.even {
+    background-color: #FFF;
+}
+
+div.visitsList table tbody tr td {
+    border: solid 1px #AAA;
+}

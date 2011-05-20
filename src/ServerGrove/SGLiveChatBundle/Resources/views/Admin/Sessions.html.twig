@@ -1,5 +1,11 @@
 <script type="text/javascript">
     //<![CDATA[
     {% include "SGLiveChatBundle:Admin:Sessions.js.twig" %}
+    jQuery('#currentVisits').ready(function() {
+        SessionToolkit.Global.refresh();
+    });
+    jQuery(document).ready(function() {
+        SessionToolkit.Global.loadTimeout();
+    });
     //]]>
 </script>

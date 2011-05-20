@@ -152,6 +152,10 @@ sglc_admin_visitors:
   defaults: { _controller: SGLiveChatBundle:Admin:visitors, page: 1}
   requirements: { page: \d+ }
 
+sglc_admin_visitor:
+  pattern: /admin/sglivechat/visitor/{id}
+  defaults: { _controller: SGLiveChatBundle:Admin:visitor}
+
 sglc_admin_visits:
   pattern: /admin/sglivechat/visits/{page}
   defaults: { _controller: SGLiveChatBundle:Admin:visits, page: 1}

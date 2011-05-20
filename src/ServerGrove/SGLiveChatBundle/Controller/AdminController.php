@@ -348,6 +348,21 @@ class AdminController extends BaseController
         return $this->getResponse();
     }
 
+    public function visitorAction($id)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        $visitor = $this->getDocumentManager()->find('SGLiveChatBundle:Visitor', $id);
+
+        if (!$visitor) {
+            throw new NotFoundHttpException();
+        }
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:visitor.html.twig', array('visitor' => $visitor, 'visits' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->toArray($visitor->getVisits())));
+    }
+
     public function visitorsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Visitor', 'visitors');

@@ -1,0 +1,74 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+
+<h1>Visitor "{{visitor.getId()}}"</h1>
+<script type="text/javascript">
+    //<![CDATA[
+    {% include "SGLiveChatBundle:Admin:Sessions.js.twig" %}
+    jQuery(document).ready(function(){
+        SessionToolkit.Visit.setListContainer('#visits');
+        SessionToolkit.Visit.disableChatInvitation();
+        SessionToolkit.Visit.Item.drawAll({{visits|json_encode|raw}});
+    });
+    //]]>
+</script>
+<h2>Details</h2>
+
+<table width="100%">
+	<tbody>
+		<tr>
+			<td>Visitor ID</td>
+			<td>{{visitor.getId()}}</td>
+		</tr>
+		<tr>
+			<td>Browser</td>
+			<td>{{visitor.getAgent()}}</td>
+		</tr>
+		<tr>
+			<td>Languages</td>
+			<td>{{visitor.getLanguages()}}</td>
+		</tr>
+		<tr>
+			<td>Hostname</td>
+			<td>{{visitor.getHostname()}}</td>
+		</tr>
+		<tr>
+			<td>Name</td>
+			<td>{{visitor.getName()}}</td>
+		</tr>
+		<tr>
+			<td>Email</td>
+			<td>
+			<a href="mailto:{{visitor.getEmail()}}">{{visitor.getEmail()}}</a>
+			</td>
+		</tr>
+		<tr>
+			<td>Chat sessions #</td>
+			<td>N/A</td>
+		</tr>
+	</tbody>
+</table>
+
+<h2>Visits</h2>
+<div id="visits" class="visitsList">
+    <table width="100%" border="0" cellpadding="3" cellspacing="0">
+        <thead>
+            <tr class="header">
+                <th>Visitor ID (# visits)</th>
+                <th>Local Time</th>
+                <th>Hostname</th>
+                <th>Time</th>
+                <th>Duration (current page/Total)</th>
+                <th>Languages</th>
+                <th>Browser</th>
+                <th>Current Page</th>
+                <th>Referrer</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+{% endblock %}
