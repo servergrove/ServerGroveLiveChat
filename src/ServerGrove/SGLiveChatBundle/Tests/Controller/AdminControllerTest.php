@@ -183,6 +183,7 @@ class AdminControllerTest extends WebTestCase
 
         $crawler = $client->submit($form);
 
+        file_put_contents('/Users/ismael/a.out.html', $client->getResponse()->getContent());
         $this->assertPostRedirect($client);
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */

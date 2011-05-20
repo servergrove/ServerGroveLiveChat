@@ -87,5 +87,9 @@ class Department
     {
         $this->operators[] = $operator;
     }
+    
+    public function __toString() {
+        return $this->getName();
+    }
 
 }

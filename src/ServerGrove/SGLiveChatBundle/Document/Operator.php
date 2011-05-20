@@ -122,6 +122,10 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
         $this->departments[] = $department;
     }
 
+    public function setDepartments($departments) {
+        $this->departments = $departments;
+    }
+    
     public function getKind()
     {
         return 'Operator';

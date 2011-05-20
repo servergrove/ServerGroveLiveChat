@@ -249,20 +249,23 @@ class AdminController extends BaseController
 
         if ($id) {
             $operator = $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $id);
+            $edit = false; # Just temporary until empty password problem is fixed
         } else {
             $operator = new Operator();
+            $edit = false;
         }
 
-        $form = $this->get('form.factory')->create(new OperatorType());
+        /* @var $form Symfony\Component\Form\Form */
+        $form = $this->get('form.factory')->create(new OperatorType($this->getDocumentManager(), $edit));
         $form->setData($operator);
 
         switch ($this->getRequest()->getMethod()) {
             case 'POST':
             case 'PUT':
+                
                 $form->bindRequest($this->getRequest());
 
                 if ($form->isValid()) {
-
                     $this->getDocumentManager()->persist($operator);
                     $this->getDocumentManager()->flush();
                     $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
@@ -277,7 +280,8 @@ class AdminController extends BaseController
 
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
             'operator' => $operator,
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'edit' => $edit 
         ));
     }
 

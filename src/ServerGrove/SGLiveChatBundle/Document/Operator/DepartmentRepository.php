@@ -11,5 +11,14 @@ use ServerGrove\SGLiveChatBundle\Document\DocumentRepository;
  */
 class DepartmentRepository extends DocumentRepository
 {
-    
+
+    public function getDepartments()
+    {
+        return $this->createQueryBuilder()->field('isActive')
+                ->equals(true)
+                ->sort('name')
+                ->getQuery()
+                ->execute();
+    }
+
 }
