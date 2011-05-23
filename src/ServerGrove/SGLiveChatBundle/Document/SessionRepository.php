@@ -12,6 +12,11 @@ use MongoDate;
 class SessionRepository extends DocumentRepository
 {
 
+    public function findSlice($offset, $length)
+    {
+        return $this->createQueryBuilder()->skip($offset)->limit($length)->sort('createdAt', 'desc')->getQuery()->execute();
+    }
+
     public function getRequestedChats()
     {
         $qb = $this->createQueryBuilder();

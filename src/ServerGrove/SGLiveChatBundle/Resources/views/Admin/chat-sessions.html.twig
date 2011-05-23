@@ -1,0 +1,88 @@
+{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+<h1>Chat sessions list</h1>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col style="width: 140px;"/>
+        <col style="width: 120px;"/>
+        <col style="width: 140px;"/>
+        <col style="width: 140px;"/>
+        <col/>
+        <col style="width: 75px;"/>
+        <col style="width: 120px;"/>
+        <col style="width: 120px;"/>
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Created At
+            </th>
+            <th>
+                Operator
+            </th>
+            <th>
+                Visitor
+            </th>
+            <th>
+                Question
+            </th>
+            <th>
+                Messages
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Rating
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="8" style="text-align: right;">
+            {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_chat_sessions'} %}
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if sessions %}
+        {% for session in sessions %}
+        <tr>
+            <td>
+                <a href="{{ path('sglc_admin_chat_session', {'id': session.getId()})}}">{{session.getId()}}</a>
+            </td>
+            <td style="text-align: center;">
+                {{session.getCreatedAt().format('Y-m-d H:i:s')}}
+            </td>
+            <td>
+                {% if session.getOperator() %}
+                {{session.getOperator().getName()}}
+                {%else%}
+                Unknown
+                {%endif%}
+            </td>
+            <td>
+                <a target="_blank" href="{{ path('sglc_admin_visitor', {'id': session.getVisitor().getId()})}}">{{session.getVisitor().getName() ? session.getVisitor().getName() : session.getVisitor().getId()}}</a>
+            </td>
+            <td>
+                {{session.getQuestion()}}
+            </td>
+            <td style="text-align: center;">
+                {{session.getMessages().count()}}
+            </td>
+            <td>
+                {{session.getStatus()}}
+            </td>
+            <td>
+                {{session.getRating().getGrade()}}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

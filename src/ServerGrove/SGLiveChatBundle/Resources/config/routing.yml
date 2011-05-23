@@ -146,7 +146,16 @@ sglc_admin_canned_messages:
 sglc_admin_console_sessions:
   pattern: /admin/sglivechat/console/sessions
   defaults: { _controller: SGLiveChatBundle:Admin:sessions }
+  
+sglc_admin_chat_session:
+  pattern: /admin/sglivechat/console/chat-session/{id}
+  defaults: { _controller: SGLiveChatBundle:Admin:chatSession }
 
+sglc_admin_chat_sessions:
+  pattern: /admin/sglivechat/console/chat-sessions/{page}
+  defaults: { _controller: SGLiveChatBundle:Admin:chatSessions, page: 1 }
+  requirements: { page: \d+ }
+  
 sglc_admin_visitors:
   pattern: /admin/sglivechat/visitors/{page}
   defaults: { _controller: SGLiveChatBundle:Admin:visitors, page: 1}

@@ -90,6 +90,22 @@ class Message
 
         return null;
     }
+    
+    public function getSenderName() {
+        if (!$this->getSender()->getId()) {
+            return $this->isOperator() ? 'Operator' : 'Visitor';
+        }
+        
+        return $this->getSender()->getName();
+    }
+    
+    public function isOperator() {
+        return $this->getSender() instanceof Operator;
+    }
+    
+    public function isVisitor() {
+        return $this->getSender() instanceof Visitor;
+    }
 
     /**
      * @return the $session

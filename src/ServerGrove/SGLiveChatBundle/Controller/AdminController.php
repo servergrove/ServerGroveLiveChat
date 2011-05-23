@@ -75,6 +75,26 @@ class AdminController extends BaseController
         return $this->simpleListAction($page, 'SGLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
     }
 
+    public function chatSessionAction($id)
+    {
+        if (!is_null($response = $this->checkLogin())) {
+            return $response;
+        }
+
+        $chat_session = $this->getDocumentManager()->find('SGLiveChatBundle:Session', $id);
+
+        if (!$chat_session) {
+            throw new NotFoundHttpException();
+        }
+
+        return $this->renderTemplate('SGLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chat_session));
+    }
+
+    public function chatSessionsAction($page)
+    {
+        return $this->simpleListAction($page, 'SGLiveChatBundle:Session', 'sessions', 'chat-sessions');
+    }
+
     /**
      * @todo Search about security in Symfony2
      */
@@ -262,7 +282,7 @@ class AdminController extends BaseController
         switch ($this->getRequest()->getMethod()) {
             case 'POST':
             case 'PUT':
-                
+
                 $form->bindRequest($this->getRequest());
 
                 if ($form->isValid()) {
@@ -281,7 +301,7 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
             'operator' => $operator,
             'form' => $form->createView(),
-            'edit' => $edit 
+            'edit' => $edit
         ));
     }
 
