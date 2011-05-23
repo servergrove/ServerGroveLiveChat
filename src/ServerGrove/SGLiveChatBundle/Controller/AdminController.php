@@ -81,13 +81,13 @@ class AdminController extends BaseController
             return $response;
         }
 
-        $chat_session = $this->getDocumentManager()->find('SGLiveChatBundle:Session', $id);
+        $chatSession = $this->getDocumentManager()->find('SGLiveChatBundle:Session', $id);
 
-        if (!$chat_session) {
+        if (!$chatSession) {
             throw new NotFoundHttpException();
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chat_session));
+        return $this->renderTemplate('SGLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chatSession));
     }
 
     public function chatSessionsAction($page)
