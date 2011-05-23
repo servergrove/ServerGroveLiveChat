@@ -27,6 +27,9 @@ class VisitorRepository extends DocumentRepository
         }
         $visitor->setKey(md5(time() . $visitor->getAgent() . rand(0, 100)));
 
+        $this->getDocumentManager()->persist($visitor);
+        $this->getDocumentManager()->flush();
+        
         return $visitor;
     }
 

@@ -34,6 +34,9 @@ class VisitRepository extends DocumentRepository
         $visit->setRemoteAddr($remoteAddr);
         $visit->setLocalTime($localTime);
         $visit->setLocalTimeZone($timeZone);
+        
+        $this->getDocumentManager()->persist($visit);
+        $this->getDocumentManager()->flush();
 
         return $visit;
     }

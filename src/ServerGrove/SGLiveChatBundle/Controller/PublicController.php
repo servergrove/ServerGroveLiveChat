@@ -32,7 +32,6 @@ abstract class PublicController extends BaseController
 
         if (!$visitor) {
             $visitor = $this->createVisitor();
-            $this->getVisitorRepository()->persist($visitor);
         }
 
         if (!$visitor) {
