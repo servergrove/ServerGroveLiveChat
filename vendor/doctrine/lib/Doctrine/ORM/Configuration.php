@@ -163,16 +163,6 @@ class Configuration extends \Doctrine\DBAL\Configuration
     {
         $this->_attributes['entityNamespaces'] = $entityNamespaces;
     }
-    
-    /**
-     * Retrieves the list of registered entity namespace aliases.
-     * 
-     * @return array
-     */
-    public function getEntityNamespaces()
-    {
-        return $this->_attributes['entityNamespaces'];
-    }
 
     /**
      * Gets the cache driver implementation that is used for the mapping metadata.

@@ -107,9 +107,6 @@ class MySqlSchemaManager extends AbstractSchemaManager
         $precision = null;
         
         $type = $this->_platform->getDoctrineTypeMapping($dbType);
-        $type = $this->extractDoctrineTypeFromComment($tableColumn['comment'], $type);
-        $tableColumn['comment'] = $this->removeDoctrineTypeFromComment($tableColumn['comment'], $type);
-
         switch ($dbType) {
             case 'char':
                 $fixed = true;
@@ -159,7 +156,6 @@ class MySqlSchemaManager extends AbstractSchemaManager
             'scale'         => null,
             'precision'     => null,
             'autoincrement' => (bool) (strpos($tableColumn['extra'], 'auto_increment') !== false),
-            'comment'       => (isset($tableColumn['comment'])) ? $tableColumn['comment'] : null
         );
 
         if ($scale !== null && $precision !== null) {

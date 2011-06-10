@@ -21,7 +21,7 @@ use Monolog\Logger;
  *
  * @author Jordi Boggiano <j.boggiano@seld.be>
  */
-class StreamHandler extends AbstractHandler
+class StreamHandler extends AbstractProcessingHandler
 {
     protected $stream;
     protected $url;
@@ -64,7 +64,7 @@ class StreamHandler extends AbstractHandler
             $this->stream = @fopen($this->url, 'a');
             if (!is_resource($this->stream)) {
                 $this->stream = null;
-                throw new \UnexpectedValueException('The stream could not be opened, "'.$this->url.'" may be an invalid url.');
+                throw new \UnexpectedValueException(sprintf('The stream or file "%s" could not be opened; it may be invalid or not writable.', $this->url));
             }
         }
         fwrite($this->stream, (string) $record['message']);

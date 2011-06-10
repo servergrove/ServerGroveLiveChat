@@ -190,12 +190,9 @@ abstract class AbstractHydrator
                     continue;
                 } else {
                     // Meta column (has meaning in relational schema only, i.e. foreign keys or discriminator columns).
-                    $fieldName = $this->_rsm->metaMappings[$key];
                     $cache[$key]['isMetaColumn'] = true;
-                    $cache[$key]['fieldName'] = $fieldName;
+                    $cache[$key]['fieldName'] = $this->_rsm->metaMappings[$key];
                     $cache[$key]['dqlAlias'] = $this->_rsm->columnOwnerMap[$key];
-                    $classMetadata = $this->_em->getClassMetadata($this->_rsm->aliasMap[$cache[$key]['dqlAlias']]);
-                    $cache[$key]['isIdentifier'] = $classMetadata->isIdentifier($fieldName);
                 }
             }
             
@@ -206,22 +203,13 @@ abstract class AbstractHydrator
 
             $dqlAlias = $cache[$key]['dqlAlias'];
 
-            if ($cache[$key]['isIdentifier']) {
-                $id[$dqlAlias] .= '|' . $value;
+            if (isset($cache[$key]['isMetaColumn'])) {
+                $rowData[$dqlAlias][$cache[$key]['fieldName']] = $value;
+                continue;
             }
 
-            if (isset($cache[$key]['isMetaColumn'])) {
-                if (!isset($rowData[$dqlAlias][$cache[$key]['fieldName']]) || $value !== null) {
-                    $rowData[$dqlAlias][$cache[$key]['fieldName']] = $value;
-                }
-                continue;
-            }
-            
-            // in an inheritance hierachy the same field could be defined several times.
-            // We overwrite this value so long we dont have a non-null value, that value we keep.
-            // Per definition it cannot be that a field is defined several times and has several values.
-            if (isset($rowData[$dqlAlias][$cache[$key]['fieldName']]) && $value === null) {
-                continue;
+            if ($cache[$key]['isIdentifier']) {
+                $id[$dqlAlias] .= '|' . $value;
             }
 
             $rowData[$dqlAlias][$cache[$key]['fieldName']] = $cache[$key]['type']->convertToPHPValue($value, $this->_platform);

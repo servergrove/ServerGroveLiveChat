@@ -23,9 +23,9 @@ namespace JMS\SecurityExtraBundle\Annotation;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class SecureReturn implements AnnotationInterface
+class SecureReturn
 {
-    protected $permissions;
+    public $permissions;
 
     public function __construct(array $values)
     {
@@ -37,10 +37,5 @@ class SecureReturn implements AnnotationInterface
         }
 
         $this->permissions = array_map('trim', explode(',', $values['permissions']));
-    }
-
-    public function getPermissions()
-    {
-        return $this->permissions;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace JMS\SecurityExtraBundle\Tests\Controller;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use JMS\SecurityExtraBundle\Tests\Controller\Fixtures\SecuredController;
@@ -103,7 +104,7 @@ class ControllerListenerTest extends \PHPUnit_Framework_TestCase
     protected function getListener()
     {
         $container = $this->getMock('Symfony\Component\DependencyInjection\ContainerInterface');
-        $listener = new ControllerListener($container);
+        $listener = new ControllerListener($container, new AnnotationReader());
 
         return array($listener, $container);
     }

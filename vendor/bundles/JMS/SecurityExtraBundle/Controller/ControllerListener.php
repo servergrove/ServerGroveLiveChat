@@ -18,12 +18,13 @@
 
 namespace JMS\SecurityExtraBundle\Controller;
 
+use Doctrine\Common\Annotations\Reader;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use JMS\SecurityExtraBundle\Mapping\Driver\AnnotationConverter;
-use JMS\SecurityExtraBundle\Mapping\MethodMetadata;
+use JMS\SecurityExtraBundle\Metadata\Driver\AnnotationConverter;
+use JMS\SecurityExtraBundle\Metadata\MethodMetadata;
 use JMS\SecurityExtraBundle\Security\Authorization\Interception\MethodInvocation;
 use JMS\SecurityExtraBundle\Annotation\Secure;
-use JMS\SecurityExtraBundle\Mapping\Driver\AnnotationReader;
+use JMS\SecurityExtraBundle\Metadata\Driver\AnnotationReader;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /**
@@ -37,10 +38,10 @@ class ControllerListener
     private $converter;
     private $container;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, Reader $reader)
     {
         $this->container = $container;
-        $this->reader = new AnnotationReader();
+        $this->reader = $reader;
         $this->converter = new AnnotationConverter();
     }
 
@@ -52,6 +53,11 @@ class ControllerListener
 
         $method = new MethodInvocation($controller[0], $controller[1], $controller[0]);
         if (!$annotations = $this->reader->getMethodAnnotations($method)) {
+            return;
+        }
+
+        static $emptyMetadata = array('roles' => array(), 'run_as_roles' => array(), 'param_permissions' => array(), 'return_permissions' => array());
+        if ($emptyMetadata === $jmsSecurityExtra__metadata = $this->converter->convertMethodAnnotations($method, $annotations)->getAsArray()) {
             return;
         }
 
@@ -78,7 +84,6 @@ class ControllerListener
         $params = implode(', ', $params);
         $closureCode .= $params.') ';
 
-        $jmsSecurityExtra__metadata = $this->converter->convertMethodAnnotations($method, $annotations)->getAsArray();
         $jmsSecurityExtra__interceptor = $this->container->get('security.access.method_interceptor');
         $jmsSecurityExtra__method = $method;
 

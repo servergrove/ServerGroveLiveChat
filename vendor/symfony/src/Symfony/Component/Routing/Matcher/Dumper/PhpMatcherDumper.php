@@ -63,7 +63,7 @@ class PhpMatcherDumper extends MatcherDumper
         \$allow = array();
 
 $code
-        throw 0 < count(\$allow) ? new MethodNotAllowedException(array_unique(\$allow)) : new NotFoundException();
+        throw 0 < count(\$allow) ? new MethodNotAllowedException(array_unique(\$allow)) : new ResourceNotFoundException();
     }
 
 EOF;
@@ -74,8 +74,10 @@ EOF;
         $code = array();
         foreach ($routes as $name => $route) {
             if ($route instanceof RouteCollection) {
+                $prefix = $route->getPrefix();
+                $optimizable = $prefix && count($route->all()) > 1 && false === strpos($route->getPrefix(), '{');
                 $indent = '';
-                if (count($route->all()) > 1 && $prefix = $route->getPrefix()) {
+                if ($optimizable) {
                     $code[] = sprintf("        if (0 === strpos(\$pathinfo, '%s')) {", $prefix);
                     $indent = '    ';
                 }
@@ -86,7 +88,7 @@ EOF;
                     }
                 }
 
-                if ($indent) {
+                if ($optimizable) {
                     $code[] = "        }\n";
                 }
             } else {
@@ -137,7 +139,11 @@ EOF;
 EOF;
 
         if ($req = $route->getRequirement('_method')) {
-            $methods = array_map('strtolower', explode('|', $req));
+            $methods = explode('|', strtoupper($req));
+            // GET and HEAD are equivalent
+            if (in_array('GET', $methods) && !in_array('HEAD', $methods)) {
+                $methods[] = 'HEAD';
+            }
             if (1 === count($methods)) {
                 $code[] = <<<EOF
             if (\$this->context->getMethod() != '$methods[0]') {
@@ -206,8 +212,8 @@ EOF
         return <<<EOF
 <?php
 
-use Symfony\Component\Routing\Matcher\Exception\MethodNotAllowedException;
-use Symfony\Component\Routing\Matcher\Exception\NotFoundException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 
 /**

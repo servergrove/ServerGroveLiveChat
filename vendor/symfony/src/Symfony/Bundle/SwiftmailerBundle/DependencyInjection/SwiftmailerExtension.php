@@ -45,9 +45,6 @@ class SwiftmailerExtension extends Extension
         $loader->load('swiftmailer.xml');
         $container->setAlias('mailer', 'swiftmailer.mailer');
 
-        $r = new \ReflectionClass('Swift_Message');
-        $container->getDefinition('swiftmailer.mailer')->setFile(dirname(dirname(dirname($r->getFilename()))).'/swift_init.php');
-
         $processor = new Processor();
         $configuration = new Configuration($container->getParameter('kernel.debug'));
         $config = $processor->processConfiguration($configuration, $configs);
@@ -92,10 +89,18 @@ class SwiftmailerExtension extends Extension
                 $container->setParameter('swiftmailer.spool.'.$type.'.'.$key, $config['spool'][$key]);
             }
         }
+        $container->setParameter('swiftmailer.spool.enabled', isset($config['spool']));
 
         if ($config['logging']) {
             $container->findDefinition('swiftmailer.transport')->addMethodCall('registerPlugin', array(new Reference('swiftmailer.plugin.messagelogger')));
             $container->findDefinition('swiftmailer.data_collector')->addTag('data_collector', array('template' => 'SwiftmailerBundle:Collector:swiftmailer', 'id' => 'swiftmailer'));
+        }
+        
+        if (isset($config['sender_address']) && $config['sender_address']) {
+            $container->setParameter('swiftmailer.sender_address', $config['sender_address']);
+            $container->findDefinition('swiftmailer.transport')->addMethodCall('registerPlugin', array(new Reference('swiftmailer.plugin.impersonate')));
+        } else {
+            $container->setParameter('swiftmailer.sender_address', null);
         }
 
         if (isset($config['delivery_address']) && $config['delivery_address']) {

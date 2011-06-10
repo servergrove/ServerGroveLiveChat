@@ -36,16 +36,31 @@ Installation
 ------------
 Checkout a copy of the code::
 
-    git submodule add https://github.com/schmittjoh/SecurityExtraBundle.git src/JMS/SecurityExtraBundle
+    git submodule add https://github.com/schmittjoh/SecurityExtraBundle.git vendor/bundles/JMS/SecurityExtraBundle
     
 Then register the bundle with your kernel::
 
     // in AppKernel::registerBundles()
     $bundles = array(
         // ...
-        new JMS\SecurityExtraBundle\SecurityExtraBundle(),
+        new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
         // ...
     );
+
+This bundle also requires the Metadata library::
+
+    git submodule add https://github.com/schmittjoh/metadata.git vendor/metadata
+
+Make sure that you also register the namespaces with the autoloader::
+
+    // app/autoload.php
+    $loader->registerNamespaces(array(
+        // ...
+        'JMS'              => __DIR__.'/../vendor/bundles',
+        'Metadata'         => __DIR__.'/../vendor/metadata/src',
+        // ...
+    ));    
+
 
 Configuration
 -------------
@@ -81,16 +96,18 @@ be very slow depending on how many services you have defined.
 Annotations
 -----------
 
-@extra:Secure
-~~~~~~~~~~~~~
+@Secure
+~~~~~~~
 This annotation lets you define who is allowed to invoke a method::
 
     <?php
     
+    use JMS\SecurityExtraBundle\Annotation\Secure;
+    
     class MyService
     {
         /**
-         * @extra:Secure(roles="ROLE_USER, ROLE_FOO, ROLE_ADMIN")
+         * @Secure(roles="ROLE_USER, ROLE_FOO, ROLE_ADMIN")
          */
         public function secureMethod() 
         {
@@ -98,18 +115,20 @@ This annotation lets you define who is allowed to invoke a method::
         }
     }
 
-@extra:SecureParam
-~~~~~~~~~~~~~~~~~~
+@SecureParam
+~~~~~~~~~~~~
 This annotation lets you define restrictions for parameters which are passed to
 the method. This is only useful if the parameters are domain objects::
 
     <?php
     
+    use JMS\SecurityExtraBundle\Annotation\SecureParam;
+    
     class MyService
     {
         /**
-         * @extra:SecureParam(name="comment", permissions="EDIT, DELETE")
-         * @extra:SecureParam(name="post", permissions="OWNER")
+         * @SecureParam(name="comment", permissions="EDIT, DELETE")
+         * @SecureParam(name="post", permissions="OWNER")
          */
         public function secureMethod($comment, $post)
         {
@@ -117,17 +136,19 @@ the method. This is only useful if the parameters are domain objects::
         }
     }
 
-@extra:SecureReturn
-~~~~~~~~~~~~~~~~~~~
+@SecureReturn
+~~~~~~~~~~~~~
 This annotation lets you define restrictions for the value which is returned by
 the method. This is also only useful if the returned value is a domain object::
 
     <?php
     
+    use JMS\SecurityExtraBundle\Annotation\SecureReturn;
+    
     class MyService
     {
         /**
-         * @extra:SecureReturn(permissions="VIEW")
+         * @SecureReturn(permissions="VIEW")
          */
         public function secureMethod()
         {
@@ -137,8 +158,8 @@ the method. This is also only useful if the returned value is a domain object::
         }
     }
     
-@extra:RunAs
-~~~~~~~~~~~~
+@RunAs
+~~~~~~
 This annotation lets you specifiy roles which are added only for the duration 
 of the method invocation. These roles will not be taken into consideration 
 for before, or after invocation access decisions. 
@@ -149,10 +170,13 @@ through a specific public service::
 
     <?php
     
+    use JMS\SecurityExtraBundle\Annotation\Secure;
+    use JMS\SecurityExtraBundle\Annotation\RunAs;
+    
     class MyPrivateService
     {
         /**
-         * @extra:Secure(roles="ROLE_PRIVATE_SERVICE")
+         * @Secure(roles="ROLE_PRIVATE_SERVICE")
          */
         public function aMethodOnlyToBeInvokedThroughASpecificChannel()
         {
@@ -165,8 +189,8 @@ through a specific public service::
         protected $myPrivateService;
     
         /**
-         * @extra:Secure(roles="ROLE_USER")
-         * @extra:RunAs(roles="ROLE_PRIVATE_SERVICE")
+         * @Secure(roles="ROLE_USER")
+         * @RunAs(roles="ROLE_PRIVATE_SERVICE")
          */
         public function canBeInvokedFromOtherServices()
         {
@@ -174,8 +198,8 @@ through a specific public service::
         }
     }
 
-@extra:SatisfiesParentSecurityPolicy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+@SatisfiesParentSecurityPolicy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This must be defined on a method that overrides a method which has security metadata.
 It is there to ensure that you are aware the security of the overridden method cannot
 be enforced anymore, and that you must copy over all annotations if you want to keep

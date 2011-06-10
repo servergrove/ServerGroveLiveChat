@@ -12,6 +12,7 @@
 namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Loads STYL files.
@@ -20,7 +21,6 @@ use Assetic\Asset\AssetInterface;
  */
 class StylusFilter implements FilterInterface
 {
-    private $baseDir;
     private $nodeBin;
     private $nodePaths;
     private $compress;
@@ -28,13 +28,11 @@ class StylusFilter implements FilterInterface
     /**
      * Constructs filter.
      *
-     * @param string $baseDir   The base web directory
      * @param string $nodeBin   The path to the node binary
      * @param array  $nodePaths An array of node paths
      */
-    public function __construct($baseDir, $nodeBin = '/usr/bin/node', array $nodePaths = array())
+    public function __construct($nodeBin = '/usr/bin/node', array $nodePaths = array())
     {
-        $this->baseDir = $baseDir;
         $this->nodeBin = $nodeBin;
         $this->nodePaths = $nodePaths;
     }
@@ -69,31 +67,34 @@ stylus(%s, %s).render(function(e, css){
 
 EOF;
 
+        $root = $asset->getSourceRoot();
+        $path = $asset->getSourcePath();
+
         // parser options
         $parserOptions = array();
-        if ($sourceUrl = $asset->getSourceUrl()) {
-            $parserOptions['filename']  = basename($sourceUrl);
-            $parserOptions['paths']     = array($this->baseDir . DIRECTORY_SEPARATOR . dirname($sourceUrl));
+        if ($root && $path) {
+            $parserOptions['paths'] = array(dirname($root.'/'.$path));
+            $parserOptions['filename'] = basename($path);
         }
 
         if (null !== $this->compress) {
             $parserOptions['compress'] = $this->compress;
         }
 
+        $pb = new ProcessBuilder();
+
         // node.js configuration
-        $env = array();
         if (0 < count($this->nodePaths)) {
-            $env['NODE_PATH'] = implode(':', $this->nodePaths);
+            $pb->setEnv('NODE_PATH', implode(':', $this->nodePaths));
         }
 
-        $options = array($this->nodeBin);
-        $options[] = $input = tempnam(sys_get_temp_dir(), 'assetic_stylus');
+        $pb->add($this->nodeBin)->add($input = tempnam(sys_get_temp_dir(), 'assetic_stylus'));
         file_put_contents($input, sprintf($format,
             json_encode($asset->getContent()),
             json_encode($parserOptions)
         ));
 
-        $proc = new Process(implode(' ', array_map('escapeshellarg', $options)), null, $env);
+        $proc = $pb->getProcess();
         $code = $proc->run();
         unlink($input);
 

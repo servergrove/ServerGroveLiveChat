@@ -19,10 +19,10 @@
 namespace JMS\SecurityExtraBundle\DependencyInjection\Compiler;
 
 use JMS\SecurityExtraBundle\Analysis\ServiceAnalyzer;
-use JMS\SecurityExtraBundle\Mapping\ServiceMetadata;
-use JMS\SecurityExtraBundle\Mapping\ClassMetadata;
+use JMS\SecurityExtraBundle\Metadata\ServiceMetadata;
+use JMS\SecurityExtraBundle\Metadata\ClassMetadata;
 use JMS\SecurityExtraBundle\Generator\ProxyClassGenerator;
-use JMS\SecurityExtraBundle\Mapping\Driver\DriverChain;
+use JMS\SecurityExtraBundle\Metadata\Driver\DriverChain;
 use \ReflectionClass;
 use \ReflectionMethod;
 use Symfony\Component\Config\Resource\FileResource;
@@ -47,7 +47,7 @@ class SecureMethodInvocationsPass implements CompilerPassInterface
     {
         $cacheDir .= '/security/';
         if (!file_exists($cacheDir)) {
-            mkdir($cacheDir, 0777, true);
+            @mkdir($cacheDir, 0777, true);
         }
         if (false === is_writable($cacheDir)) {
             throw new \RuntimeException('Cannot write to cache folder: '.$cacheDir);
@@ -55,7 +55,7 @@ class SecureMethodInvocationsPass implements CompilerPassInterface
         $this->cacheDir = $cacheDir;
 
         if (!file_exists($cacheDir.'SecurityProxies/')) {
-            mkdir($cacheDir.'SecurityProxies/', 0777, true);
+            @mkdir($cacheDir.'SecurityProxies/', 0777, true);
         }
         if (false === is_writeable($cacheDir.'SecurityProxies/')) {
             throw new \RuntimeException('Cannot write to cache folder: '.$cacheDir.'SecurityProxies/');
@@ -108,7 +108,7 @@ class SecureMethodInvocationsPass implements CompilerPassInterface
     private function processDefinition(ContainerBuilder $container, $id, Definition $definition)
     {
         if ($this->needsReAssessment($id, $definition)) {
-            $analyzer = new ServiceAnalyzer($definition->getClass());
+            $analyzer = new ServiceAnalyzer($definition->getClass(), $container->get('annotation_reader'));
             $analyzer->analyze();
 
             $files = array();

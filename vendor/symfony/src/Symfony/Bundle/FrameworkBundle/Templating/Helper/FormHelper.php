@@ -86,9 +86,13 @@ class FormHelper extends Helper
         return $this->renderSection($view, 'row', $variables);
     }
 
-    public function label(FormView $view, $label = null)
+    public function label(FormView $view, $label = null, array $variables = array())
     {
-        return $this->renderSection($view, 'label', null === $label ? array() : array('label' => $label));
+        if ($label !== null) {
+            $variables += array('label' => $label);
+        }
+
+        return $this->renderSection($view, 'label', $variables);
     }
 
     public function errors(FormView $view)
@@ -135,11 +139,12 @@ class FormHelper extends Helper
             $variables
         );
 
-        array_push($this->viewStack, $view);
+        $this->viewStack[] = $view;
 
         $html = $this->engine->render($template, $this->varStack[$view]);
 
         array_pop($this->viewStack);
+        unset($this->varStack[$view]);
 
         return $html;
     }
@@ -156,7 +161,7 @@ class FormHelper extends Helper
             $template = $this->templateDir.':'.$template;
         }
 */
-$template = 'FrameworkBundle:Form:'.$template;
+        $template = 'FrameworkBundle:Form:'.$template;
         if (!$this->engine->exists($template)) {
             $template = false;
         }

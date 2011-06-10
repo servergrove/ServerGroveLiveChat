@@ -45,22 +45,19 @@ class Parser
 
     /** READ-ONLY: Maps BUILT-IN numeric function names to AST class names. */
     private static $_NUMERIC_FUNCTIONS = array(
-        'length'    => 'Doctrine\ORM\Query\AST\Functions\LengthFunction',
-        'locate'    => 'Doctrine\ORM\Query\AST\Functions\LocateFunction',
-        'abs'       => 'Doctrine\ORM\Query\AST\Functions\AbsFunction',
-        'sqrt'      => 'Doctrine\ORM\Query\AST\Functions\SqrtFunction',
-        'mod'       => 'Doctrine\ORM\Query\AST\Functions\ModFunction',
-        'size'      => 'Doctrine\ORM\Query\AST\Functions\SizeFunction',
-        'date_diff' => 'Doctrine\ORM\Query\AST\Functions\DateDiffFunction',
+        'length' => 'Doctrine\ORM\Query\AST\Functions\LengthFunction',
+        'locate' => 'Doctrine\ORM\Query\AST\Functions\LocateFunction',
+        'abs'    => 'Doctrine\ORM\Query\AST\Functions\AbsFunction',
+        'sqrt'   => 'Doctrine\ORM\Query\AST\Functions\SqrtFunction',
+        'mod'    => 'Doctrine\ORM\Query\AST\Functions\ModFunction',
+        'size'   => 'Doctrine\ORM\Query\AST\Functions\SizeFunction'
     );
 
     /** READ-ONLY: Maps BUILT-IN datetime function names to AST class names. */
     private static $_DATETIME_FUNCTIONS = array(
         'current_date'      => 'Doctrine\ORM\Query\AST\Functions\CurrentDateFunction',
         'current_time'      => 'Doctrine\ORM\Query\AST\Functions\CurrentTimeFunction',
-        'current_timestamp' => 'Doctrine\ORM\Query\AST\Functions\CurrentTimestampFunction',
-        'date_add'          => 'Doctrine\ORM\Query\AST\Functions\DateAddFunction',
-        'date_sub'          => 'Doctrine\ORM\Query\AST\Functions\DateSubFunction',
+        'current_timestamp' => 'Doctrine\ORM\Query\AST\Functions\CurrentTimestampFunction'
     );
 
     /**
@@ -234,7 +231,7 @@ class Parser
      * If they match, updates the lookahead token; otherwise raises a syntax
      * error.
      *
-     * @param int token type
+     * @param int|string token type or value
      * @return void
      * @throws QueryException If the tokens dont match.
      */
@@ -925,10 +922,6 @@ class Parser
     {
         $token = $this->_lexer->lookahead;
         $identVariable = $this->IdentificationVariable();
-
-        if (!isset($this->_queryComponents[$identVariable])) {
-            $this->semanticalError('Identification Variable ' . $identVariable .' used in join path expression but was not defined before.');
-        }
 
         $this->match(Lexer::T_DOT);
         $this->match(Lexer::T_IDENTIFIER);

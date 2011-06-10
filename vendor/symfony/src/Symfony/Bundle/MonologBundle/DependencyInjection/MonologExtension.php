@@ -76,6 +76,7 @@ class MonologExtension extends Extension
                 'Monolog\\Formatter\\LineFormatter',
                 'Monolog\\Handler\\HandlerInterface',
                 'Monolog\\Handler\\AbstractHandler',
+                'Monolog\\Handler\\AbstractProcessingHandler',
                 'Monolog\\Handler\\StreamHandler',
                 'Monolog\\Handler\\FingersCrossedHandler',
                 'Monolog\\Logger',
@@ -124,7 +125,7 @@ class MonologExtension extends Extension
                 $handler['level'],
                 $handler['bubble'],
             ));
-            $definition->addTag('kernel.listener', array('event' => 'onCoreResponse'));
+            $definition->addTag('kernel.listener', array('event' => 'core.response', 'method' => 'onCoreResponse'));
             break;
 
         case 'rotating_file':
@@ -139,7 +140,7 @@ class MonologExtension extends Extension
         case 'fingers_crossed':
             $handler['action_level'] = is_int($handler['action_level']) ? $handler['action_level'] : constant('Monolog\Logger::'.strtoupper($handler['action_level']));
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
-            array_push($this->nestedHandlers, $nestedHandlerId);
+            $this->nestedHandlers[] = $nestedHandlerId;
 
             $definition->setArguments(array(
                 new Reference($nestedHandlerId),
@@ -152,12 +153,26 @@ class MonologExtension extends Extension
 
         case 'buffer':
             $nestedHandlerId = $this->getHandlerId($handler['handler']);
-            array_push($this->nestedHandlers, $nestedHandlerId);
+            $this->nestedHandlers[] = $nestedHandlerId;
 
             $definition->setArguments(array(
                 new Reference($nestedHandlerId),
                 $handler['buffer_size'],
                 $handler['level'],
+                $handler['bubble'],
+            ));
+            break;
+
+        case 'group':
+            $references = array();
+            foreach ($handler['members'] as $nestedHandler) {
+                $nestedHandlerId = $this->getHandlerId($nestedHandler);
+                $this->nestedHandlers[] = $nestedHandlerId;
+                $references[] = new Reference($nestedHandlerId);
+            }
+
+            $definition->setArguments(array(
+                $references,
                 $handler['bubble'],
             ));
             break;

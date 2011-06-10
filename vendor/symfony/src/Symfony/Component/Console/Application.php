@@ -697,7 +697,7 @@ class Application
     {
         $strlen = function ($string)
         {
-            return function_exists('mb_strlen') ? mb_strlen($string) : strlen($string);
+            return function_exists('mb_strlen') ? mb_strlen($string, mb_detect_encoding($string)) : strlen($string);
         };
 
         do {
@@ -724,7 +724,7 @@ class Application
             $output->writeln("\n");
 
             if (OutputInterface::VERBOSITY_VERBOSE === $output->getVerbosity()) {
-                $output->writeln('</comment>Exception trace:</comment>');
+                $output->writeln('<comment>Exception trace:</comment>');
 
                 // exception related properties
                 $trace = $e->getTrace();

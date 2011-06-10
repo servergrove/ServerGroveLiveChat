@@ -13,6 +13,8 @@ namespace Symfony\Bundle\DoctrineBundle;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\Configuration;
+use Doctrine\ORM\ORMException;
 
 /**
  * References all Doctrine connections and entity managers in a given Container.
@@ -107,6 +109,19 @@ class Registry
     }
 
     /**
+     * Shortcut method to return the EntityRepository for an entity.
+     *
+     * @param string $entityName The name of the entity.
+     * @param string $entityManagerNAme The entity manager name (null for the default one)
+     *
+     * @return Doctrine\ORM\EntityRepository
+     */
+    public function getRepository($entityName, $entityManagerName = null)
+    {
+        return $this->getEntityManager($entityManagerName)->getRepository($entityName);
+    }
+
+    /**
      * Resets a named entity manager.
      *
      * This method is useful when an entity manager has been closed
@@ -136,6 +151,29 @@ class Registry
         // force the creation of a new entity manager
         // if the current one is closed
         $this->container->set($this->entityManagers[$name], null);
+    }
+
+    /**
+     * Resolves a registered namespace alias to the full namespace.
+     *
+     * This method looks for the alias in all registered entity managers.
+     *
+     * @param string $alias The alias
+     *
+     * @return string The full namespace
+     *
+     * @see Configuration::getEntityNamespace
+     */
+    public function getEntityNamespace($alias)
+    {
+        foreach (array_keys($this->entityManagers) as $name) {
+            try {
+                return $this->getEntityManager($name)->getConfiguration()->getEntityNamespace($alias);
+            } catch (ORMException $e) {
+            }
+        }
+
+        throw ORMException::unknownEntityNamespace($alias);
     }
 
     /**

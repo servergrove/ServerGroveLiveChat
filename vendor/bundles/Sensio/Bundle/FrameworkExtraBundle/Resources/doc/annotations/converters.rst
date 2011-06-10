@@ -1,16 +1,19 @@
-@extra:ParamConverter
-=====================
+@ParamConverter
+===============
 
 Usage
 -----
 
-The ``@extra:ParamConverter`` annotation calls *converters* to convert request
+The ``@ParamConverter`` annotation calls *converters* to convert request
 parameters to objects. These objects are stored as request attributes and so
 they can be injected as controller method arguments::
 
+    use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+    use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
     /**
-     * @extra:Route("/blog/:id")
-     * @extra:ParamConverter("post", class="SensioBlogBundle:Post")
+     * @Route("/blog/{id}")
+     * @ParamConverter("post", class="SensioBlogBundle:Post")
      */
     public function showAction(Post $post)
     {
@@ -18,8 +21,8 @@ they can be injected as controller method arguments::
 
 Several things happens under the hood:
 
-* The converter tries to get a ``SensioBlogBundle:Post`` object from the request
-  attributes (request attributes comes from route placeholders -- here
+* The converter tries to get a ``SensioBlogBundle:Post`` object from the
+  request attributes (request attributes comes from route placeholders -- here
   ``id``);
 
 * If no ``Post`` object is found, a ``404`` Response is generated;
@@ -31,7 +34,7 @@ Several things happens under the hood:
   controller when present in the method signature.
 
 If you use type hinting as in the example above, you can even omit the
-``@extra:ParamConverter`` annotation altogether::
+``@ParamConverter`` annotation altogether::
 
     // automatic with method signature
     public function showAction(Post $post)
@@ -42,6 +45,23 @@ Built-in Converters
 -------------------
 
 The bundle has only one built-in converter, the Doctrine one.
+
+Doctrine Converter
+~~~~~~~~~~~~~~~~~~
+
+By default, the Doctrine converter uses the *default* entity manager. This can
+configured with the ``entity_manager`` option::
+
+    use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+    use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+
+    /**
+     * @Route("/blog/{id}")
+     * @ParamConverter("post", class="SensioBlogBundle:Post", options={"entity_manager" = "foo"})
+     */
+    public function showAction(Post $post)
+    {
+    }
 
 Creating a Converter
 --------------------
@@ -77,4 +97,5 @@ on the request attributes, it should set an attribute named
 ``$configuration->getClass()``.
 
 .. tip::
+
    Use the ``DoctrineConverter`` class as a template for your own converters.

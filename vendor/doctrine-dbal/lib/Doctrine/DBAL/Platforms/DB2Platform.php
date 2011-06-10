@@ -197,7 +197,7 @@ class DB2Platform extends AbstractPlatform
      * @param  string $table
      * @return string
      */
-    public function getListTableColumnsSQL($table, $database = null)
+    public function getListTableColumnsSQL($table)
     {
         return "SELECT DISTINCT c.tabschema, c.tabname, c.colname, c.colno,
                 c.typename, c.default, c.nulls, c.length, c.scale,
@@ -549,10 +549,5 @@ class DB2Platform extends AbstractPlatform
     public function supportsSavepoints()
     {
         return false;
-    }
-    
-    protected function getReservedKeywordsClass()
-    {
-        return 'Doctrine\DBAL\Platforms\Keywords\DB2Keywords';
     }
 }

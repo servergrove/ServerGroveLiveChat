@@ -13,7 +13,7 @@ namespace Assetic\Filter\Sass;
 
 use Assetic\Asset\AssetInterface;
 use Assetic\Filter\FilterInterface;
-use Assetic\Filter\Process;
+use Assetic\Util\ProcessBuilder;
 
 /**
  * Loads SASS files.
@@ -27,7 +27,6 @@ class SassFilter implements FilterInterface
     const STYLE_COMPACT    = 'compact';
     const STYLE_COMPRESSED = 'compressed';
 
-    private $baseDir;
     private $sassPath;
     private $unixNewlines;
     private $scss;
@@ -40,11 +39,10 @@ class SassFilter implements FilterInterface
     private $noCache;
     private $compass;
 
-    public function __construct($baseDir, $sassPath = '/usr/bin/sass')
+    public function __construct($sassPath = '/usr/bin/sass')
     {
-        $this->baseDir = $baseDir;
         $this->sassPath = $sassPath;
-        $this->cacheLocation = sys_get_temp_dir();
+        $this->cacheLocation = realpath(sys_get_temp_dir());
     }
 
     public function setUnixNewlines($unixNewlines)
@@ -99,86 +97,72 @@ class SassFilter implements FilterInterface
 
     public function filterLoad(AssetInterface $asset)
     {
-        $options = array($this->sassPath);
+        $pb = new ProcessBuilder();
+        $pb->add($this->sassPath);
 
-        $sourceUrl = $asset->getSourceUrl();
-        if ($sourceUrl && false === strpos($sourceUrl, '://')) {
-            $baseDir = self::isAbsolutePath($sourceUrl) ? '' : $this->baseDir.'/';
+        $root = $asset->getSourceRoot();
+        $path = $asset->getSourcePath();
 
-            $options[] = '--load-path';
-            $options[] = $baseDir.dirname($sourceUrl);
+        if ($root && $path) {
+            $pb->add('--load-path')->add(dirname($root.'/'.$path));
         }
 
         if ($this->unixNewlines) {
-            $options[] = '--unix-newlines';
+            $pb->add('--unix-newlines');
         }
 
-        if ($this->scss) {
-            $options[] = '--scss';
+        if (true === $this->scss || (null === $this->scss && 'scss' == pathinfo($path, PATHINFO_EXTENSION))) {
+            $pb->add('--scss');
         }
 
         if ($this->style) {
-            $options[] = '--style';
-            $options[] = $this->style;
+            $pb->add('--style')->add($this->style);
         }
 
         if ($this->quiet) {
-            $options[] = '--quiet';
+            $pb->add('--quiet');
         }
 
         if ($this->debugInfo) {
-            $options[] = '--debug-info';
+            $pb->add('--debug-info');
         }
 
         if ($this->lineNumbers) {
-            $options[] = '--line-numbers';
+            $pb->add('--line-numbers');
         }
 
         foreach ($this->loadPaths as $loadPath) {
-            $options[] = '--load-path';
-            $options[] = $loadPath;
+            $pb->add('--load-path')->add($loadPath);
         }
 
         if ($this->cacheLocation) {
-            $options[] = '--cache-location';
-            $options[] = $this->cacheLocation;
+            $pb->add('--cache-location')->add($this->cacheLocation);
         }
 
         if ($this->noCache) {
-            $options[] = '--no-cache';
+            $pb->add('--no-cache');
         }
 
         if ($this->compass) {
-            $options[] = '--compass';
+            $pb->add('--compass');
         }
 
         // input
-        $options[] = $input = tempnam(sys_get_temp_dir(), 'assetic_sass');
+        $pb->add($input = tempnam(sys_get_temp_dir(), 'assetic_sass'));
         file_put_contents($input, $asset->getContent());
 
-        // output
-        $options[] = $output = tempnam(sys_get_temp_dir(), 'assetic_sass');
-
-        $proc = new Process(implode(' ', array_map('escapeshellarg', $options)));
+        $proc = $pb->getProcess();
         $code = $proc->run();
+        unlink($input);
 
         if (0 < $code) {
-            unlink($input);
             throw new \RuntimeException($proc->getErrorOutput());
         }
 
-        $asset->setContent(file_get_contents($output));
-
-        unlink($input);
-        unlink($output);
+        $asset->setContent($proc->getOutput());
     }
 
     public function filterDump(AssetInterface $asset)
     {
-    }
-
-    static private function isAbsolutePath($path)
-    {
-        return '/' == $path[0] || '\\' == $path[0] || (3 < strlen($path) && ctype_alpha($path[0]) && $path[1] == ':' && ('\\' == $path[2] || '/' == $path[2]));
     }
 }

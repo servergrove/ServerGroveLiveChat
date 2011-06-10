@@ -99,31 +99,6 @@ class MySqlPlatform extends AbstractPlatform
         return 'CONCAT(' . join(', ', (array) $args) . ')';
     }
 
-    public function getDateDiffExpression($date1, $date2)
-    {
-        return 'DATEDIFF(' . $date1 . ', ' . $date2 . ')';
-    }
-
-    public function getDateAddDaysExpression($date, $days)
-    {
-        return 'DATE_ADD(' . $date . ', INTERVAL ' . (int)$days . ' DAY)';
-    }
-
-    public function getDateSubDaysExpression($date, $days)
-    {
-        return 'DATE_SUB(' . $date . ', INTERVAL ' . (int)$days . ' DAY)';
-    }
-
-    public function getDateAddMonthExpression($date, $months)
-    {
-        return 'DATE_ADD(' . $date . ', INTERVAL ' . (int)$months . ' MONTH)';
-    }
-
-    public function getDateSubMonthExpression($date, $months)
-    {
-        return 'DATE_SUB(' . $date . ', INTERVAL ' . (int)$months . ' MONTH)';
-    }
-
     public function getListDatabasesSQL()
     {
         return 'SHOW DATABASES';
@@ -289,11 +264,6 @@ class MySqlPlatform extends AbstractPlatform
         return true;
     }
 
-    public function supportsInlineColumnComments()
-    {
-        return true;
-    }
-
     public function getShowDatabasesSQL()
     {
         return 'SHOW DATABASES';
@@ -304,16 +274,9 @@ class MySqlPlatform extends AbstractPlatform
         return "SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'";
     }
 
-    public function getListTableColumnsSQL($table, $database = null)
+    public function getListTableColumnsSQL($table)
     {
-        if ($database) {
-            return "SELECT COLUMN_NAME AS Field, COLUMN_TYPE AS Type, IS_NULLABLE AS `Null`, ".
-                   "COLUMN_KEY AS `Key`, COLUMN_DEFAULT AS `Default`, EXTRA AS Extra, COLUMN_COMMENT AS Comment, " .
-                   "CHARACTER_SET_NAME AS CharacterSet, COLLATION_NAME AS CollactionName ".
-                   "FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '" . $database . "' AND TABLE_NAME = '" . $table . "'";
-        } else {
-            return 'DESCRIBE ' . $table;
-        }
+        return 'DESCRIBE ' . $table;
     }
 
     /**
@@ -452,9 +415,7 @@ class MySqlPlatform extends AbstractPlatform
         }
 
         foreach ($diff->addedColumns AS $fieldName => $column) {
-            $columnArray = $column->toArray();
-            $columnArray['comment'] = $this->getColumnComment($column);
-            $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+            $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
 
         foreach ($diff->removedColumns AS $column) {
@@ -464,17 +425,13 @@ class MySqlPlatform extends AbstractPlatform
         foreach ($diff->changedColumns AS $columnDiff) {
             /* @var $columnDiff Doctrine\DBAL\Schema\ColumnDiff */
             $column = $columnDiff->column;
-            $columnArray = $column->toArray();
-            $columnArray['comment'] = $this->getColumnComment($column);
             $queryParts[] =  'CHANGE ' . ($columnDiff->oldColumnName) . ' '
-                    . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+                    . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
 
         foreach ($diff->renamedColumns AS $oldColumnName => $column) {
-            $columnArray = $column->toArray();
-            $columnArray['comment'] = $this->getColumnComment($column);
             $queryParts[] =  'CHANGE ' . $oldColumnName . ' '
-                    . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+                    . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
 
         $sql = array();
@@ -651,10 +608,5 @@ class MySqlPlatform extends AbstractPlatform
     public function getVarcharMaxLength()
     {
         return 65535;
-    }
-    
-    protected function getReservedKeywordsClass()
-    {
-        return 'Doctrine\DBAL\Platforms\Keywords\MySQLKeywords';
     }
 }

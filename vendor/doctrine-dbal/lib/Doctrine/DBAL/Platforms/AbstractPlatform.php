@@ -25,9 +25,7 @@ use Doctrine\DBAL\DBALException,
     Doctrine\DBAL\Schema\Table,
     Doctrine\DBAL\Schema\Index,
     Doctrine\DBAL\Schema\ForeignKeyConstraint,
-    Doctrine\DBAL\Schema\TableDiff,
-    Doctrine\DBAL\Schema\Column,
-    Doctrine\DBAL\Types\Type;
+    Doctrine\DBAL\Schema\TableDiff;
 
 /**
  * Base class for all DatabasePlatforms. The DatabasePlatforms are the central
@@ -81,14 +79,6 @@ abstract class AbstractPlatform
      * @var array
      */
     protected $doctrineTypeMapping = null;
-
-    /**
-     * Contains a list of all columns that should generate parseable column comments for type-detection
-     * in reverse engineering scenarios.
-     *
-     * @var array
-     */
-    protected $doctrineTypeComments = null;
 
     /**
      * Constructor.
@@ -235,71 +225,6 @@ abstract class AbstractPlatform
 
         $dbType = strtolower($dbType);
         return isset($this->doctrineTypeMapping[$dbType]);
-    }
-
-    /**
-     * Initialize the Doctrine Type comments instance variable for in_array() checks.
-     *
-     * @return void
-     */
-    protected function initializeCommentedDoctrineTypes()
-    {
-        $this->doctrineTypeComments = array(Type::TARRAY, Type::OBJECT);
-    }
-
-    /**
-     * Is it necessary for the platform to add a parsable type comment to allow reverse engineering the given type?
-     *
-     * @param Type $doctrineType
-     * @return bool
-     */
-    public function isCommentedDoctrineType(Type $doctrineType)
-    {
-        if ($this->doctrineTypeComments === null) {
-            $this->initializeCommentedDoctrineTypes();
-        }
-
-        return in_array($doctrineType->getName(), $this->doctrineTypeComments);
-    }
-
-    /**
-     * Mark this type as to be commented in ALTER TABLE and CREATE TABLE statements.
-     * 
-     * @param Type $doctrineType
-     * @return void
-     */
-    public function markDoctrineTypeCommented(Type $doctrineType)
-    {
-        if ($this->doctrineTypeComments === null) {
-            $this->initializeCommentedDoctrineTypes();
-        }
-        $this->doctrineTypeComments[] = $doctrineType->getName();
-    }
-
-    /**
-     * Get the comment to append to a column comment that helps parsing this type in reverse engineering.
-     * 
-     * @param Type $doctrineType
-     * @return string
-     */
-    public function getDoctrineTypeComment(Type $doctrineType)
-    {
-        return '(DC2Type:' . $doctrineType->getName() . ')';
-    }
-
-    /**
-     * Return the comment of a passed column modified by potential doctrine type comment hints.
-     * 
-     * @param Column $column
-     * @return string
-     */
-    protected function getColumnComment(Column $column)
-    {
-        $comment = $column->getComment();
-        if ($this->isCommentedDoctrineType($column->getType())) {
-            $comment .= $this->getDoctrineTypeComment($column->getType());
-        }
-        return $comment;
     }
 
     /**
@@ -719,68 +644,6 @@ abstract class AbstractPlatform
         return 'COS(' . $value . ')';
     }
 
-    /**
-     * Calculate the difference in days between the two passed dates.
-     *
-     * Computes diff = date1 - date2
-     *
-     * @param string $date1
-     * @param string $date2
-     * @return string
-     */
-    public function getDateDiffExpression($date1, $date2)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * Add the number of given days to a date.
-     *
-     * @param string $date
-     * @param int $days
-     * @return string
-     */
-    public function getDateAddDaysExpression($date, $days)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * Substract the number of given days to a date.
-     *
-     * @param string $date
-     * @param int $days
-     * @return string
-     */
-    public function getDateSubDaysExpression($date, $days)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * Add the number of given months to a date.
-     *
-     * @param string $date
-     * @param int $months
-     * @return string
-     */
-    public function getDateAddMonthExpression($date, $months)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * Substract the number of given months to a date.
-     *
-     * @param string $date
-     * @param int $months
-     * @return string
-     */
-    public function getDateSubMonthExpression($date, $months)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
     public function getForUpdateSQL()
     {
         return 'FOR UPDATE';
@@ -942,7 +805,6 @@ abstract class AbstractPlatform
             $columnData['type'] = $column->getType();
             $columnData['length'] = $column->getLength();
             $columnData['notnull'] = $column->getNotNull();
-            $columnData['fixed'] = $column->getFixed();
             $columnData['unique'] = false; // TODO: what do we do about this?
             $columnData['version'] = ($column->hasPlatformOption("version"))?$column->getPlatformOption('version'):false;
             if(strtolower($columnData['type']) == "string" && $columnData['length'] === null) {
@@ -953,7 +815,6 @@ abstract class AbstractPlatform
             $columnData['default'] = $column->getDefault();
             $columnData['columnDefinition'] = $column->getColumnDefinition();
             $columnData['autoincrement'] = $column->getAutoincrement();
-            $columnData['comment'] = $this->getColumnComment($column);
 
             if(in_array($column->getName(), $options['primary'])) {
                 $columnData['primary'] = true;
@@ -969,20 +830,7 @@ abstract class AbstractPlatform
             }
         }
 
-        $sql = $this->_getCreateTableSQL($tableName, $columns, $options);
-        if ($this->supportsCommentOnStatement()) {
-            foreach ($table->getColumns() AS $column) {
-                if ($column->getComment()) {
-                    $sql[] = $this->getCommentOnColumnSQL($tableName, $column->getName(), $this->getColumnComment($column));
-                }
-            }
-        }
-        return $sql;
-    }
-
-    public function getCommentOnColumnSQL($tableName, $columnName, $comment)
-    {
-        return "COMMENT ON COLUMN " . $tableName . "." . $columnName . " IS '" . $comment . "'";
+        return $this->_getCreateTableSQL($tableName, $columns, $options);
     }
 
     /**
@@ -1310,10 +1158,6 @@ abstract class AbstractPlatform
 
             $typeDecl = $field['type']->getSqlDeclaration($field, $this);
             $columnDef = $typeDecl . $charset . $default . $notnull . $unique . $check . $collation;
-        }
-
-        if ($this->supportsInlineColumnComments() && isset($field['comment']) && $field['comment']) {
-            $columnDef .= " COMMENT '" . $field['comment'] . "'";
         }
 
         return $name . ' ' . $columnDef;
@@ -1790,7 +1634,7 @@ abstract class AbstractPlatform
         throw DBALException::notSupported(__METHOD__);
     }
 
-    public function getListTableColumnsSQL($table, $database = null)
+    public function getListTableColumnsSQL($table)
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -2067,26 +1911,6 @@ abstract class AbstractPlatform
         return true;
     }
 
-    /**
-     * Does this plaform support to add inline column comments as postfix.
-     *
-     * @return bool
-     */
-    public function supportsInlineColumnComments()
-    {
-        return false;
-    }
-
-    /**
-     * Does this platform support the propriortary synatx "COMMENT ON asset"
-     * 
-     * @return bool
-     */
-    public function supportsCommentOnStatement()
-    {
-        return false;
-    }
-
     public function getIdentityColumnNullInsertSQL()
     {
         return "";
@@ -2277,33 +2101,5 @@ abstract class AbstractPlatform
     public function rollbackSavePoint($savepoint)
     {
         return 'ROLLBACK TO SAVEPOINT ' . $savepoint;
-    }
-
-    /**
-     * Return the keyword list instance of this platform.
-     * 
-     * Throws exception if no keyword list is specified.
-     * 
-     * @throws DBALException
-     * @return KeywordList
-     */
-    final public function getReservedKeywordsList()
-    {
-        $class = $this->getReservedKeywordsClass();
-        $keywords = new $class;
-        if (!$keywords instanceof \Doctrine\DBAL\Platforms\Keywords\KeywordList) {
-            throw DBALException::notSupported(__METHOD__);
-        }
-        return $keywords;
-    }
-    
-    /**
-     * The class name of the reserved keywords list.
-     * 
-     * @return string
-     */
-    protected function getReservedKeywordsClass()
-    {
-        throw DBALException::notSupported(__METHOD__);
     }
 }

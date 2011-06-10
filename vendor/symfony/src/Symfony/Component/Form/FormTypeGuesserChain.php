@@ -18,6 +18,13 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
 {
     private $guessers = array();
 
+    /**
+     * Constructor.
+     *
+     * @param array $guessers Guessers as instances of FormTypeGuesserInterface
+     *
+     * @throws UnexpectedTypeException if any guesser does not implement FormTypeGuesserInterface
+     */
     public function __construct(array $guessers)
     {
         foreach ($guessers as $guesser) {
@@ -54,12 +61,20 @@ class FormTypeGuesserChain implements FormTypeGuesserInterface
         });
     }
 
+    public function guessMinLength($class, $property)
+    {
+        return $this->guess(function ($guesser) use ($class, $property) {
+            return $guesser->guessMinLength($class, $property);
+        });
+    }
+
     /**
      * Executes a closure for each guesser and returns the best guess from the
      * return values
      *
      * @param  \Closure $closure  The closure to execute. Accepts a guesser
      *                            as argument and should return a Guess instance
+     * 
      * @return FieldFactoryGuess  The guess with the highest confidence
      */
     private function guess(\Closure $closure)

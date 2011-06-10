@@ -21,7 +21,6 @@ namespace Doctrine\ORM;
 
 use Closure, Exception,
     Doctrine\Common\EventManager,
-    Doctrine\Common\Persistence\ObjectManager,
     Doctrine\DBAL\Connection,
     Doctrine\DBAL\LockMode,
     Doctrine\ORM\Mapping\ClassMetadata,
@@ -38,7 +37,7 @@ use Closure, Exception,
  * @author  Jonathan Wage <jonwage@gmail.com>
  * @author  Roman Borschel <roman@code-factory.org>
  */
-class EntityManager implements ObjectManager
+class EntityManager
 {
     /**
      * The used Configuration.
@@ -203,18 +202,13 @@ class EntityManager implements ObjectManager
     public function transactional(Closure $func)
     {
         $this->conn->beginTransaction();
-        
         try {
-            $return = $func($this);
-            
+            $func($this);
             $this->flush();
             $this->conn->commit();
-            
-            return $return ?: true;
         } catch (Exception $e) {
             $this->close();
             $this->conn->rollback();
-            
             throw $e;
         }
     }
@@ -687,9 +681,6 @@ class EntityManager implements ObjectManager
                 break;
             case Query::HYDRATE_SINGLE_SCALAR:
                 $hydrator = new Internal\Hydration\SingleScalarHydrator($this);
-                break;
-            case Query::HYDRATE_SIMPLEOBJECT:
-                $hydrator = new Internal\Hydration\SimpleObjectHydrator($this);
                 break;
             default:
                 if ($class = $this->config->getCustomHydrationMode($hydrationMode)) {

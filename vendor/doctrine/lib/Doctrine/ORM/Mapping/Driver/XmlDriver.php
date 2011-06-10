@@ -55,9 +55,6 @@ class XmlDriver extends AbstractFileDriver
             $metadata->setCustomRepositoryClass(
                 isset($xmlRoot['repository-class']) ? (string)$xmlRoot['repository-class'] : null
             );
-            if (isset($xmlRoot['read-only']) && $xmlRoot['read-only'] == "true") {
-                $metadata->markReadOnly();
-            }
         } else if ($xmlRoot->getName() == 'mapped-superclass') {
             $metadata->isMappedSuperclass = true;
         } else {
@@ -71,16 +68,6 @@ class XmlDriver extends AbstractFileDriver
         }
 
         $metadata->setPrimaryTable($table);
-
-        // Evaluate named queries
-        if (isset($xmlRoot['named-queries'])) {
-            foreach ($xmlRoot->{'named-queries'}->{'named-query'} as $namedQueryElement) {
-                $metadata->addNamedQuery(array(
-                    'name'  => (string)$namedQueryElement['name'],
-                    'query' => (string)$namedQueryElement['query']
-                ));
-            }
-        }
 
         /* not implemented specially anyway. use table = schema.table
         if (isset($xmlRoot['schema'])) {
@@ -207,13 +194,7 @@ class XmlDriver extends AbstractFileDriver
         }
 
         // Evaluate <id ...> mappings
-        $associationIds = array();
         foreach ($xmlRoot->id as $idElement) {
-            if ((bool)$idElement['association-key'] == true) {
-                $associationIds[(string)$idElement['fieldName']] = true;
-                continue;
-            }
-
             $mapping = array(
                 'id' => true,
                 'fieldName' => (string)$idElement['name'],
@@ -253,10 +234,6 @@ class XmlDriver extends AbstractFileDriver
                     'fieldName' => (string)$oneToOneElement['field'],
                     'targetEntity' => (string)$oneToOneElement['target-entity']
                 );
-
-                if (isset($associationIds[$mapping['fieldName']])) {
-                    $mapping['id'] = true;
-                }
 
                 if (isset($oneToOneElement['fetch'])) {
                     $mapping['fetch'] = constant('Doctrine\ORM\Mapping\ClassMetadata::FETCH_' . (string)$oneToOneElement['fetch']);
@@ -322,10 +299,6 @@ class XmlDriver extends AbstractFileDriver
                     $mapping['orderBy'] = $orderBy;
                 }
 
-                if (isset($oneToManyElement->{'index-by'})) {
-                    $mapping['indexBy'] = (string)$oneToManyElement->{'index-by'};
-                }
-
                 $metadata->mapOneToMany($mapping);
             }
         }
@@ -337,10 +310,6 @@ class XmlDriver extends AbstractFileDriver
                     'fieldName' => (string)$manyToOneElement['field'],
                     'targetEntity' => (string)$manyToOneElement['target-entity']
                 );
-
-                if (isset($associationIds[$mapping['fieldName']])) {
-                    $mapping['id'] = true;
-                }
 
                 if (isset($manyToOneElement['fetch'])) {
                     $mapping['fetch'] = constant('Doctrine\ORM\Mapping\ClassMetadata::FETCH_' . (string)$manyToOneElement['fetch']);
@@ -430,10 +399,6 @@ class XmlDriver extends AbstractFileDriver
                         $orderBy[(string)$orderByField['name']] = (string)$orderByField['direction'];
                     }
                     $mapping['orderBy'] = $orderBy;
-                }
-
-                if (isset($manyToManyElement->{'index-by'})) {
-                    $mapping['indexBy'] = (string)$manyToManyElement->{'index-by'};
                 }
 
                 $metadata->mapManyToMany($mapping);

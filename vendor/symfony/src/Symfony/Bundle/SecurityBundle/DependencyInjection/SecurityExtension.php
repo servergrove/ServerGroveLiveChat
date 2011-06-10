@@ -15,6 +15,10 @@ use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Parameter;
@@ -62,7 +66,7 @@ class SecurityExtension extends Extension
 
         // set some global scalars
         $container->setParameter('security.access.denied_url', $config['access_denied_url']);
-        $container->getDefinition('security.authentication.session_strategy')->replaceArgument(0, $config['session_fixation_strategy']);
+        $container->setParameter('security.authentication.session_strategy.strategy', $config['session_fixation_strategy']);
         $container
             ->getDefinition('security.access.decision_manager')
             ->addArgument($config['access_decision_manager']['strategy'])
@@ -70,6 +74,7 @@ class SecurityExtension extends Extension
             ->addArgument($config['access_decision_manager']['allow_if_equal_granted_denied'])
         ;
         $container->setParameter('security.access.always_authenticate_before_granting', $config['always_authenticate_before_granting']);
+        $container->setParameter('security.authentication.hide_user_not_found', $config['hide_user_not_found']);
 
         $this->createFirewalls($config, $container);
         $this->createAuthorization($config, $container);
@@ -383,7 +388,7 @@ class SecurityExtension extends Extension
         }
 
         if (false === $hasListeners) {
-            throw new \LogicException(sprintf('No authentication listener registered for pattern "%s".', isset($firewall['pattern']) ? $firewall['pattern'] : ''));
+            throw new \LogicException(sprintf('No authentication listener registered for firewall "%s".', $id));
         }
 
         return array($listeners, $defaultEntryPoint);
@@ -566,7 +571,15 @@ class SecurityExtension extends Extension
         // load service templates
         $c = new ContainerBuilder();
         $parameterBag = $container->getParameterBag();
-        $loader = new XmlFileLoader($c, new FileLocator(__DIR__.'/../Resources/config'));
+
+        $locator = new FileLocator(__DIR__.'/../Resources/config');
+        $resolver = new LoaderResolver(array(
+            new XmlFileLoader($c, $locator),
+            new YamlFileLoader($c, $locator),
+            new PhpFileLoader($c, $locator),
+        ));
+        $loader = new DelegatingLoader($resolver);
+
         $loader->load('security_factories.xml');
 
         // load user-created listener factories

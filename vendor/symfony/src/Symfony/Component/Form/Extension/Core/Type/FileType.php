@@ -44,20 +44,34 @@ class FileType extends AbstractType
             ->add('file', 'field')
             ->add('token', 'hidden')
             ->add('name', 'hidden')
-            ->add('originalName', 'hidden');
+            ->add('originalName', 'hidden')
+        ;
     }
 
     public function buildViewBottomUp(FormView $view, FormInterface $form)
     {
-        $view->set('multipart', true);
-        $view['file']->set('type', 'file');
+        $view
+            ->set('multipart', true)
+            ->getChild('file')
+                ->set('type', 'file')
+                ->set('value', '')
+        ;
     }
 
     public function getDefaultOptions(array $options)
     {
         return array(
             'type' => 'string',
-            'csrf_protection' => false,
+        );
+    }
+
+    public function getAllowedOptionValues(array $options)
+    {
+        return array(
+            'type' => array(
+                'string',
+                'file',
+            ),
         );
     }
 

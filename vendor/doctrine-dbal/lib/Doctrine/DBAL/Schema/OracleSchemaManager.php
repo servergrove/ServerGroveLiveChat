@@ -117,9 +117,6 @@ class OracleSchemaManager extends AbstractSchemaManager
         $scale = null;
 
         $type = $this->_platform->getDoctrineTypeMapping($dbType);
-        $type = $this->extractDoctrineTypeFromComment($tableColumn['comments'], $type);
-        $tableColumn['comments'] = $this->removeDoctrineTypeFromComment($tableColumn['comments'], $type);
-
         switch ($dbType) {
             case 'number':
                 if ($tableColumn['data_precision'] == 20 && $tableColumn['data_scale'] == 0) {
@@ -189,7 +186,6 @@ class OracleSchemaManager extends AbstractSchemaManager
             'length'     => $length,
             'precision'  => $precision,
             'scale'      => $scale,
-            'comment'       => (isset($tableColumn['comments'])) ? $tableColumn['comments'] : null,
             'platformDetails' => array(),
         );
 

@@ -185,7 +185,7 @@ class SchemaTool
 
                     // Add a FK constraint on the ID column
                     $table->addUnnamedForeignKeyConstraint(
-                        $this->_em->getClassMetadata($class->rootEntityName)->getTableName(),
+                        $this->_em->getClassMetadata($class->rootEntityName)->getQuotedTableName($this->_platform),
                         array($columnName), array($columnName), array('onDelete' => 'CASCADE')
                     );
                 }
@@ -197,22 +197,6 @@ class SchemaTool
             } else {
                 $this->_gatherColumns($class, $table);
                 $this->_gatherRelationsSql($class, $table, $schema);
-            }
-
-            $pkColumns = array();
-            foreach ($class->identifier AS $identifierField) {
-                if (isset($class->fieldMappings[$identifierField])) {
-                    $pkColumns[] = $class->getQuotedColumnName($identifierField, $this->_platform);
-                } else if (isset($class->associationMappings[$identifierField])) {
-                    /* @var $assoc \Doctrine\ORM\Mapping\OneToOne */
-                    $assoc = $class->associationMappings[$identifierField];
-                    foreach ($assoc['joinColumns'] AS $joinColumn) {
-                        $pkColumns[] = $joinColumn['name'];
-                    }
-                }
-            }
-            if (!$table->hasIndex('primary')) {
-                $table->setPrimaryKey($pkColumns);
             }
 
             if (isset($class->table['indexes'])) {
@@ -301,11 +285,10 @@ class SchemaTool
                 $pkColumns[] = $class->getQuotedColumnName($mapping['fieldName'], $this->_platform);
             }
         }
-
         // For now, this is a hack required for single table inheritence, since this method is called
         // twice by single table inheritence relations
         if(!$table->hasIndex('primary')) {
-            //$table->setPrimaryKey($pkColumns);
+            $table->setPrimaryKey($pkColumns);
         }
 
         return $columns;
@@ -427,46 +410,12 @@ class SchemaTool
     }
 
     /**
-     * Get the class metadata that is responsible for the definition of the referenced column name.
-     *
-     * Previously this was a simple task, but with DDC-117 this problem is actually recursive. If its
-     * not a simple field, go through all identifier field names that are associations recursivly and
-     * find that referenced column name.
-     *
-     * TODO: Is there any way to make this code more pleasing?
-     *
-     * @param ClassMetadata $class
-     * @param string $referencedColumnName
-     * @return array(ClassMetadata, referencedFieldName)
-     */
-    private function getDefiningClass($class, $referencedColumnName)
-    {
-        $referencedFieldName = $class->getFieldName($referencedColumnName);
-
-        if ($class->hasField($referencedFieldName)) {
-            return array($class, $referencedFieldName);
-        } else if (in_array($referencedColumnName, $class->getIdentifierColumnNames())) {
-            // it seems to be an entity as foreign key
-            foreach ($class->getIdentifierFieldNames() AS $fieldName) {
-                if ($class->hasAssociation($fieldName) && $class->getSingleAssociationJoinColumnName($fieldName) == $referencedColumnName) {
-                    return $this->getDefiningClass(
-                        $this->_em->getClassMetadata($class->associationMappings[$fieldName]['targetEntity']),
-                        $class->getSingleAssociationReferencedJoinColumnName($fieldName)
-                    );
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Gather columns and fk constraints that are required for one part of relationship.
      *
      * @param array $joinColumns
      * @param \Doctrine\DBAL\Schema\Table $theJoinTable
      * @param ClassMetadata $class
-     * @param array $mapping
+     * @param \Doctrine\ORM\Mapping\AssociationMapping $mapping
      * @param array $primaryKeyColumns
      * @param array $uniqueConstraints
      */
@@ -475,13 +424,13 @@ class SchemaTool
         $localColumns = array();
         $foreignColumns = array();
         $fkOptions = array();
-        $foreignTableName = $class->getTableName();
+        $foreignTableName = $class->getQuotedTableName($this->_platform);
 
         foreach ($joinColumns as $joinColumn) {
             $columnName = $joinColumn['name'];
-            list($definingClass, $referencedFieldName) = $this->getDefiningClass($class, $joinColumn['referencedColumnName']);
+            $referencedFieldName = $class->getFieldName($joinColumn['referencedColumnName']);
 
-            if (!$definingClass) {
+            if ( ! $class->hasField($referencedFieldName)) {
                 throw new \Doctrine\ORM\ORMException(
                     "Column name `".$joinColumn['referencedColumnName']."` referenced for relation from ".
                     $mapping['sourceEntity'] . " towards ". $mapping['targetEntity'] . " does not exist."
@@ -497,7 +446,7 @@ class SchemaTool
                 // It might exist already if the foreign key is mapped into a regular
                 // property as well.
 
-                $fieldMapping = $definingClass->getFieldMapping($referencedFieldName);
+                $fieldMapping = $class->getFieldMapping($referencedFieldName);
 
                 $columnDef = null;
                 if (isset($joinColumn['columnDefinition'])) {
@@ -516,7 +465,9 @@ class SchemaTool
                     $columnOptions['precision'] = $fieldMapping['precision'];
                 }
 
-                $theJoinTable->addColumn($columnName, $fieldMapping['type'], $columnOptions);
+                $theJoinTable->addColumn(
+                    $columnName, $class->getTypeOfColumn($joinColumn['referencedColumnName']), $columnOptions
+                );
             }
 
             if (isset($joinColumn['unique']) && $joinColumn['unique'] == true) {
@@ -625,11 +576,9 @@ class SchemaTool
 
     /**
      * Updates the database schema of the given classes by comparing the ClassMetadata
-     * instances to the current database schema that is inspected. If $saveMode is set
-     * to true the command is executed in the Database, else SQL is returned.
+     * ins$tableNametances to the current database schema that is inspected.
      *
      * @param array $classes
-     * @param boolean $saveMode
      * @return void
      */
     public function updateSchema(array $classes, $saveMode=false)
@@ -645,11 +594,8 @@ class SchemaTool
     /**
      * Gets the sequence of SQL statements that need to be performed in order
      * to bring the given class mappings in-synch with the relational schema.
-     * If $saveMode is set to true the command is executed in the Database, 
-     * else SQL is returned.
      *
      * @param array $classes The classes to consider.
-     * @param boolean $saveMode True for writing to DB, false for SQL string
      * @return array The sequence of SQL statements.
      */
     public function getUpdateSchemaSql(array $classes, $saveMode=false)
