@@ -3,26 +3,25 @@
 namespace ServerGrove\SGLiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Date;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
  * Description of Message
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:EmbeddedDocument
- * @mongodb:HasLifecycleCallbacks
+ * @MongoDB\EmbeddedDocument
  */
 class Message
 {
 
     /**
      * @var integer
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
-
     /**
      * @var User
-     * @mongodb:ReferenceOne(
+     * @MongoDB\ReferenceOne(
      * 	discriminatorMap={
      * 		"operator"="Operator",
      * 		"visitor"="Visitor",
@@ -31,27 +30,24 @@ class Message
      * )
      */
     private $sender;
-
     /**
      * @var Session
-     * @mongodb:ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
      */
     private $session;
-
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $createdAt;
-
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $content;
 
     /**
-     * @mongodb:PrePersist
+     * @MongoDB\PrePersist
      */
     public function registerCreatedDate()
     {
@@ -90,20 +86,23 @@ class Message
 
         return null;
     }
-    
-    public function getSenderName() {
+
+    public function getSenderName()
+    {
         if (!$this->getSender()->getId()) {
             return $this->isOperator() ? 'Operator' : 'Visitor';
         }
-        
+
         return $this->getSender()->getName();
     }
-    
-    public function isOperator() {
+
+    public function isOperator()
+    {
         return $this->getSender() instanceof Operator;
     }
-    
-    public function isVisitor() {
+
+    public function isVisitor()
+    {
         return $this->getSender() instanceof Visitor;
     }
 

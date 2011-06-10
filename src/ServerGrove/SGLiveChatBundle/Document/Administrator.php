@@ -2,10 +2,12 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
  *
- * @mongodb:Document
+ * @MongoDB\Document
  */
 class Administrator extends Operator
 {

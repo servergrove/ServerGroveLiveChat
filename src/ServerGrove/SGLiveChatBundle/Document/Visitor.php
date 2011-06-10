@@ -2,49 +2,45 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
 /**
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(
+ * @MongoDB\Document(
  * collection="visitor",
  * repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitorRepository"
  * )
- * @mongodb:HasLifecycleCallbacks
  */
 class Visitor extends User
 {
 
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $agent;
-
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $key;
-
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $remoteAddr;
-
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $languages;
-
     /**
-     * @mongodb:ReferenceMany(targetDocument="Visit")
+     * @MongoDB\ReferenceMany(targetDocument="Visit")
      */
     private $visits = array();
-
     /**
-     * @mongodb:ReferenceOne(targetDocument="Visit", mappedBy="visitor", sort={"createdAt"="desc"})
+     * @MongoDB\ReferenceOne(targetDocument="Visit", mappedBy="visitor", sort={"createdAt"="desc"})
      */
     private $lastVisit;
 
@@ -87,7 +83,7 @@ class Visitor extends User
     {
         return $this->remoteAddr;
     }
-    
+
     /**
      * @return the $remoteAddr
      */
@@ -130,7 +126,8 @@ class Visitor extends User
         $this->visits[] = $visit;
     }
 
-    public function getLastVisit() {
+    public function getLastVisit()
+    {
         return $this->lastVisit;
     }
 

@@ -2,11 +2,13 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document\Operator;
 
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
 /**
  * Description of Rating
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(
+ * @MongoDB\Document(
  *  collection="operator_rating",
  *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\Operator\RatingRepository"
  * )
@@ -16,37 +18,37 @@ class Rating
 
     /**
      * @var integer
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
     /**
      * @var integer
-     * @mongodb:Field(type="int")
+     * @MongoDB\Field(type="int")
      */
     private $grade;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $comments;
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $createdAt;
     /**
      * @var ServerGrove\SGLiveChatBundle\Document\Session
-     * @mongodb:ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
      */
     private $session;
     /**
      * @var ServerGrove\SGLiveChatBundle\Document\Operator
-     * @mongodb:ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
      */
     private $operator;
 
     /**
-     * @mongodb:PrePersist
+     * @MongoDB\PrePersist
      */
     public function registerCreatedDate()
     {

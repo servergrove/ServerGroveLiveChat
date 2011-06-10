@@ -2,44 +2,46 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
 /**
  * Description of CannedMessage
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(collection="canned_message",repositoryClass="ServerGrove\SGLiveChatBundle\Document\CannedMessageRepository")
+ * @MongoDB\Document(collection="canned_message",repositoryClass="ServerGrove\SGLiveChatBundle\Document\CannedMessageRepository")
  */
 class CannedMessage
 {
 
     /**
      * @var integer
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $content;
     /**
      * @var string
-     * @mongodb:String
-     * @mongodb:UniqueIndex(order="asc")
+     * @MongoDB\String
+     * @MongoDB\UniqueIndex(order="asc")
      */
     private $title;
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $createdAt;
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $updatedAt;
 
     /**
-     * @mongodb:PrePersist
+     * @MongoDB\PrePersist
      */
     public function registerCreatedDate()
     {
@@ -48,7 +50,7 @@ class CannedMessage
     }
 
     /**
-     * @mongodb:PreUpdate
+     * @MongoDB\PreUpdate
      */
     public function registerUpdatedDate()
     {

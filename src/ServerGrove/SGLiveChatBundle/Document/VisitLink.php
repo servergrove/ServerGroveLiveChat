@@ -2,11 +2,13 @@
 
 namespace ServerGrove\SGLiveChatBundle\Document;
 
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+
 /**
  * Description of VisitLink
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(
+ * @MongoDB\Document(
  *  collection="visit_link",
  *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitLinkRepository"
  * )
@@ -15,7 +17,7 @@ class VisitLink
 {
 
     /**
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
 
@@ -28,7 +30,7 @@ class VisitLink
     }
 
     /**
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $url;
 
@@ -49,7 +51,7 @@ class VisitLink
     }
 
     /**
-     * @mongodb:ReferenceMany(targetDocument="VisitHit")
+     * @MongoDB\ReferenceMany(targetDocument="VisitHit")
      */
     private $hits;
 

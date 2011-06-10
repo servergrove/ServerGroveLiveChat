@@ -3,12 +3,13 @@
 namespace ServerGrove\SGLiveChatBundle\Document\Operator;
 
 use ServerGrove\SGLiveChatBundle\Document\Operator;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
  * Description of Department
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(
+ * @MongoDB\Document(
  *  collection="operator_department",
  *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\Operator\DepartmentRepository"
  * )
@@ -18,22 +19,22 @@ class Department
 
     /**
      * @var integer
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $name;
     /**
      * @var boolean
-     * @mongodb:Field(type="boolean")
+     * @MongoDB\Field(type="boolean")
      */
     private $isActive = true;
     /**
      * @var \ServerGrove\SGLiveChatBundle\Document\Operator[]
-     * @mongodb:ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
+     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
      */
     private $operators = array();
 
@@ -79,7 +80,8 @@ class Department
         return $this->id;
     }
 
-    public function getOperators() {
+    public function getOperators()
+    {
         return $this->operators;
     }
 
@@ -87,8 +89,9 @@ class Department
     {
         $this->operators[] = $operator;
     }
-    
-    public function __toString() {
+
+    public function __toString()
+    {
         return $this->getName();
     }
 

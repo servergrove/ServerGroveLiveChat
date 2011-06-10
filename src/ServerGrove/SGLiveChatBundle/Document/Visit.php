@@ -3,58 +3,58 @@
 namespace ServerGrove\SGLiveChatBundle\Document;
 
 use \DateTime;
+use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @mongodb:Document(
+ * @MongoDB\Document(
  * collection="visit",
  * repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitRepository"
  * )
- * @mongodb:HasLifecycleCallbacks
  */
 class Visit
 {
 
     /**
-     * @mongodb:Id
+     * @MongoDB\Id
      */
     private $id;
     /**
-     * @mongodb:ReferenceOne(targetDocument="Visitor", inversedBy="visits")
+     * @MongoDB\ReferenceOne(targetDocument="Visitor", inversedBy="visits")
      */
     private $visitor;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $key;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $remoteAddr;
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $createdAt;
     /**
      * @var string
-     * @mongodb:Date
+     * @MongoDB\Date
      */
     private $updatedAt;
     /**
      * @var string
-     * @mongodb:String
+     * @MongoDB\String
      */
     private $localTime;
     /**
      * @var int
-     * @mongodb:Int
+     * @MongoDB\Int
      */
     private $localTimeZone;
     /**
-     * @mongodb:EmbedMany(targetDocument="VisitHit")
+     * @MongoDB\EmbedMany(targetDocument="VisitHit")
      */
     private $hits;
 
@@ -120,7 +120,7 @@ class Visit
     }
 
     /**
-     * @mongodb:PrePersist
+     * @MongoDB\PrePersist
      */
     public function registerCreatedDate()
     {
@@ -129,7 +129,7 @@ class Visit
     }
 
     /**
-     * @mongodb:PreUpdate
+     * @MongoDB\PreUpdate
      */
     public function registerUpdatedDate()
     {
