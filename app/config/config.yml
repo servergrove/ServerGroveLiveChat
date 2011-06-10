@@ -3,13 +3,13 @@ imports:
     - { resource: security.yml }
 
 framework:
-    secret:        %secret%
-    charset:       UTF-8
-    csrf_protection:
-        enabled: true
-    router:        { resource: "%kernel.root_dir%/config/routing.yml" }
-    validation:    { enabled: true, annotations: true }
-    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
+    secret:          %secret%
+    charset:         UTF-8
+    router:          { resource: "%kernel.root_dir%/config/routing.yml" }
+    form:            true
+    csrf_protection: true
+    validation:      { enable_annotations: true }
+    templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
     session:
         default_locale: %locale%
         lifetime:       0
@@ -39,7 +39,10 @@ assetic:
 #        dbname:   %database_name%
 #        user:     %database_user%
 #        password: %database_password%
-#        logging:  %kernel.debug%
+#
+#    orm:
+#        auto_generate_proxy_classes: %kernel.debug%
+#        auto_mapping: true
 
 doctrine_mongodb:
   connections:
@@ -55,18 +58,17 @@ doctrine_mongodb:
       mappings:
         SGLiveChatBundle: ~
       metadata_cache_driver: array # array, apc, xcache, memcache
- 
-#    orm:
-#        auto_generate_proxy_classes: %kernel.debug%
-#        mappings:
-#            AcmeDemoBundle: ~
 
 # Swiftmailer Configuration
-swiftmailer: ~
-#    transport:  %mailer_transport%
-#    host:       %mailer_host%
-#    username:   %mailer_user%
-#    password:   %mailer_password%
+swiftmailer:
+    transport: %mailer_transport%
+    host:      %mailer_host%
+    username:  %mailer_user%
+    password:  %mailer_password%
+
+jms_security_extra:
+    secure_controllers:  true
+    secure_all_services: false
 
 sg_live_chat:
   cache_engine: mongo

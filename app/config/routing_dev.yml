@@ -1,5 +1,15 @@
-_main:
-    resource: routing.yml
+_welcome:
+    pattern:  /
+    defaults: { _controller: AcmeDemoBundle:Welcome:index }
+
+_demo_secured:
+    resource: "@AcmeDemoBundle/Controller/SecuredController.php"
+    type:     annotation
+
+_demo:
+    resource: "@AcmeDemoBundle/Controller/DemoController.php"
+    type:     annotation
+    prefix:   /demo
 
 _assetic:
     resource: .
@@ -16,3 +26,6 @@ _profiler:
 _configurator:
     resource: "@SymfonyWebConfiguratorBundle/Resources/config/routing/configurator.xml"
     prefix:   /_configurator
+
+_main:
+    resource: routing.yml
