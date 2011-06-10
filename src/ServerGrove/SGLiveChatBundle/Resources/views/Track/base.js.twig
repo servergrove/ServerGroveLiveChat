@@ -99,7 +99,7 @@ if (typeof(SGChatTracker) == 'undefined') {
             }
             jQuery.ajax({
                 type: _type,
-                url: "{{ path('sglc_track_updater')}}",
+                url: "{{ url('sglc_track_updater')}}",
                 data: _data,
                 cache: false,
                 success: function(){
