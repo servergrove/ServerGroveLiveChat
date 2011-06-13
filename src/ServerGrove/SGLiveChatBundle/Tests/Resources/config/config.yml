@@ -3,18 +3,19 @@ imports:
     - { resource: security.yml }
 
 framework:
-    secret:        %secret%
-    charset:       UTF-8
-    csrf_protection:
-        enabled: true
-    router:        { resource: "%kernel.root_dir%/config/routing.yml" }
-    validation:    { enabled: true, annotations: true }
-    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
+    secret:          %secret%
+    charset:         UTF-8
+    router:          { resource: "%kernel.root_dir%/config/routing.yml" }
+    form:            true
+    csrf_protection: true
+    validation:      { enable_annotations: true }
+    templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
     session:
         default_locale: %locale%
         lifetime:       0
         auto_start:     true
 
+# Twig Configuration
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
@@ -31,6 +32,18 @@ assetic:
         #     jar: %kernel.root_dir%/java/yuicompressor-2.4.2.jar
 
 # Doctrine Configuration
+#doctrine:
+#    dbal:
+#        driver:   %database_driver%
+#        host:     %database_host%
+#        dbname:   %database_name%
+#        user:     %database_user%
+#        password: %database_password%
+#
+#    orm:
+#        auto_generate_proxy_classes: %kernel.debug%
+#        auto_mapping: true
+
 doctrine_mongodb:
   connections:
     default:
@@ -48,6 +61,10 @@ doctrine_mongodb:
 
 # Swiftmailer Configuration
 swiftmailer: ~
+
+jms_security_extra:
+    secure_controllers:  true
+    secure_all_services: false
 
 sg_live_chat:
   cache_engine: mongo
