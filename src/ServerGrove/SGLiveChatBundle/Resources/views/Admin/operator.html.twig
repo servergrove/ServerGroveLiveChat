@@ -1,4 +1,44 @@
 {% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+
+{% form_theme form _self %}
+{% use 'TwigBundle:Form:div_layout.html.twig' %}
+
+{% block field_errors %}
+{% spaceless %}
+{% if errors|length > 0 %}
+<ul style="display: inline; margin: 0; padding: 0;">
+    <li>(</li>
+    {% for error in errors %}
+    <li style="list-style: none; color: red; display: inline-block; font-size: 0.95em;">{{ error.messageTemplate|trans(error.messageParameters, 'validators') }}</li>
+    {% endfor %}
+    <li>)</li>
+</ul>
+{% endif %}
+{% endspaceless %}
+{% endblock field_errors %}
+
+{% block repeated_row %}
+{% spaceless %}
+<div class="inputname">
+        {{ form_label(form) }}
+</div>
+<div class="inputbox">
+        {{ form_widget(form.first) }} &nbsp; {{ form_widget(form.second) }}{{ form_errors(form) }}
+</div>
+{% endspaceless %}
+{% endblock repeated_row %}
+
+{% block field_row %}
+{% spaceless %}
+<div class="inputname">
+        {{ form_label(form) }}
+</div>
+<div class="inputbox">
+        {{ form_widget(form) }}{{ form_errors(form) }}
+</div>
+{% endspaceless %}
+{% endblock field_row %}
+
 {% block content %}
 {% include "SGLiveChatBundle:Admin:header.html.twig" %}
 
@@ -10,6 +50,7 @@
 
 {% set route = operator.getId() ? 'sglc_admin_operator_edit' : 'sglc_admin_operator' %}
 {% set vars = operator.getId() ? {'id': operator.getId()} : {} %}
+
 <script type="text/javascript">
     jQuery(document).ready(function(){
         jQuery(':text:first').focus();
@@ -29,45 +70,18 @@
         <div>
             {{ form_errors(form) }}
         </div>
-        <div class="inputname">
-            {{ form_label(form.name) }}
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.name) }}
-        </div>
-        <p>
-        </p>
-        <div class="inputname">
-            {{ form_label(form.email) }}
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.email.first) }} &nbsp; {{ form_widget(form.email.second) }}
-        </div>
-        <p>
-        </p>
-        <div class="inputname">
-            {{ form_label(form.passwd) }}
-        </div>
-        <div class="inputbox">
-            {% set attr = edit ? {'autocomplete': 'off', 'disabled': 'disabled'} : {'autocomplete': 'off'} %}
-            {{ form_widget(form.passwd.first, {'attr': attr}) }} &nbsp; {{ form_widget(form.passwd.second, {'attr': attr}) }}
-            {% if edit %}
+        {{ form_row(form.name) }}
+        <p></p>
+        {{ form_row(form.email) }}
+        <p></p>
+        {% set attr = edit ? {'autocomplete': 'off', 'disabled': 'disabled'} : {'autocomplete': 'off'} %}
+        {{ form_row(form.passwd, {'attr': attr}) }}
+        {# if edit %}
             <input type="checkbox" id="passwordEnabler" onclick="jQuery(this).siblings(':password').attr({'disabled': !this.checked}).prev(':password:first').focus();" /> Change
-            {%endif%}
-        </div>
-        <p>
-            {{ form_widget(form.isActive) }}
-            {{ form_label(form.isActive) }}
-        </p>
-        <div class="inputname">
-            {{ form_label(form.departments) }}
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.departments)}}
-        </div>
-        <p>
-            {{ form_rest(form) }}
-        </p>
+        {% endif #}
+        <p>{{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}</p>
+        {{ form_row(form.departments) }}
+        <p>{{ form_rest(form) }}</p>
         <input type="submit" value="Submit" onclick="return " />
     </div>
 </form>
