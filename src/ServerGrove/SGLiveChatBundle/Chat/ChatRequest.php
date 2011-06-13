@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Chat;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * A domain object for handling new Chat requests
  *
@@ -12,22 +14,20 @@ class ChatRequest
 
     /**
      * @var string
-     * @assert:MaxLength(150)
-     * @assert:MinLength(6)
-     * @assert:NotBlank
+     * @Assert\MaxLength(150)
+     * @Assert\MinLength(6)
+     * @Assert\NotBlank
      */
     private $name;
-
     /**
      * @var string
-     * @assert:Email
-     * @assert:NotBlank
+     * @Assert\Email
+     * @Assert\NotBlank
      */
     private $email;
-
     /**
      * @var string
-     * @assert:NotBlank
+     * @Assert\NotBlank
      */
     private $question;
 

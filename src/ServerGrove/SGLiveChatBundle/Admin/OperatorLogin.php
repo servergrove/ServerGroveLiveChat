@@ -2,6 +2,8 @@
 
 namespace ServerGrove\SGLiveChatBundle\Admin;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * Simple domain object for handling admin
  * access to the backend
@@ -13,16 +15,15 @@ class OperatorLogin
 
     /**
      * @var string
-     * @assert:Email
-     * @assert:NotBlank
+     * @Assert\Email
+     * @Assert\NotBlank
      */
     private $email;
-
     /**
      * @var string
-     * @assert:MaxLength(20)
-     * @assert:MinLength(6)
-     * @assert:NotBlank
+     * @Assert\MaxLength(20)
+     * @Assert\MinLength(6)
+     * @Assert\NotBlank
      */
     private $passwd;
 
