@@ -26,19 +26,28 @@ class ChatController extends PublicController
 {
 
     /**
+     * @param string $id        Session id
+     * @param boolean $finished Whether or not the session has finished
+     *
      * @return ServerGrove\SGLiveChatBundle\Document\Session
      */
-    private function getChatSession($id)
+    private function getChatSession($id, $finished = true)
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getSessionIfNotFinished($id);
+        if ($finished) {
+            return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getSessionIfNotFinished($id);
+        }
+
+        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->find($id);
     }
 
     /**
+     * @param boolean $finished Whether or not the session has finished
+     *
      * @return ServerGrove\SGLiveChatBundle\Document\Session
      */
-    public function getChatSessionForCurrentUser()
+    public function getChatSessionForCurrentUser($finished = true)
     {
-        return $this->getChatSession($this->getSessionStorage()->has('_operator') ? $this->getRequest()->get('id') : $this->getSessionStorage()->get('chatsession'));
+        return $this->getChatSession($this->getSessionStorage()->has('_operator') ? $this->getRequest()->get('id') : $this->getSessionStorage()->get('chatsession'), $finished);
     }
 
     /**
@@ -114,7 +123,7 @@ class ChatController extends PublicController
                 $this->cacheUserForSession($visitor, $chatSession);
 
                 return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
-                    'id' => $chatSession->getId())));
+                            'id' => $chatSession->getId())));
             }
         }
 
@@ -159,7 +168,7 @@ class ChatController extends PublicController
         $this->cacheUserForSession($operator, $chatSession);
 
         return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
-            'id' => $chatSession->getId())));
+                    'id' => $chatSession->getId())));
     }
 
     public function acceptInviteAction($id)
@@ -186,7 +195,7 @@ class ChatController extends PublicController
         $this->getDocumentManager()->flush();
 
         return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
-            'id' => $chatSession->getId())));
+                    'id' => $chatSession->getId())));
     }
 
     public function rejectInviteAction($id)
@@ -232,7 +241,7 @@ class ChatController extends PublicController
                 $this->cacheUserForSession($operator, $chatSession);
 
                 return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
-                    'id' => $chatSession->getId())));
+                            'id' => $chatSession->getId())));
             }
         }
 
@@ -260,9 +269,9 @@ class ChatController extends PublicController
                 /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
                     $arrCannedMessages[] = $cannedMessage->renderContent(array(
-                        'operator' => $operator,
-                        'currtime' => date('H:i:s'),
-                        'currdate' => date('m-d-Y')));
+                                'operator' => $operator,
+                                'currtime' => date('H:i:s'),
+                                'currdate' => date('m-d-Y')));
                 }
             }
         }
@@ -361,7 +370,9 @@ class ChatController extends PublicController
                     if ($chatSession->getOtherMember($user)->getLastVisit() && $chatSession->getOtherMember($user)->getLastVisit()->getLastHit() && $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()) {
                         $json['current_hit'] = $chatSession->getOtherMember($user)->getLastVisit()->getLastHit()->getVisitLink()->getUrl();
                     }
-                } catch (Exception $e) {}
+                } catch (Exception $e) {
+
+                }
             }
 
             $this->getResponse()->setContent(json_encode($json));
@@ -377,8 +388,8 @@ class ChatController extends PublicController
      */
     public function doneAction()
     {
-        if (!$chatSession = $this->getChatSessionForCurrentUser()) {
-            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Session may have expired. Please start again.');
+        if (!$chatSession = $this->getChatSessionForCurrentUser(false)) {
+            $this->getSessionStorage()->setFlash('errorMsg', 'No chat found. Please start again.');
             return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
@@ -412,8 +423,11 @@ class ChatController extends PublicController
             }
 
             $mailer = $this->get('mailer');
-            $message = Swift_Message::newInstance()->setSubject('Transcripts for: ' . $chatSession->getQuestion())->setFrom(array(
-                'help@servergrove.com' => 'ServerGrove Support'))->setTo($this->getRequest()->get('email'))->setBody(implode(PHP_EOL, $contents));
+            $message = Swift_Message::newInstance()
+                    ->setSubject('Transcripts for: ' . $chatSession->getQuestion())
+                    ->setFrom(array('help@servergrove.com' => 'ServerGrove Support'))
+                    ->setTo($this->getRequest()->get('email'))
+                    ->setBody(implode(PHP_EOL, $contents));
             $mailer->send($message);
         }
 
