@@ -269,7 +269,7 @@ class AdminController extends BaseController
 
         if ($id) {
             $operator = $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $id);
-            $edit = false; # Just temporary until empty password problem is fixed
+            $edit = true;
         } else {
             $operator = new Operator();
             $edit = false;
