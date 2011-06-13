@@ -420,6 +420,7 @@ class AdminController extends BaseController
         return $this->renderTemplate($template, array(
             $documentTemplateKey => $documents,
             'msg' => $msg,
+            'page' => $page,
             'pages' => $pages
         ));
     }

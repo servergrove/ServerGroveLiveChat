@@ -116,12 +116,16 @@ ul#header-menu, ul.pager  {
     border: solid 1px #888;
 }
 
+ul.pager  {
+    padding: 2px 5px;
+}
+
 ul#header-menu li {
     padding: 5px;
 }
 
 ul.pager li {
-    padding: 2px;
+    padding: 0 0 0 10px;
 }
 
 ul#header-menu li a, ul.pager li a {
