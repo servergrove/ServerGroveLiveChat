@@ -2,7 +2,7 @@
 <script type="text/javascript" src="{{asset('js/sglc.js')}}"></script>
 <script type="text/javascript">
     //<![CDATA[
-    {% include "SGLiveChatBundle:Track:base.js.twig" %}
+    {% render "SGLiveChatBundle:Track:api" %}
     SGChatTracker.callUpdater(true);
     SGChatTracker.drawStatusLink(false);
     //]]>

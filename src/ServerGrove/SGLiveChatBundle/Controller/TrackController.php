@@ -5,6 +5,7 @@ namespace ServerGrove\SGLiveChatBundle\Controller;
 use Symfony\Component\HttpFoundation\Cookie;
 use ServerGrove\SGLiveChatBundle\Document\VisitHit;
 use ServerGrove\SGLiveChatBundle\Controller\BaseController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use MongoDate;
 
 /**
@@ -17,13 +18,23 @@ class TrackController extends PublicController
 
     public function indexAction()
     {
-        //$this->getResponse()->headers->set('Content-type', 'text/js');
         return $this->renderTemplate('SGLiveChatBundle:Track:index.html.twig');
+    }
+
+    /**
+     * @Template
+     */
+    public function apiAction()
+    {
+        return array(
+            'hostname' => $this->getRequest()->server->get('HTTP_HOST')
+        );
     }
 
     public function updateAction()
     {
-        $this->getResponse()->setContent(1);
+        $this->getResponse()->setContent('1');
+        $this->getResponse()->headers->set('Content-type', 'text/plain');
         if ($this->getOperator()) {
             return $this->getResponse();
         }
@@ -48,7 +59,15 @@ class TrackController extends PublicController
         $this->getDocumentManager()->persist($visit);
         $this->getDocumentManager()->flush();
 
-        if ('POST' == $this->getRequest()->getMethod()) {
+        $remote = ($this->getRequest()->query->has('remote') && 1 == $this->getRequest()->get('remote'));
+        if ($remote) {
+            $this->getResponse()->setContent('SGChatTracker.loadUpdater();');
+            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+        }
+
+        $firstRequest = 'POST' == $this->getRequest()->getMethod() || ($this->getRequest()->query->has('first') && 1 == $this->getRequest()->get('first'));
+        ;
+        if ($firstRequest) {
             $hit = new VisitHit();
             $visit->addHit($hit);
 
@@ -93,8 +112,7 @@ class TrackController extends PublicController
     public function statusAction($_format)
     {
         $online = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->getOnlineOperatorsCount() > 0;
-        return $this->renderTemplate('SGLiveChatBundle:Track:status.' . $_format . '.twig', array(
-            'online' => $online));
+        return $this->renderTemplate('SGLiveChatBundle:Track:status.' . $_format . '.twig', array('online' => $online));
     }
 
     public function resetAction()

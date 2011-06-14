@@ -79,7 +79,34 @@ if (typeof(SGChatTracker) == 'undefined') {
                 document.write('<img src="https://secure.servergrove.com/sglivechat/images/livechat_off.png" alt="Livechat is Offline" />');
             }
         },
-        callUpdater: function(first){
+        _remoteRequestTime: null,
+        _remoteResponseTime: null,
+        callRemoteUpdater: function(first) {
+            var _id = 'sglc-tracker';
+
+            var lastRequestTime = SGChatTracker._remoteRequestTime;
+
+            SGChatTracker._remoteRequestTime = new Date();
+
+            if (lastRequestTime != null
+            && SGChatTracker._remoteResponseTime != null
+            && lastRequestTime.getMilliseconds() > SGChatTracker._remoteResponseTime.getMilliseconds()) {
+                return;
+            }
+
+            if (jQuery("#" + _id).length > 0) {
+                jQuery("#" + _id).remove();
+            }
+
+            jQuery(document.createElement("script")).attr({
+                src: "{{ url('sglc_track_updater')}}?"+(first ? "first=1&" : "")+"remote=1&lt=" + SGChatTracker._remoteRequestTime.toString() + "&tz=" + SGChatTracker._getTimeZone() + "&r=" + encodeURIComponent(document.referrer),
+                type: "text/javascript",
+                id: _id
+            }).appendTo("head");
+
+            
+        },
+        callLocalUpdater: function(first){
             var _data = null;
             var _type = 'GET';
   
@@ -110,9 +137,20 @@ if (typeof(SGChatTracker) == 'undefined') {
                 }
             });
         },
+        callUpdater: function(first){
+            if (document.location.hostname != "{{ hostname }}") {
+                SGChatTracker.callRemoteUpdater(first);
+            } else {
+                SGChatTracker.callLocalUpdater(first);
+            }
+        },
         loadUpdater: function(){
             window.setTimeout(function(){
-                SGChatTracker.callUpdater(false);
+                if (document.location.hostname != "{{ hostname }}") {
+                    SGChatTracker.callRemoteUpdater(false);
+                } else {
+                    SGChatTracker.callUpdater(false);
+                }
             }, 5000);
         },
         Chat: {
@@ -126,6 +164,10 @@ if (typeof(SGChatTracker) == 'undefined') {
                 });
                 jQuery.get('{{path("sglc_chat_reject", {"id": "__idchat__"})}}'.replace("__idchat__", id));
             },
+            createInvite: function(){
+                jQuery(document.createElement("div")).attr({id: "chatDiv"}).hide().appendTo("body");
+                SGChatTracker.Chat.clearInvite();
+            },
             removeInvite: function(){
                 jQuery('#chatDiv').remove();
             },
@@ -137,6 +179,9 @@ if (typeof(SGChatTracker) == 'undefined') {
             openInvite: function(){
                 jQuery('#chatDiv').show();
                 SGChatTracker.Chat.scrollInvite();
+            },
+            clearInvite: function(){
+                jQuery("#chatDiv").html("");
             }
         }
     };
