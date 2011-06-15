@@ -289,7 +289,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/operators/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
+     * @Route("/admin/sglivechat/operator/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
      */
     public function operatorDepartmentsAction($page)
     {
