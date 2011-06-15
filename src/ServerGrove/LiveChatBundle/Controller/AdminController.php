@@ -110,51 +110,6 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/login/check", name="_security_check", requirements={"_method"="post"})
-     *
-     * @todo Search about security in Symfony2
-     */
-    public function checkLoginAction()
-    {
-        /* @var $form Form */
-        $form = $this->createLoginForm();
-        $form->bindRequest($this->getRequest());
-
-        try {
-            if (!$form->isValid()) {
-                throw new FormException('Invalid data');
-            }
-
-            $operatorLogin = $form->getData();
-
-            $email = $operatorLogin->getEmail();
-            $passwd = $operatorLogin->getPasswd();
-
-            /* @var $operator ServerGrove\LiveChatBundle\Document\Operator */
-            $operator = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator')->loadUserByUsername($email);
-
-            if ($operator->getPasswd() != $operator->encodePassword($passwd, $operator->getSalt())) {
-                throw new UsernameNotFoundException('Invalid password');
-            }
-
-            $this->getSessionStorage()->set('_operator', $operator->getId());
-            $operator->setIsOnline(true);
-            $this->getDocumentManager()->persist($operator);
-            $this->getDocumentManager()->flush();
-        } catch (UsernameNotFoundException $e) {
-            $this->getSessionStorage()->setFlash('_error', $e->getMessage());
-
-            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
-        } catch (FormException $e) {
-            $this->getSessionStorage()->setFlash('_error', $e->getMessage());
-
-            return new RedirectResponse($this->generateUrl("_security_login", array('e' => __LINE__)));
-        }
-
-        return new RedirectResponse($this->generateUrl("sglc_admin_index"));
-    }
-
-    /**
      * @Route("/admin/sglivechat/console/close/{id}", name="sglc_admin_console_close")
      */
     public function closeChatAction($id)
@@ -206,15 +161,46 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/login", name="_security_login")
+     * @Route("/admin/sglivechat/login", name="_security_login", requirements={"_method"="get"})
+     * @Route("/admin/sglivechat/login/check", name="_security_check", requirements={"_method"="post"})
      */
     public function loginAction()
     {
-        $errorMsg = $this->getSessionStorage()->getFlash('_error');
+        $errorMsg = null;
         if (!empty($errorMsg)) {
             $this->getResponse()->setStatusCode(401);
         }
         $form = $this->createLoginForm();
+
+        if ('POST' == $this->getRequest()->getMethod()) {
+            $form->bindRequest($this->getRequest());
+
+            try {
+                if ($form->isValid()) {
+                    $operatorLogin = $form->getData();
+
+                    $email = $operatorLogin->getEmail();
+                    $passwd = $operatorLogin->getPasswd();
+
+                    /* @var $operator ServerGrove\LiveChatBundle\Document\Operator */
+                    $operator = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator')->loadUserByUsername($email);
+
+                    if ($operator->getPasswd() != $operator->encodePassword($passwd, $operator->getSalt())) {
+                        throw new UsernameNotFoundException('Invalid password');
+                    }
+
+                    $this->getSessionStorage()->set('_operator', $operator->getId());
+                    $operator->setIsOnline(true);
+                    $this->getDocumentManager()->persist($operator);
+                    $this->getDocumentManager()->flush();
+
+                    return new RedirectResponse($this->generateUrl("sglc_admin_index"));
+                }
+            } catch (UsernameNotFoundException $e) {
+                $this->getResponse()->setStatusCode(401);
+                $errorMsg = $e->getMessage();
+            }
+        }
 
         return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:login.html.twig', array(
             'form' => $form->createView(),
