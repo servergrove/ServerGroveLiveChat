@@ -29,7 +29,7 @@ class OperatorType extends AbstractType
         $builder->add('name', 'text', array('label' => 'Name'));
         $builder->add('email', 'repeated', array('label' => 'e-mail'));
         $builder->add('passwd', 'repeated', array('type' => 'password', 'label' => 'Password', 'required' => !$this->edit));
-        $builder->add('isActive', 'checkbox', array('label' => 'Is Active'));
+        $builder->add('isActive', 'checkbox', array('label' => 'Is Active', 'required' => false));
 
         $departments = $this->dm->getRepository('SGLiveChatBundle:Operator\Department')->getDepartments();
 
@@ -38,7 +38,7 @@ class OperatorType extends AbstractType
         foreach ($departments as $department) {
             $choices[$department->getId()] = $department->getName();
         }
-        
+
         $builder->add('departments', 'document', array(
             'document_manager' => $this->dm,
             'class' => 'SGLiveChatBundle:Operator\Department',

@@ -17,7 +17,7 @@ class OperatorDepartmentType extends AbstractType
     {
         $builder->add('id', 'hidden');
         $builder->add('name', 'text', array('label' => 'Name'));
-        $builder->add('isActive', 'checkbox', array('label' => 'Is Active'));
+        $builder->add('isActive', 'checkbox', array('label' => 'Is Active', 'required' => false));
     }
 
     public function getDefaultOptions(array $options)
