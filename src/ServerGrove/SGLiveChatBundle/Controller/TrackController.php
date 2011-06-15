@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Cookie;
 use ServerGrove\SGLiveChatBundle\Document\VisitHit;
 use ServerGrove\SGLiveChatBundle\Controller\BaseController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use MongoDate;
 
 /**
@@ -16,13 +17,16 @@ use MongoDate;
 class TrackController extends PublicController
 {
 
+    /**
+     * @Route("/js/sglivechat-tracker", name="sglc_track_index")
+     */
     public function indexAction()
     {
         return $this->renderTemplate('SGLiveChatBundle:Track:index.html.twig');
     }
 
     /**
-     * @Template
+     * @Template("SGLiveChatBundle:Track:api.js.twig")
      */
     public function apiAction()
     {
@@ -31,6 +35,9 @@ class TrackController extends PublicController
         );
     }
 
+    /**
+     * @Route("/js/sglivechat-tracker/update", name="sglc_track_updater")
+     */
     public function updateAction()
     {
         $this->getResponse()->setContent('1');
@@ -109,12 +116,18 @@ class TrackController extends PublicController
         return $this->getResponse();
     }
 
+    /**
+     * @Route("/js/sglivechat-tracker/status.{_format}", name="sglc_track_status", defaults={"_format"="html"})
+     */
     public function statusAction($_format)
     {
         $online = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->getOnlineOperatorsCount() > 0;
         return $this->renderTemplate('SGLiveChatBundle:Track:status.' . $_format . '.twig', array('online' => $online));
     }
 
+    /**
+     * @Route("/js/sglivechat-tracker/update", name="sglc_track_reset")
+     */
     public function resetAction()
     {
         $this->getResponse()->headers->setCookie(new Cookie('vtrid', null, mktime(0, 0, 0, 12, 31, 2020), '/'));

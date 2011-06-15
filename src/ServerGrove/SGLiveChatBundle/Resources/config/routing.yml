@@ -2,6 +2,10 @@ sglc_admin:
   resource: "@SGLiveChatBundle/Controller/AdminController.php"
   type:     annotation
 
+sglc_tracker:
+  resource: "@SGLiveChatBundle/Controller/TrackController.php"
+  type:     annotation
+
 
 homepage:
   pattern:  /
@@ -59,22 +63,3 @@ sglc_chat_status:
   pattern: /sglivechat/status
   defaults: { _controller: SGLiveChatBundle:Chat:status }
   requirements: { _method: get }
-
-
-# -- Tracker -------------------------------------------------------------------
-
-sglc_track_index:
-  pattern: /js/sglivechat-tracker
-  defaults: { _controller: SGLiveChatBundle:Track:index }
-  requirements: { _method: get }
-
-sglc_track_updater:
-  pattern: /js/sglivechat-tracker/update
-  defaults: { _controller: SGLiveChatBundle:Track:update }
-
-sglc_track_reset:
-  pattern: /js/sglivechat-tracker/reset
-  defaults: { _controller: SGLiveChatBundle:Track:reset }
-sglc_track_status:
-  pattern: /js/sglivechat-tracker/status.{_format}
-  defaults: { _controller: SGLiveChatBundle:Track:status, _format: html }
