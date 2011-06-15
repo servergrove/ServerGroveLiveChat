@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use \DateTime;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
@@ -9,7 +9,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  * collection="visit",
- * repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitRepository"
+ * repositoryClass="ServerGrove\LiveChatBundle\Document\VisitRepository"
  * )
  */
 class Visit

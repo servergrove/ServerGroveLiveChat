@@ -20,7 +20,7 @@
         </thead>
         <tbody>
             {% for chat in chats %}
-            {% include "SGLiveChatBundle:Admin:requestItem.html.twig" with {'chat': chat} only %}
+            {% include "ServerGroveLiveChatBundle:Admin:requestItem.html.twig" with {'chat': chat} only %}
             {% endfor %}
         </tbody>
     </table>

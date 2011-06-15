@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 

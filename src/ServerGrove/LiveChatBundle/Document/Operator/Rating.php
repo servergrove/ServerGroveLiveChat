@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document\Operator;
+namespace ServerGrove\LiveChatBundle\Document\Operator;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
@@ -10,7 +10,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  *  collection="operator_rating",
- *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\Operator\RatingRepository"
+ *  repositoryClass="ServerGrove\LiveChatBundle\Document\Operator\RatingRepository"
  * )
  */
 class Rating
@@ -37,13 +37,13 @@ class Rating
      */
     private $createdAt;
     /**
-     * @var ServerGrove\SGLiveChatBundle\Document\Session
-     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
+     * @var ServerGrove\LiveChatBundle\Document\Session
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Session")
      */
     private $session;
     /**
-     * @var ServerGrove\SGLiveChatBundle\Document\Operator
-     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
+     * @var ServerGrove\LiveChatBundle\Document\Operator
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Operator")
      */
     private $operator;
 

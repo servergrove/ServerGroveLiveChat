@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Form;
+namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilder;
@@ -23,7 +23,7 @@ class CannedMessageType extends AbstractType
     public function getDefaultOptions(array $options)
     {
         return array(
-            'data_class' => 'ServerGrove\SGLiveChatBundle\Document\CannedMessage'
+            'data_class' => 'ServerGrove\LiveChatBundle\Document\CannedMessage'
         );
     }
 

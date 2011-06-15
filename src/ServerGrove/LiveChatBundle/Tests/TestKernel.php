@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests;
+namespace ServerGrove\LiveChatBundle\Tests;
 
 use Symfony\Component\ClassLoader\DebugUniversalClassLoader;
 use Symfony\Component\HttpKernel\Debug\ErrorHandler;
@@ -12,7 +12,7 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Bundle\MonologBundle\MonologBundle;
 use Symfony\Bundle\AsseticBundle\AsseticBundle;
 use JMS\SecurityExtraBundle\JMSSecurityExtraBundle;
-use ServerGrove\SGLiveChatBundle\SGLiveChatBundle;
+use ServerGrove\LiveChatBundle\ServerGroveLiveChatBundle;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 
@@ -32,7 +32,7 @@ class TestKernel extends Kernel
             new DoctrineMongoDBBundle(),
             new AsseticBundle(),
             new JMSSecurityExtraBundle(),
-            new SGLiveChatBundle());
+            new ServerGroveLiveChatBundle());
 
         return $bundles;
     }

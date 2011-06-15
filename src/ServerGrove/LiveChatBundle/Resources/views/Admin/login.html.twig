@@ -1,9 +1,9 @@
-{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
 {% block content %}
 <form action="{{ path('_security_check') }}" method="post">
     <div style="padding-left: 30px;padding-right: 30px;">
         <h3>Please enter your e-mail and password to access the admin panel</h3>
-        <div>
+        <div style="color: red;">
             {% if errorMsg %}
             {{errorMsg}}
             {% endif %}

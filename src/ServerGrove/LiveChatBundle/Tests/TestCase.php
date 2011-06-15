@@ -1,13 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests;
+namespace ServerGrove\LiveChatBundle\Tests;
 
 use Symfony\Bundle\DoctrineMongoDBBundle\DependencyInjection\DoctrineMongoDBExtension;
-
-use ServerGrove\SGLiveChatBundle\DependencyInjection\SGLiveChatExtension;
-
+use ServerGrove\LiveChatBundle\DependencyInjection\ServerGroveLiveChatExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 abstract class TestCase extends \PHPUnit_Framework_TestCase
@@ -53,4 +50,5 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     {
         return $this->cacheEngineName;
     }
+
 }

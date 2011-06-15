@@ -1,16 +1,16 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Controller;
+namespace ServerGrove\LiveChatBundle\Controller;
 
-use ServerGrove\SGLiveChatBundle\Chat\ChatRequest;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
-use ServerGrove\SGLiveChatBundle\Document\Operator\Rating;
-use ServerGrove\SGLiveChatBundle\Document\User;
-use ServerGrove\SGLiveChatBundle\Document\Visit;
-use ServerGrove\SGLiveChatBundle\Document\Visitor;
-use ServerGrove\SGLiveChatBundle\Document\Session;
-use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
-use ServerGrove\SGLiveChatBundle\Form\ChatRequestType;
+use ServerGrove\LiveChatBundle\Chat\ChatRequest;
+use ServerGrove\LiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator\Rating;
+use ServerGrove\LiveChatBundle\Document\User;
+use ServerGrove\LiveChatBundle\Document\Visit;
+use ServerGrove\LiveChatBundle\Document\Visitor;
+use ServerGrove\LiveChatBundle\Document\Session;
+use ServerGrove\LiveChatBundle\Document\CannedMessage;
+use ServerGrove\LiveChatBundle\Form\ChatRequestType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -29,21 +29,21 @@ class ChatController extends PublicController
      * @param string $id        Session id
      * @param boolean $finished Whether or not the session has finished
      *
-     * @return ServerGrove\SGLiveChatBundle\Document\Session
+     * @return ServerGrove\LiveChatBundle\Document\Session
      */
     private function getChatSession($id, $finished = true)
     {
         if ($finished) {
-            return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getSessionIfNotFinished($id);
+            return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->getSessionIfNotFinished($id);
         }
 
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->find($id);
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->find($id);
     }
 
     /**
      * @param boolean $finished Whether or not the session has finished
      *
-     * @return ServerGrove\SGLiveChatBundle\Document\Session
+     * @return ServerGrove\LiveChatBundle\Document\Session
      */
     public function getChatSessionForCurrentUser($finished = true)
     {
@@ -51,11 +51,11 @@ class ChatController extends PublicController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\CannedMessage[]
+     * @return ServerGrove\LiveChatBundle\Document\CannedMessage[]
      */
     private function getCannedMessages()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:CannedMessage')->findAll();
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:CannedMessage')->findAll();
     }
 
     private function cacheUserForSession(User $user, Session $chatSession)
@@ -77,7 +77,7 @@ class ChatController extends PublicController
         $userId = $this->getSessionStorage()->get('userId-' . $chatSession->getId());
         $userKind = $this->getSessionStorage()->get('userKind-' . $chatSession->getId());
 
-        return $this->getDocumentManager()->find('SGLiveChatBundle:' . ($userKind == 'Client' ? 'Visitor' : 'Operator'), $userId);
+        return $this->getDocumentManager()->find('ServerGroveLiveChatBundle:' . ($userKind == 'Client' ? 'Visitor' : 'Operator'), $userId);
     }
 
     /**
@@ -93,7 +93,7 @@ class ChatController extends PublicController
             return $this->getResponse();
         }
 
-        /* @var $form \ServerGrove\SGLiveChatBundle\Form\ChatRequest */
+        /* @var $form \ServerGrove\LiveChatBundle\Form\ChatRequest */
         $form = $this->get('form.factory')->create(new ChatRequestType());
 
         if ($this->getRequest()->getMethod() == 'POST') {
@@ -105,7 +105,7 @@ class ChatController extends PublicController
                 $visitor->setName($chatRequest->getName());
                 $this->getDocumentManager()->persist($visitor);
 
-                /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
+                /* @var $chatSession ServerGrove\LiveChatBundle\Document\Session */
                 $chatSession = new Session();
                 $chatSession->setRemoteAddr($visitor->getRemoteAddr());
                 $chatSession->setVisitor($visitor);
@@ -127,7 +127,7 @@ class ChatController extends PublicController
             }
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Chat:index.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:index.html.twig', array(
             'visitor' => $visitor,
             'errorMsg' => $this->getSessionStorage()->getFlash('errorMsg', null),
             'form' => $form->createView()));
@@ -143,7 +143,7 @@ class ChatController extends PublicController
             return new RedirectResponse($this->generateUrl('sglc_chat_homepage'));
         }
 
-        if (!($visit = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->find($sessId))) {
+        if (!($visit = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit')->find($sessId))) {
             $this->getResponse()->setContent('Visit not found');
 
             return $this->getReponse();
@@ -151,7 +151,7 @@ class ChatController extends PublicController
 
         $visitor = $visit->getVisitor();
 
-        /* @var $chatSession ServerGrove\SGLiveChatBundle\Document\Session */
+        /* @var $chatSession ServerGrove\LiveChatBundle\Document\Session */
         $chatSession = new Session();
         $chatSession->setRemoteAddr($visitor->getRemoteAddr());
 
@@ -245,7 +245,7 @@ class ChatController extends PublicController
             }
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Chat:accept.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:accept.html.twig', array(
             'chat' => $chatSession,
             'visitor' => $chatSession->getVisitor(),
             'messages' => $chatSession->getMessages(),
@@ -266,7 +266,7 @@ class ChatController extends PublicController
         $arrCannedMessages = array();
         if ($operator) {
             if (($cannedMessages = $this->getCannedMessages()) !== false) {
-                /* @var $cannedMessage ServerGrove\SGLiveChatBundle\Document\CannedMessage */
+                /* @var $cannedMessage ServerGrove\LiveChatBundle\Document\CannedMessage */
                 foreach ($cannedMessages as $cannedMessage) {
                     $arrCannedMessages[] = $cannedMessage->renderContent(array(
                                 'operator' => $operator,
@@ -281,7 +281,7 @@ class ChatController extends PublicController
         $this->getSessionStorage()->set('lastMessage', 0);
 
         $user = $this->getUserForSession($chatSession);
-        return $this->renderTemplate('SGLiveChatBundle:Chat:load.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:load.html.twig', array(
             'chat' => $chatSession,
             'canned' => $arrCannedMessages,
             'user' => $user,
@@ -293,7 +293,7 @@ class ChatController extends PublicController
      */
     public function faqAction()
     {
-        return $this->renderTemplate('SGLiveChatBundle:Chat:faq.html.twig');
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:faq.html.twig');
     }
 
     public function sendAction($id)
@@ -379,7 +379,7 @@ class ChatController extends PublicController
             return $this->getResponse();
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Chat:messages.' . $_format . '.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:messages.' . $_format . '.twig', array(
             'messages' => $messages));
     }
 
@@ -398,7 +398,7 @@ class ChatController extends PublicController
         if ($this->getRequest()->getMethod() != "POST") {
             $chatSession->close();
             $this->getDocumentManager()->flush();
-            return $this->renderTemplate('SGLiveChatBundle:Chat:done.html.twig', array(
+            return $this->renderTemplate('ServerGroveLiveChatBundle:Chat:done.html.twig', array(
                 'enableSendTranscripts' => $this->has('mailer'),
                 'email' => $visitor->getEmail()));
         }
@@ -417,7 +417,7 @@ class ChatController extends PublicController
         if ($this->getRequest()->get('transcripts', 0)) {
             $messages = $chatSession->getMessages();
             $contents = array();
-            /* @var $message ServerGrove\SGLiveChatBundle\Document\Message */
+            /* @var $message ServerGrove\LiveChatBundle\Document\Message */
             foreach ($messages as $message) {
                 $contents[] = sprintf('%s: %s', $message->getSender()->getKind(), $message->getContent());
             }
@@ -431,7 +431,7 @@ class ChatController extends PublicController
             $mailer->send($message);
         }
 
-        return $this->render('SGLiveChatBundle:Chat:rated.html.twig', array(
+        return $this->render('ServerGroveLiveChatBundle:Chat:rated.html.twig', array(
             'transcripts' => $this->getRequest()->get('transcripts', 0),
             'email' => $this->getRequest()->get('email')));
     }
@@ -509,7 +509,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Cache\Manager
+     * @return ServerGrove\LiveChatBundle\Cache\Manager
      */
     private function getCacheManager()
     {

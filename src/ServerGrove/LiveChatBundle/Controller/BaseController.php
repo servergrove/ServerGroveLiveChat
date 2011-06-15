@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Controller;
+namespace ServerGrove\LiveChatBundle\Controller;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -74,14 +74,14 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Operator
+     * @return ServerGrove\LiveChatBundle\Document\Operator
      */
     protected function getOperator()
     {
         if (!$this->getSessionStorage()->has('_operator')) {
             return null;
         }
-        return $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $this->getSessionStorage()->get('_operator'));
+        return $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator', $this->getSessionStorage()->get('_operator'));
     }
 
     /**

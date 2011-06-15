@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Util;
+namespace ServerGrove\LiveChatBundle\Util;
 
 class DateTool
 {

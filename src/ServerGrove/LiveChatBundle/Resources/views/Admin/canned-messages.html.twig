@@ -1,6 +1,6 @@
-{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 {% block content %}
-{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 <h1>Canned Messages list</h1>
 <h2>{{msg}}</h2>
 <table cellpadding="3" cellspacing="3" border="0" width="100%">
@@ -25,7 +25,7 @@
     <tfoot>
         <tr>
             <td colspan="3" style="text-align: right;">
-            {% include "SGLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_canned_messages'} %}
+            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_canned_messages'} %}
             </td>
         </tr>
         <tr>

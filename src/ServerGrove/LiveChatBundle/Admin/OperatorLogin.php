@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Admin;
+namespace ServerGrove\LiveChatBundle\Admin;
 
 use Symfony\Component\Validator\Constraints as Assert;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Form;
+namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\AbstractType;
@@ -31,7 +31,7 @@ class OperatorType extends AbstractType
         $builder->add('passwd', 'repeated', array('type' => 'password', 'label' => 'Password', 'required' => !$this->edit));
         $builder->add('isActive', 'checkbox', array('label' => 'Is Active', 'required' => false));
 
-        $departments = $this->dm->getRepository('SGLiveChatBundle:Operator\Department')->getDepartments();
+        $departments = $this->dm->getRepository('ServerGroveLiveChatBundle:Operator\Department')->getDepartments();
 
         $choices = array();
 
@@ -41,7 +41,7 @@ class OperatorType extends AbstractType
 
         $builder->add('departments', 'document', array(
             'document_manager' => $this->dm,
-            'class' => 'SGLiveChatBundle:Operator\Department',
+            'class' => 'ServerGroveLiveChatBundle:Operator\Department',
             'multiple' => true,
             'required' => false
         ));
@@ -50,7 +50,7 @@ class OperatorType extends AbstractType
     public function getDefaultOptions(array $options)
     {
         return array(
-            'data_class' => 'ServerGrove\SGLiveChatBundle\Document\Operator',
+            'data_class' => 'ServerGrove\LiveChatBundle\Document\Operator',
         );
     }
 

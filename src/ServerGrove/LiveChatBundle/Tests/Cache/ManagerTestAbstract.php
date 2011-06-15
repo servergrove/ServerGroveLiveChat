@@ -1,7 +1,7 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Cache;
-use ServerGrove\SGLiveChatBundle\Tests\TestCase;
+namespace ServerGrove\LiveChatBundle\Tests\Cache;
+use ServerGrove\LiveChatBundle\Tests\TestCase;
 
 /**
  * Manager test case.
@@ -24,7 +24,7 @@ abstract class ManagerTestAbstract extends TestCase
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Cache\Manager
+     * @return ServerGrove\LiveChatBundle\Cache\Manager
      */
     protected abstract function createManager();
 
@@ -42,7 +42,7 @@ abstract class ManagerTestAbstract extends TestCase
      */
     public function testCorrectInstance()
     {
-        $this->assertEquals('ServerGrove\\SGLiveChatBundle\\Cache\\Manager', get_class($this->Manager));
+        $this->assertEquals('ServerGrove\\LiveChatBundle\\Cache\\Manager', get_class($this->Manager));
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 /**
  * Description of VisitRepository
@@ -9,7 +9,7 @@ namespace ServerGrove\SGLiveChatBundle\Document;
  */
 class VisitorRepository extends DocumentRepository
 {
-    const REPOSITORY_NAME = 'SGLiveChatBundle:Visitor';
+    const REPOSITORY_NAME = 'ServerGroveLiveChatBundle:Visitor';
 
     public function findSlice($offset, $length)
     {
@@ -40,7 +40,7 @@ class VisitorRepository extends DocumentRepository
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visitor
+     * @return ServerGrove\LiveChatBundle\Document\Visitor
      */
     public function getByKey($key)
     {

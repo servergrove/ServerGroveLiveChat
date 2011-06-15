@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
@@ -10,7 +10,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  * collection="chat_session",
- * repositoryClass="ServerGrove\SGLiveChatBundle\Document\SessionRepository"
+ * repositoryClass="ServerGrove\LiveChatBundle\Document\SessionRepository"
  * )
  */
 class Session
@@ -93,8 +93,8 @@ class Session
      */
     private $messages = array();
     /**
-     * @var ServerGrove\SGLiveChatBundle\Document\Operator\Rating
-     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator\Rating")
+     * @var ServerGrove\LiveChatBundle\Document\Operator\Rating
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
     private $rating;
 
@@ -246,7 +246,7 @@ class Session
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Operator
+     * @return ServerGrove\LiveChatBundle\Document\Operator
      */
     public function getOperator()
     {
@@ -254,7 +254,7 @@ class Session
     }
 
     /**
-     * @param ServerGrove\SGLiveChatBundle\Document\Operator $operator
+     * @param ServerGrove\LiveChatBundle\Document\Operator $operator
      * @return void
      */
     public function setOperator($operator)
@@ -324,7 +324,7 @@ class Session
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Rating
+     * @return ServerGrove\LiveChatBundle\Document\Rating
      */
     public function getRating()
     {
@@ -338,7 +338,7 @@ class Session
     }
 
     /**
-     * @param ServerGrove\SGLiveChatBundle\Document\Rating $rating
+     * @param ServerGrove\LiveChatBundle\Document\Rating $rating
      * @return void
      */
     public function setRating($rating)

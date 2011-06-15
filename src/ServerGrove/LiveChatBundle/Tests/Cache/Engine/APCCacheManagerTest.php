@@ -1,9 +1,9 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Cache;
+namespace ServerGrove\LiveChatBundle\Tests\Cache;
 
-use ServerGrove\SGLiveChatBundle\Cache\Manager;
-use ServerGrove\SGLiveChatBundle\Cache\Engine\Apc;
+use ServerGrove\LiveChatBundle\Cache\Manager;
+use ServerGrove\LiveChatBundle\Cache\Engine\Apc;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>

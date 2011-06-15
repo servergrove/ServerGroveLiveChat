@@ -1,7 +1,7 @@
-{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 
 {% block content %}
-{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 {% if department.getId() %}
 <h1>Edit department "{{department.getName()}}"</h1>
 {% else %}

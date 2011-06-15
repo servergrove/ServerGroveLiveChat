@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\DependencyInjection;
+namespace ServerGrove\LiveChatBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -9,11 +9,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 
 /**
- * Description of SGLiveChatExtension
+ * Description of ServerGroveLiveChatExtension
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-class SGLiveChatExtension extends Extension
+class ServerGroveLiveChatExtension extends Extension
 {
 
     public function load(array $config, ContainerBuilder $container)

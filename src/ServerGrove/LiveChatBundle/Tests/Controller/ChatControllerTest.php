@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Controller;
+namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

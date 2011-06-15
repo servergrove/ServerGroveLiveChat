@@ -56,7 +56,7 @@ doctrine_mongodb:
   document_managers:
     default:
       mappings:
-        SGLiveChatBundle: ~
+        ServerGroveLiveChatBundle: ~
       metadata_cache_driver: array # array, apc, xcache, memcache
 
 # Swiftmailer Configuration
@@ -66,5 +66,5 @@ jms_security_extra:
     secure_controllers:  true
     secure_all_services: false
 
-sg_live_chat:
+server_grove_live_chat:
   cache_engine: mongo

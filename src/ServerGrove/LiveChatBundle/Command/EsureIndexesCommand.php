@@ -1,5 +1,5 @@
 <?php
-namespace ServerGrove\SGLiveChatBundle\Command;
+namespace ServerGrove\LiveChatBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 

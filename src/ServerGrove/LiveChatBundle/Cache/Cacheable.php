@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Cache;
+namespace ServerGrove\LiveChatBundle\Cache;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>

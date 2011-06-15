@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
@@ -9,7 +9,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  * collection="visitor",
- * repositoryClass="ServerGrove\SGLiveChatBundle\Document\VisitorRepository"
+ * repositoryClass="ServerGrove\LiveChatBundle\Document\VisitorRepository"
  * )
  */
 class Visitor extends User

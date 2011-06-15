@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
@@ -10,7 +10,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Pablo Godel<pablo@servergrove.com>
  * @MongoDB\Document(
  * collection="cache",
- * repositoryClass="ServerGrove\SGLiveChatBundle\Document\CacheRepository"
+ * repositoryClass="ServerGrove\LiveChatBundle\Document\CacheRepository"
  * )
  */
 class CacheEntry

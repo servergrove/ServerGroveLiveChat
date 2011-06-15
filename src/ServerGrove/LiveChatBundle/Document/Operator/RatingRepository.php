@@ -1,9 +1,9 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
-use ServerGrove\SGLiveChatBundle\Document\DocumentRepository;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\DocumentRepository;
+use ServerGrove\LiveChatBundle\Document\Operator;
 
 /**
  * Description of RatingRepository

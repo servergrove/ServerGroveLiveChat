@@ -1,12 +1,12 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\AccountInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator;
 use MongoDate;
 
 /**
@@ -18,7 +18,7 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
 {
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Operator
+     * @return ServerGrove\LiveChatBundle\Document\Operator
      */
     public function loadUserByAccount(AccountInterface $user)
     {
@@ -30,7 +30,7 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Operator
+     * @return ServerGrove\LiveChatBundle\Document\Operator
      */
     public function loadUserByUsername($username)
     {

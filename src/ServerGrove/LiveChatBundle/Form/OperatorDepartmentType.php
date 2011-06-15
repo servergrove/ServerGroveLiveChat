@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Form;
+namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Form\AbstractType;
@@ -23,7 +23,7 @@ class OperatorDepartmentType extends AbstractType
     public function getDefaultOptions(array $options)
     {
         return array(
-            'data_class' => 'ServerGrove\SGLiveChatBundle\Document\Operator\Department',
+            'data_class' => 'ServerGrove\LiveChatBundle\Document\Operator\Department',
         );
     }
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document\Operator;
+namespace ServerGrove\LiveChatBundle\Document\Operator;
 
-use ServerGrove\SGLiveChatBundle\Document\DocumentRepository;
+use ServerGrove\LiveChatBundle\Document\DocumentRepository;
 
 /**
  * Description of DepartmentRepository

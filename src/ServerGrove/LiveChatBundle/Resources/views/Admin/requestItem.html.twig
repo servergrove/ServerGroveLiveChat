@@ -12,17 +12,17 @@
     <td>&nbsp;</td>
     {% endif %}
     <td>
-        {% if not chat.getOperator() and chat.getStatusId() is not constant('ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CANCELED') and chat.getStatusId() is not constant('ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
+        {% if not chat.getOperator() and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED') and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
         <a href="javascript:void(0);" onclick="window.open('{{path('sglc_chat_accept', {'id': chat.getId()})}}','livechat{{chat.getId()}}','width=700,height=575,toolbar=no,location=no');">
             Accept
         </a>
         {% endif %}
-        {% if chat.getOperator() and chat.getStatusId() is not constant('ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_IN_PROGRESS') %}
+        {% if chat.getOperator() and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_IN_PROGRESS') %}
         <a href="javascript:void(0);" onclick="window.open('{{path('sglc_chat_load', {'id': chat.getId()})}}','livechat{{chat.getId()}}','width=700,height=575,toolbar=no,location=no');">
             Reload
         </a>
         {% endif %}
-        {% if chat.getStatusId() is not constant('ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CANCELED') and chat.getStatusId() is not constant('ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
+        {% if chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED') and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
         | <a onclick="return confirm( 'Are you sure?' );" href="{{path('sglc_admin_console_close', {'id': chat.getId()})}}">Close</a>
         {% endif %}
     </td>

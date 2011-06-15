@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Cache;
+namespace ServerGrove\LiveChatBundle\Cache;
 
-use ServerGrove\SGLiveChatBundle\Cache\Engine\Apc;
+use ServerGrove\LiveChatBundle\Cache\Engine\Apc;
 
 /**
  * Description of Manager
@@ -13,12 +13,12 @@ class Manager implements Cacheable
 {
 
     /**
-     * @var ServerGrove\SGLiveChatBundle\Cache\Engine\Base
+     * @var ServerGrove\LiveChatBundle\Cache\Engine\Base
      */
     private $engine;
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Cache\Engine\Base
+     * @return ServerGrove\LiveChatBundle\Cache\Engine\Base
      */
     public function getEngine()
     {

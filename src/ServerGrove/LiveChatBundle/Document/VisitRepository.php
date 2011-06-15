@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
-use ServerGrove\SGLiveChatBundle\Util\DateTool;
+use ServerGrove\LiveChatBundle\Util\DateTool;
 use MongoDate;
 
 /**
@@ -19,7 +19,7 @@ class VisitRepository extends DocumentRepository
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visit
+     * @return ServerGrove\LiveChatBundle\Document\Visit
      */
     public function create(Visitor $visitor, $remoteAddr, $localTime, $timeZone, $visitKey = null)
     {
@@ -42,7 +42,7 @@ class VisitRepository extends DocumentRepository
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visit
+     * @return ServerGrove\LiveChatBundle\Document\Visit
      */
     public function getByKey($key, Visitor $visitor)
     {

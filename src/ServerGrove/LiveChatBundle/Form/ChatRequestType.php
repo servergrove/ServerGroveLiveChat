@@ -1,5 +1,5 @@
 <?php
-namespace ServerGrove\SGLiveChatBundle\Form;
+namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\FormBuilder;
 
@@ -21,6 +21,6 @@ class ChatRequestType extends AbstractType
     public function getDefaultOptions(array $options)
     {
         return array(
-            'data_class' => 'ServerGrove\\SGLiveChatBundle\\Chat\\ChatRequest');
+            'data_class' => 'ServerGrove\\LiveChatBundle\\Chat\\ChatRequest');
     }
 }

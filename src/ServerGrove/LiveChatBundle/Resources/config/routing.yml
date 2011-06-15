@@ -1,65 +1,65 @@
 sglc_admin:
-  resource: "@SGLiveChatBundle/Controller/AdminController.php"
+  resource: "@ServerGroveLiveChatBundle/Controller/AdminController.php"
   type:     annotation
 
 sglc_tracker:
-  resource: "@SGLiveChatBundle/Controller/TrackController.php"
+  resource: "@ServerGroveLiveChatBundle/Controller/TrackController.php"
   type:     annotation
 
 
 homepage:
   pattern:  /
-  defaults: { _controller: SGLiveChatBundle:Default:index }
+  defaults: { _controller: ServerGroveLiveChatBundle:Default:index }
 
 # -- Live Chat -----------------------------------------------------------------
 
 sglc_chat_homepage:
     pattern:  /sglivechat
-    defaults: { _controller: SGLiveChatBundle:Chat:index }
+    defaults: { _controller: ServerGroveLiveChatBundle:Chat:index }
 
 sglc_chat_invite:
   pattern: /sglivechat/{sessId}/invite
-  defaults: { _controller: SGLiveChatBundle:Chat:invite }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:invite }
 
 sglc_chat_invite_accept:
   pattern: /sglivechat/{id}/invite/accept
-  defaults: { _controller: SGLiveChatBundle:Chat:acceptInvite }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:acceptInvite }
 
 sglc_chat_invite_reject:
   pattern: /sglivechat/{id}/invite/reject
-  defaults: { _controller: SGLiveChatBundle:Chat:rejectInvite }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:rejectInvite }
 
 sglc_chat_load:
   pattern: /sglivechat/{id}/load
-  defaults: { _controller: SGLiveChatBundle:Chat:load }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:load }
 
 sglc_chat_accept:
   pattern: /sglivechat/{id}/accept
-  defaults: { _controller: SGLiveChatBundle:Chat:accept }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:accept }
 
 sglc_chat_reject:
   pattern: /sglivechat/{id}/reject/
-  defaults: { _controller: SGLiveChatBundle:Chat:reject }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:reject }
   
 sglc_chat_user_action:
   pattern: /sglivechat/{id}/user/action/{action}
-  defaults: { _controller: SGLiveChatBundle:Chat:userAction }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:userAction }
 
 sglc_chat_done:
   pattern: /sglivechat/{id}/done
-  defaults: { _controller: SGLiveChatBundle:Chat:done }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:done }
 
 sglc_chat_send:
   pattern: /sglivechat/{id}/send
-  defaults: { _controller: SGLiveChatBundle:Chat:send }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:send }
   requirements: { _method: post }
 
 sglc_chat_messages:
   pattern: /sglivechat/{id}/messages.{_format}
-  defaults: { _controller: SGLiveChatBundle:Chat:messages, _format: html }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:messages, _format: html }
   requirements: { _method: get }
   
 sglc_chat_status:
   pattern: /sglivechat/status
-  defaults: { _controller: SGLiveChatBundle:Chat:status }
+  defaults: { _controller: ServerGroveLiveChatBundle:Chat:status }
   requirements: { _method: get }

@@ -1,4 +1,4 @@
-{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 
 {% form_theme form _self %}
 {% use 'TwigBundle:Form:div_layout.html.twig' %}
@@ -40,7 +40,7 @@
 {% endblock field_row %}
 
 {% block content %}
-{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 
 {% if operator.getId() %}
 <h1>Edit operator "{{operator.getName()}}"</h1>

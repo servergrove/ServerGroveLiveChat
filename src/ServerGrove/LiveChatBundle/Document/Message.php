@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Date;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
@@ -32,7 +32,7 @@ class Message
     private $sender;
     /**
      * @var Session
-     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\SGLiveChatBundle\Document\Session")
+     * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Session")
      */
     private $session;
     /**

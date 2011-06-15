@@ -1,4 +1,4 @@
-{% extends "SGLiveChatBundle::layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
 {% block content %}
 <form method="POST" action="{{path('sglc_chat_accept', {'id': chat.getId()})}}">
     <span class="inputname">Name</span>

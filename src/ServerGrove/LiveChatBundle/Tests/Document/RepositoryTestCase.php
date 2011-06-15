@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Document;
+namespace ServerGrove\LiveChatBundle\Tests\Document;
 
-use Servergrove\SGLiveChatBundle\Tests\TestCase;
+use Servergrove\LiveChatBundle\Tests\TestCase;
 
 abstract class RepositoryTestCase extends TestCase {
 	
@@ -15,7 +15,7 @@ abstract class RepositoryTestCase extends TestCase {
     protected function setUp()
     {
         parent::setUp();
-        $this->repository = $this->getContainer()->get('doctrine.odm.mongodb.document_manager')->getRepository('SGLiveChatBundle:' . $this->getDocumentName());
+        $this->repository = $this->getContainer()->get('doctrine.odm.mongodb.document_manager')->getRepository('ServerGroveLiveChatBundle:' . $this->getDocumentName());
     }
 
     protected function getDocumentName() {

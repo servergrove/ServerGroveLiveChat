@@ -5,9 +5,9 @@
  xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="livechat.cache_engine">apc</parameter>
-        <parameter key="livechat.cache.manager.class">ServerGrove\SGLiveChatBundle\Cache\Manager</parameter>
-        <parameter key="livechat.cache.engine.apc.class">ServerGrove\SGLiveChatBundle\Cache\Engine\Apc</parameter>
-        <parameter key="livechat.cache.engine.mongo.class">ServerGrove\SGLiveChatBundle\Cache\Engine\Mongo</parameter>
+        <parameter key="livechat.cache.manager.class">ServerGrove\LiveChatBundle\Cache\Manager</parameter>
+        <parameter key="livechat.cache.engine.apc.class">ServerGrove\LiveChatBundle\Cache\Engine\Apc</parameter>
+        <parameter key="livechat.cache.engine.mongo.class">ServerGrove\LiveChatBundle\Cache\Engine\Mongo</parameter>
     </parameters>
     
     <services>

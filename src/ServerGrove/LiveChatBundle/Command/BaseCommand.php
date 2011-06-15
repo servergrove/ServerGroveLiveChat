@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Command;
+namespace ServerGrove\LiveChatBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\Command;
 
@@ -20,11 +20,11 @@ abstract class BaseCommand extends Command
 
     protected function getOperatorRepository()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator');
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator');
     }
 
     protected function getAdministratorRepository()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Administrator');
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Administrator');
     }
 }

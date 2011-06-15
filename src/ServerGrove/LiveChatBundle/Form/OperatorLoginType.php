@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Form;
+namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\FormBuilder;
 
@@ -18,6 +18,6 @@ class OperatorLoginType extends AbstractType
     public function getDefaultOptions(array $options)
     {
         return array(
-            'data_class' => 'ServerGrove\\SGLiveChatBundle\\Admin\\OperatorLogin');
+            'data_class' => 'ServerGrove\\LiveChatBundle\\Admin\\OperatorLogin');
     }
 }

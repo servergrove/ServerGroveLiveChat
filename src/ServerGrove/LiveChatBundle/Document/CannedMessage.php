@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
@@ -8,7 +8,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * Description of CannedMessage
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
- * @MongoDB\Document(collection="canned_message",repositoryClass="ServerGrove\SGLiveChatBundle\Document\CannedMessageRepository")
+ * @MongoDB\Document(collection="canned_message",repositoryClass="ServerGrove\LiveChatBundle\Document\CannedMessageRepository")
  */
 class CannedMessage
 {

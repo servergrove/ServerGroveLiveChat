@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document\Operator;
+namespace ServerGrove\LiveChatBundle\Document\Operator;
 
-use ServerGrove\SGLiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
@@ -11,7 +11,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  *  collection="operator_department",
- *  repositoryClass="ServerGrove\SGLiveChatBundle\Document\Operator\DepartmentRepository"
+ *  repositoryClass="ServerGrove\LiveChatBundle\Document\Operator\DepartmentRepository"
  * )
  */
 class Department
@@ -33,8 +33,8 @@ class Department
      */
     private $isActive = true;
     /**
-     * @var \ServerGrove\SGLiveChatBundle\Document\Operator[]
-     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator")
+     * @var \ServerGrove\LiveChatBundle\Document\Operator[]
+     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator")
      */
     private $operators = array();
 

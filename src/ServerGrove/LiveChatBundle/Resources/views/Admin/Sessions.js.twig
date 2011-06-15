@@ -1,4 +1,4 @@
-{% include "SGLiveChatBundle::DateToolkit.js.twig" %}
+{% include "ServerGroveLiveChatBundle::DateToolkit.js.twig" %}
 
 var SessionToolkit = {
     Global: {
@@ -230,7 +230,7 @@ var SessionToolkit = {
 				
                 var actionsCell = document.createElement('td');
                 var newWindowAttributes = 'width=700,height=600,toolbar=no,location=no';
-                if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
+                if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
                     var _link1 = document.createElement('a');
                     jQuery(_link1).click(function() {
                         window.open("{{path('sglc_chat_accept', {'id': '__chatId__'})}}".replace('__chatId__', item.id), 'livechat' + item.id, newWindowAttributes);
@@ -239,7 +239,7 @@ var SessionToolkit = {
                     jQuery(actionsCell).append(_link1);
                 }
                 
-                if (typeof(item.operator.id) != 'undefined' && item.status.id == '{{constant("ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_IN_PROGRESS")}}') {
+                if (typeof(item.operator.id) != 'undefined' && item.status.id == '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_IN_PROGRESS")}}') {
                     var _link2 = document.createElement('a');
                     jQuery(_link2).click(function() {
                         window.open("{{path('sglc_chat_load', {'id': '__chatId__'})}}".replace('__chatId__', item.id), 'livechat' + item.id, newWindowAttributes);
@@ -248,7 +248,7 @@ var SessionToolkit = {
                     jQuery(actionsCell).append(_link2);
                 }
                 
-                if (item.status.id != '{{constant("ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("ServerGrove\\\SGLiveChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
+                if (item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
                     var _link3 = document.createElement('a');
                     jQuery(_link3).click(function() {
                         return confirm('Are you sure?');

@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Command;
+namespace ServerGrove\LiveChatBundle\Command;
 
-use ServerGrove\SGLiveChatBundle\Document\Administrator;
+use ServerGrove\LiveChatBundle\Document\Administrator;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>

@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Command;
+namespace ServerGrove\LiveChatBundle\Command;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use MongoCursorException;

@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Cache\Engine;
+namespace ServerGrove\LiveChatBundle\Cache\Engine;
 
-use ServerGrove\SGLiveChatBundle\Document\CacheEntry;
+use ServerGrove\LiveChatBundle\Document\CacheEntry;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
@@ -26,7 +26,7 @@ class Mongo extends Base
 
     public function set($key, $var, $ttl = self::DEFAULT_TTL)
     {
-        $cache = $this->dm->getRepository('SGLiveChatBundle:CacheEntry')->getByKey($key);
+        $cache = $this->dm->getRepository('ServerGroveLiveChatBundle:CacheEntry')->getByKey($key);
 
         if (!$cache) {
             $cache = new CacheEntry();
@@ -43,7 +43,7 @@ class Mongo extends Base
 
     public function get($key, $default = null)
     {
-        $cache = $this->dm->getRepository('SGLiveChatBundle:CacheEntry')->getByKey($key);
+        $cache = $this->dm->getRepository('ServerGroveLiveChatBundle:CacheEntry')->getByKey($key);
         if ($cache && !$cache->isExpired()) {
             return $cache->getData();
         }
@@ -53,13 +53,13 @@ class Mongo extends Base
 
     public function has($key)
     {
-        $cache = $this->dm->getRepository('SGLiveChatBundle:CacheEntry')->getByKey($key);
+        $cache = $this->dm->getRepository('ServerGroveLiveChatBundle:CacheEntry')->getByKey($key);
         return ($cache !== null && !$cache->isExpired());
     }
 
     public function remove($key)
     {
-        $cache = $this->dm->getRepository('SGLiveChatBundle:CacheEntry')->getByKey($key);
+        $cache = $this->dm->getRepository('ServerGroveLiveChatBundle:CacheEntry')->getByKey($key);
         if ($cache) {
             $this->dm->remove($cache);
         }

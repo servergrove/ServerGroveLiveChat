@@ -1,8 +1,8 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Cache\Engine;
+namespace ServerGrove\LiveChatBundle\Cache\Engine;
 
-use ServerGrove\SGLiveChatBundle\Cache\Cacheable;
+use ServerGrove\LiveChatBundle\Cache\Cacheable;
 
 /**
  * Description of Base

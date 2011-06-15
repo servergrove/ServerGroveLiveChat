@@ -1,13 +1,13 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Cache;
+namespace ServerGrove\LiveChatBundle\Tests\Cache;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-use ServerGrove\SGLiveChatBundle\Cache\Engine\Mongo;
+use ServerGrove\LiveChatBundle\Cache\Engine\Mongo;
 
-use ServerGrove\SGLiveChatBundle\Cache\Manager;
+use ServerGrove\LiveChatBundle\Cache\Manager;
 
 class MongoCacheManagerTest extends ManagerTestAbstract
 {

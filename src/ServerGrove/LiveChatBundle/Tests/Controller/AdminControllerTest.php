@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Controller;
+namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
-use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
-use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
+use ServerGrove\LiveChatBundle\Document\CannedMessage;
+use ServerGrove\LiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator\Department;
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -43,7 +43,7 @@ class AdminControllerTest extends WebTestCase
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
         $crawler = $client->request('GET', '/admin/sglivechat');
-        $this->assertTrue($client->getResponse()->isRedirect());
+        $this->assertTrue($client->getResponse()->isRedirect(), $client->getResponse()->getContent());
 
         $this->logout($client);
 
@@ -100,7 +100,7 @@ class AdminControllerTest extends WebTestCase
 
         $this->assertPostRedirect($client);
 
-        $cannedMessage = $dm->getRepository('SGLiveChatBundle:CannedMessage')->find($cannedMessageId);
+        $cannedMessage = $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->find($cannedMessageId);
         $this->assertEquals($newTitle, $cannedMessage->getTitle());
 
         $dm->remove($cannedMessage);
@@ -133,11 +133,11 @@ class AdminControllerTest extends WebTestCase
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
-        $this->assertGreaterThan(0, $dm->getRepository('SGLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Unexistent canned message after form submit');
+        $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Unexistent canned message after form submit');
 
-        $dm->createQueryBuilder('SGLiveChatBundle:CannedMessage')->remove()->field('title')->equals($title)->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:CannedMessage')->remove()->field('title')->equals($title)->getQuery()->execute();
 
-        $this->assertEquals(0, $dm->getRepository('SGLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Canned message still exists after removal');
+        $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Canned message still exists after removal');
 
         $dm->flush();
 
@@ -187,12 +187,12 @@ class AdminControllerTest extends WebTestCase
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
-        $this->assertGreaterThan(0, $dm->getRepository('SGLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'Unexistent operator after form submit');
+        $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'Unexistent operator after form submit');
 
-        $dm->createQueryBuilder('SGLiveChatBundle:Operator')->remove()->field('email')->equals('john@doe.com')->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator')->remove()->field('email')->equals('john@doe.com')->getQuery()->execute();
         $dm->flush();
 
-        $this->assertEquals(0, $dm->getRepository('SGLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'operator still exists after removal');
+        $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'operator still exists after removal');
 
         $this->logout($client);
 
@@ -236,7 +236,7 @@ class AdminControllerTest extends WebTestCase
 
         $this->assertPostRedirect($client);
 
-        $operator = $dm->getRepository('SGLiveChatBundle:Operator')->find($operatorId);
+        $operator = $dm->getRepository('ServerGroveLiveChatBundle:Operator')->find($operatorId);
         $this->assertEquals('John J. Doe', $operator->getName());
 
         $dm->remove($operator);
@@ -285,12 +285,12 @@ class AdminControllerTest extends WebTestCase
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
-        $this->assertGreaterThan(0, $dm->getRepository('SGLiveChatBundle:Operator\\Department')->findBy(array('name' => 'Test Department'))->count(), 'Unexistent department after form submit');
+        $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator\\Department')->findBy(array('name' => 'Test Department'))->count(), 'Unexistent department after form submit');
 
-        $dm->createQueryBuilder('SGLiveChatBundle:Operator:Department')->remove()->field('name')->equals('Test Department')->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator:Department')->remove()->field('name')->equals('Test Department')->getQuery()->execute();
         $dm->flush();
 
-        $this->assertEquals(0, $dm->getRepository('SGLiveChatBundle:Operator:Department')->findBy(array('name' => 'Test Department'))->count(), 'Department still exists after removal');
+        $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator:Department')->findBy(array('name' => 'Test Department'))->count(), 'Department still exists after removal');
 
         $this->logout($client);
 
@@ -332,7 +332,7 @@ class AdminControllerTest extends WebTestCase
 
         $this->assertPostRedirect($client);
 
-        $department = $dm->getRepository('SGLiveChatBundle:Operator\\Department')->find($departmentId);
+        $department = $dm->getRepository('ServerGroveLiveChatBundle:Operator\\Department')->find($departmentId);
         $this->assertEquals('My test department', $department->getName());
 
         $dm->remove($department);
@@ -407,7 +407,7 @@ class AdminControllerTest extends WebTestCase
 
     private function assertGetSuccessful(Client $client)
     {
-        $this->assertTrue($client->getResponse()->isOk(), 'GET response not successful. Code: ' . $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->isOk(), 'GET response not successful. Code: ' . $client->getResponse()->getStatusCode().'_'.$client->getResponse()->getContent());
     }
 
     private function assertPostRedirect(Client $client)
@@ -471,7 +471,7 @@ class AdminControllerTest extends WebTestCase
     {
         $dm = $this->getDocumentManager();
 
-        $operator = $dm->getRepository('SGLiveChatBundle:Operator')->findOneBy(array('email' => 'ismael@servergrove.com'));
+        $operator = $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findOneBy(array('email' => 'ismael@servergrove.com'));
 
         $dm->remove($operator);
         $dm->flush();

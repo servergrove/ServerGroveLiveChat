@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Command;
+namespace ServerGrove\LiveChatBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
+use ServerGrove\LiveChatBundle\Document\CannedMessage;
 use Symfony\Component\Console\Input\InputArgument;
 use MongoCursorException;
 

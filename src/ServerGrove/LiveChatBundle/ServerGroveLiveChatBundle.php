@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle;
+namespace ServerGrove\LiveChatBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class SGLiveChatBundle extends Bundle
+class ServerGroveLiveChatBundle extends Bundle
 {
 
     /**

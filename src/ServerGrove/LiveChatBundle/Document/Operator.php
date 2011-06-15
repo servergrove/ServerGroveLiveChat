@@ -1,11 +1,11 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
+use ServerGrove\LiveChatBundle\Document\Operator\Department;
 
 /**
  * Description of Operator
@@ -13,7 +13,7 @@ use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  * collection="operator",
- * repositoryClass="ServerGrove\SGLiveChatBundle\Document\OperatorRepository"
+ * repositoryClass="ServerGrove\LiveChatBundle\Document\OperatorRepository"
  * )
  * @MongoDB\InheritanceType("SINGLE_COLLECTION")
  * @MongoDB\DiscriminatorField(fieldName="type")
@@ -38,13 +38,13 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      */
     private $passwd;
     /**
-     * @var ServerGrove\SGLiveChatBundle\Document\Operator\Rating
-     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator\Rating")
+     * @var ServerGrove\LiveChatBundle\Document\Operator\Rating
+     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
     private $ratings = array();
     /**
      * @var Department[]
-     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\SGLiveChatBundle\Document\Operator\Department")
+     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Department")
      */
     private $departments;
 

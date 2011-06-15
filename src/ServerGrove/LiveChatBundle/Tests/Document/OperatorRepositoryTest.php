@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Tests\Document;
+namespace ServerGrove\LiveChatBundle\Tests\Document;
 
 
 class OperatorRepositoryTest extends RepositoryTestCase {

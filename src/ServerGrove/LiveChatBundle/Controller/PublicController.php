@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Controller;
+namespace ServerGrove\LiveChatBundle\Controller;
 
-use ServerGrove\SGLiveChatBundle\Document\Visitor;
+use ServerGrove\LiveChatBundle\Document\Visitor;
 use Symfony\Component\HttpFoundation\Cookie;
-use ServerGrove\SGLiveChatBundle\Controller\BaseController;
+use ServerGrove\LiveChatBundle\Controller\BaseController;
 
 /**
  * Description of PublicController
@@ -15,15 +15,15 @@ abstract class PublicController extends BaseController
 {
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\VisitorRepository
+     * @return ServerGrove\LiveChatBundle\Document\VisitorRepository
      */
     protected function getVisitorRepository()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visitor');
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visitor');
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visitor
+     * @return ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function getVisitorByKey()
     {
@@ -46,15 +46,15 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\VisitRepository
+     * @return ServerGrove\LiveChatBundle\Document\VisitRepository
      */
     protected function getVisitRepository()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit');
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit');
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visit
+     * @return ServerGrove\LiveChatBundle\Document\Visit
      */
     protected function getVisitByKey(Visitor $visitor)
     {
@@ -73,7 +73,7 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visitor
+     * @return ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function createVisit(Visitor $visitor)
     {
@@ -89,7 +89,7 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Visitor
+     * @return ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function createVisitor()
     {

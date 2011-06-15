@@ -1,6 +1,6 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Cache\Engine;
+namespace ServerGrove\LiveChatBundle\Cache\Engine;
 
 /**
  * Description of Apc

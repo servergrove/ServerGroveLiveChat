@@ -1,2 +1,2 @@
 sglivechat:
-  resource: "@SGLiveChatBundle/Resources/config/routing.yml"
+  resource: "@ServerGroveLiveChatBundle/Resources/config/routing.yml"

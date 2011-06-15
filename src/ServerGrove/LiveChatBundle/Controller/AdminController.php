@@ -1,17 +1,17 @@
 <?php
 
-namespace ServerGrove\SGLiveChatBundle\Controller;
+namespace ServerGrove\LiveChatBundle\Controller;
 
-use ServerGrove\SGLiveChatBundle\Document\CannedMessage;
-use ServerGrove\SGLiveChatBundle\Form\CannedMessageType;
-use ServerGrove\SGLiveChatBundle\Form\OperatorType;
-use ServerGrove\SGLiveChatBundle\Form\OperatorDepartmentType;
-use ServerGrove\SGLiveChatBundle\Form\OperatorLoginType;
-use ServerGrove\SGLiveChatBundle\Admin\OperatorLogin;
-use ServerGrove\SGLiveChatBundle\Controller\BaseController;
-use ServerGrove\SGLiveChatBundle\Document\Session as ChatSession;
-use ServerGrove\SGLiveChatBundle\Document\Operator;
-use ServerGrove\SGLiveChatBundle\Document\Operator\Department;
+use ServerGrove\LiveChatBundle\Document\CannedMessage;
+use ServerGrove\LiveChatBundle\Form\CannedMessageType;
+use ServerGrove\LiveChatBundle\Form\OperatorType;
+use ServerGrove\LiveChatBundle\Form\OperatorDepartmentType;
+use ServerGrove\LiveChatBundle\Form\OperatorLoginType;
+use ServerGrove\LiveChatBundle\Admin\OperatorLogin;
+use ServerGrove\LiveChatBundle\Controller\BaseController;
+use ServerGrove\LiveChatBundle\Document\Session as ChatSession;
+use ServerGrove\LiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\Operator\Department;
 use Symfony\Component\Form\Exception\FormException;
 use Doctrine\ODM\MongoDB\Mapping\Document;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
@@ -43,7 +43,7 @@ class AdminController extends BaseController
         }
 
         if ($id) {
-            $cannedMessage = $this->getDocumentManager()->find('SGLiveChatBundle:CannedMessage', $id);
+            $cannedMessage = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:CannedMessage', $id);
         } else {
             $cannedMessage = new CannedMessage();
         }
@@ -69,7 +69,7 @@ class AdminController extends BaseController
                 break;
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:canned-message.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:canned-message.html.twig', array(
             'cannedMessage' => $cannedMessage,
             'form' => $form->createView()
         ));
@@ -80,7 +80,7 @@ class AdminController extends BaseController
      */
     public function cannedMessagesAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
     }
 
     /**
@@ -92,13 +92,13 @@ class AdminController extends BaseController
             return $response;
         }
 
-        $chatSession = $this->getDocumentManager()->find('SGLiveChatBundle:Session', $id);
+        $chatSession = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Session', $id);
 
         if (!$chatSession) {
             throw new NotFoundHttpException();
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chatSession));
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chatSession));
     }
 
     /**
@@ -106,7 +106,7 @@ class AdminController extends BaseController
      */
     public function chatSessionsAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:Session', 'sessions', 'chat-sessions');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Session', 'sessions', 'chat-sessions');
     }
 
     /**
@@ -130,8 +130,8 @@ class AdminController extends BaseController
             $email = $operatorLogin->getEmail();
             $passwd = $operatorLogin->getPasswd();
 
-            /* @var $operator ServerGrove\SGLiveChatBundle\Document\Operator */
-            $operator = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->loadUserByUsername($email);
+            /* @var $operator ServerGrove\LiveChatBundle\Document\Operator */
+            $operator = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator')->loadUserByUsername($email);
 
             if ($operator->getPasswd() != $operator->encodePassword($passwd, $operator->getSalt())) {
                 throw new UsernameNotFoundException('Invalid password');
@@ -180,7 +180,7 @@ class AdminController extends BaseController
         }
 
         if ($_format == 'json') {
-            $visits = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->getLastVisitsArray();
+            $visits = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit')->getLastVisitsArray();
             $this->getResponse()->setContent(json_encode($visits));
 
             return $this->getResponse();
@@ -188,7 +188,7 @@ class AdminController extends BaseController
 
         throw new NotFoundHttpException('Not supported format');
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array('visits' => $visits));
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array('visits' => $visits));
     }
 
     /**
@@ -216,7 +216,7 @@ class AdminController extends BaseController
         }
         $form = $this->createLoginForm();
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:login.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:login.html.twig', array(
             'form' => $form->createView(),
             'errorMsg' => $errorMsg
         ));
@@ -257,7 +257,7 @@ class AdminController extends BaseController
         $message = null;
 
         if ($id) {
-            $department = $this->getDocumentManager()->find('SGLiveChatBundle:Operator\Department', $id);
+            $department = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator\Department', $id);
         } else {
             $department = new Department();
         }
@@ -282,7 +282,7 @@ class AdminController extends BaseController
                 break;
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator-department.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:operator-department.html.twig', array(
             'department' => $department,
             'form' => $form->createView()
         ));
@@ -293,7 +293,7 @@ class AdminController extends BaseController
      */
     public function operatorDepartmentsAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
     }
 
     /**
@@ -309,7 +309,7 @@ class AdminController extends BaseController
         $message = null;
 
         if ($id) {
-            $operator = $this->getDocumentManager()->find('SGLiveChatBundle:Operator', $id);
+            $operator = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator', $id);
             $edit = true;
         } else {
             $operator = new Operator();
@@ -339,7 +339,7 @@ class AdminController extends BaseController
                 break;
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:operator.html.twig', array(
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:operator.html.twig', array(
             'operator' => $operator,
             'form' => $form->createView(),
             'edit' => $edit
@@ -351,7 +351,7 @@ class AdminController extends BaseController
      */
     public function operatorsAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:Operator', 'operators');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Operator', 'operators');
     }
 
     /**
@@ -365,7 +365,7 @@ class AdminController extends BaseController
             return $this->getResponse();
         }
 
-        $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
+        $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->closeSessions();
 
         if ($_format == 'json') {
             $this->getResponse()->headers->set('Content-type', 'application/json');
@@ -376,7 +376,7 @@ class AdminController extends BaseController
 
         $chats = $this->getRequestedChats();
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array('chats' => $chats));
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array('chats' => $chats));
     }
 
     /**
@@ -388,14 +388,14 @@ class AdminController extends BaseController
             return $response;
         }
 
-        $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
+        $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->closeSessions();
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:requests.html.twig', array('chats' => $this->getRequestedChats()));
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:requests.html.twig', array('chats' => $this->getRequestedChats()));
     }
 
     public function sessionsApiAction($_format)
     {
-        return $this->renderTemplate('SGLiveChatBundle:Admin:Sessions.' . $_format . '.twig');
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:Sessions.' . $_format . '.twig');
     }
 
     /**
@@ -409,16 +409,16 @@ class AdminController extends BaseController
             return $this->getResponse();
         }
 
-        $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->closeSessions();
+        $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->closeSessions();
 
         $this->getResponse()->headers->set('Content-type', 'application/json');
 
         $json = array();
         $json['requests'] = $this->getRequestedChatsArray();
         $json['count']['requests'] = count($json['requests']);
-        $json['visits'] = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->getLastVisitsArray();
+        $json['visits'] = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit')->getLastVisitsArray();
         $json['count']['visits'] = count($json['visits']);
-        $json['count']['online_operators'] = $this->getDocumentManager()->getRepository('SGLiveChatBundle:Operator')->getOnlineOperatorsCount();
+        $json['count']['online_operators'] = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator')->getOnlineOperatorsCount();
 
         $this->getResponse()->setContent(json_encode($json));
 
@@ -434,13 +434,13 @@ class AdminController extends BaseController
             return $response;
         }
 
-        $visitor = $this->getDocumentManager()->find('SGLiveChatBundle:Visitor', $id);
+        $visitor = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Visitor', $id);
 
         if (!$visitor) {
             throw new NotFoundHttpException();
         }
 
-        return $this->renderTemplate('SGLiveChatBundle:Admin:visitor.html.twig', array('visitor' => $visitor, 'visits' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->toArray($visitor->getVisits())));
+        return $this->renderTemplate('ServerGroveLiveChatBundle:Admin:visitor.html.twig', array('visitor' => $visitor, 'visits' => $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit')->toArray($visitor->getVisits())));
     }
 
     /**
@@ -448,7 +448,7 @@ class AdminController extends BaseController
      */
     public function visitorsAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:Visitor', 'visitors');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Visitor', 'visitors');
     }
 
     /**
@@ -456,7 +456,7 @@ class AdminController extends BaseController
      */
     public function visitsAction($page)
     {
-        return $this->simpleListAction($page, 'SGLiveChatBundle:Visit', 'visits');
+        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Visit', 'visits');
     }
 
     private function simpleListAction($page, $documentName, $documentTemplateKey, $template = null)
@@ -469,7 +469,7 @@ class AdminController extends BaseController
             $template = $documentTemplateKey;
         }
 
-        $template = 'SGLiveChatBundle:Admin:' . $template . '.html.twig';
+        $template = 'ServerGroveLiveChatBundle:Admin:' . $template . '.html.twig';
 
         $length = self::DEFAULT_PAGE_ITEMS_LENGTH;
         $offset = ($page - 1) * $length;
@@ -493,12 +493,12 @@ class AdminController extends BaseController
     private function checkLogin()
     {
         if (!$this->isLogged()) {
-            return $this->forward('SGLiveChatBundle:Admin:login');
+            return $this->forward('ServerGroveLiveChatBundle:Admin:login');
         }
 
         $operator = $this->getOperator();
         if (!$operator) {
-            return $this->forward('SGLiveChatBundle:Admin:logout');
+            return $this->forward('ServerGroveLiveChatBundle:Admin:logout');
         }
         $operator->setIsOnline(true);
         $this->getDocumentManager()->persist($operator);
@@ -516,11 +516,11 @@ class AdminController extends BaseController
     }
 
     /**
-     * @return ServerGrove\SGLiveChatBundle\Document\Session
+     * @return ServerGrove\LiveChatBundle\Document\Session
      */
     private function getChatSession($id)
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->find($id);
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->find($id);
     }
 
     /**
@@ -528,7 +528,7 @@ class AdminController extends BaseController
      */
     private function getRequestedChats()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChats();
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->getRequestedChats();
     }
 
     /**
@@ -536,7 +536,7 @@ class AdminController extends BaseController
      */
     private function getRequestedChatsArray()
     {
-        return $this->getDocumentManager()->getRepository('SGLiveChatBundle:Session')->getRequestedChatsArray();
+        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->getRequestedChatsArray();
     }
 
     /**

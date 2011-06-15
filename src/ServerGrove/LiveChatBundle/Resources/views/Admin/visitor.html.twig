@@ -1,11 +1,11 @@
-{% extends "SGLiveChatBundle::admin-layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 {% block content %}
-{% include "SGLiveChatBundle:Admin:header.html.twig" %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 
 <h1>Visitor "{{visitor.getId()}}"</h1>
 <script type="text/javascript">
     //<![CDATA[
-    {% include "SGLiveChatBundle:Admin:Sessions.js.twig" %}
+    {% include "ServerGroveLiveChatBundle:Admin:Sessions.js.twig" %}
     jQuery(document).ready(function(){
         SessionToolkit.Visit.setListContainer('#visits');
         SessionToolkit.Visit.disableChatInvitation();
