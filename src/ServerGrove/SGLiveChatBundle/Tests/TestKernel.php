@@ -3,9 +3,7 @@
 namespace ServerGrove\SGLiveChatBundle\Tests;
 
 use Symfony\Component\ClassLoader\DebugUniversalClassLoader;
-
 use Symfony\Component\HttpKernel\Debug\ErrorHandler;
-
 use Symfony\Bundle\DoctrineMongoDBBundle\DoctrineMongoDBBundle;
 use Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -52,8 +50,29 @@ class TestKernel extends Kernel
         }
     }
 
+    /**
+     * Gets the cache directory.
+     *
+     * @return string The cache directory
+     */
+    public function getCacheDir()
+    {
+        return sys_get_temp_dir() . '/cache/' . $this->environment;
+    }
+
+    /**
+     * Gets the log directory.
+     *
+     * @return string The log directory
+     */
+    public function getLogDir()
+    {
+        return sys_get_temp_dir() . '/logs';
+    }
+
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(__DIR__ . '/Resources/config/config.yml');
     }
+
 }
