@@ -1,4 +1,7 @@
 {% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
+{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
+
+
 {% block content %}
 <form action="{{ path('_security_check') }}" method="post">
     <div style="padding-left: 30px;padding-right: 30px;">
@@ -9,23 +12,10 @@
             {% endif %}
             {{ form_errors(form) }}
         </div>
-        <div class="inputname">
-            e-mail
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.email) }}
-        </div>
-        <p>
-        </p>
-        <div class="inputname">
-            Password
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.passwd) }}
-        </div>
-        <p>
-            {{ form_rest(form) }}
-        </p>
+        {{ form_row(form.email) }}
+        <p></p>
+        {{ form_row(form.passwd) }}
+        <p>{{ form_rest(form) }}</p>
         <input type="submit" value="Login" />
     </div>
 </form>
