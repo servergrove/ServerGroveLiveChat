@@ -108,6 +108,10 @@ class Visit
 
     public function getCurrentPageDuration()
     {
+        if ($this->getHits()->count() == 0) {
+            return 0;
+        }
+
         return time() - $this->getLastHit()->getCreatedAt()->format('U');
     }
 

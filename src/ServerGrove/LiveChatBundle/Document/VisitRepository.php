@@ -77,8 +77,8 @@ class VisitRepository extends DocumentRepository
                     'visits' => count($visit->getVisitor()->getVisits()),
                     'languages' => $visit->getVisitor()->getLanguages(),
                     'agent' => $visit->getVisitor()->getAgent(),
-                    'currentPage' => $visit->getHits()->last()->getVisitLink()->getUrl(),
-                    'referer' => $hits->last()->getReferer()
+                    'currentPage' => $hits->count() ? $hits->last()->getVisitLink()->getUrl() : '',
+                    'referer' => $hits->count() ? $hits->last()->getReferer() : ''
                 ),
                 'hits' => array_map(
                         function (VisitHit $hit) {

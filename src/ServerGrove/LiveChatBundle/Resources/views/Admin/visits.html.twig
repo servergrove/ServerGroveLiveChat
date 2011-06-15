@@ -59,7 +59,11 @@
                 {{visit.getKey()}}
             </td>
             <td>
-                {{visit.getVisitor().getId()}}
+                {% spaceless %}
+                <a target="_blank" href="{{ path('sglc_admin_visitor', {'id': visit.getVisitor().getId()})}}">
+                    {{visit.getVisitor().getId()}}
+                </a>
+                {% endspaceless %}
             </td>
             <td>
                 {{visit.getRemoteAddr()}}

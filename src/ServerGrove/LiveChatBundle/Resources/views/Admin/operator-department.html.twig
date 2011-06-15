@@ -1,4 +1,5 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
 
 {% block content %}
 {% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
@@ -16,21 +17,10 @@
 </script>
 <form action="{{ path(route, vars) }}" method="post">
     <div style="padding-left: 30px;padding-right: 30px;">
-        <div>
-            {{ form_errors(form) }}
-        </div>
-        <div class="inputname">
-            {{ form_label(form.name) }}
-        </div>
-        <div class="inputbox">
-            {{ form_widget(form.name) }}
-        </div>
-        <p>
-            {{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}
-        </p>
-        <p>
-            {{ form_rest(form) }}
-        </p>
+        <div>{{ form_errors(form) }}</div>
+        {{ form_row(form.name) }}
+        <p>{{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}</p>
+        <p>{{ form_rest(form) }}</p>
         <input type="submit" value="Submit" />
     </div>
 </form>

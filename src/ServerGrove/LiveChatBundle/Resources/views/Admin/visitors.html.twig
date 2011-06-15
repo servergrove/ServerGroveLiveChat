@@ -54,7 +54,11 @@
         {% for visitor in visitors %}
         <tr>
             <td>
-                {{visitor.getId()}}
+                {% spaceless %}
+                <a target="_blank" href="{{ path('sglc_admin_visitor', {'id': visitor.getId()})}}">
+                    {{visitor.getId()}}
+                </a>
+                {% endspaceless %}
             </td>
             <td style="text-align: center;">
                 {{visitor.getCreatedAt().format('Y-m-d H:i:s')}}
@@ -63,7 +67,7 @@
                 {{visitor.getName()}}
             </td>
             <td>
-                {{visitor.getEmail()}}
+                <a href="mailto:{{visitor.getEmail()}}">{{visitor.getEmail()}}</a>
             </td>
             <td>
                 {{visitor.getAgent()}}
