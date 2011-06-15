@@ -1,3 +1,8 @@
+sglc_admin:
+  resource: "@SGLiveChatBundle/Controller/AdminController.php"
+  type:     annotation
+
+
 homepage:
   pattern:  /
   defaults: { _controller: SGLiveChatBundle:Default:index }
@@ -73,115 +78,3 @@ sglc_track_reset:
 sglc_track_status:
   pattern: /js/sglivechat-tracker/status.{_format}
   defaults: { _controller: SGLiveChatBundle:Track:status, _format: html }
-
-# -- Admin ---------------------------------------------------------------------
-
-sglc_admin_index:
-  pattern: /admin/sglivechat
-  defaults: { _controller: SGLiveChatBundle:Admin:index }
-  requirements: { _method: get }
-
-sglc_admin_logout:
-  pattern: /admin/sglivechat/logout
-  defaults: { _controller: SGLiveChatBundle:Admin:logout }
-  requirements: { _method: get }
-
-#sglc_admin_login:
-#  pattern: /admin/sglivechat/login
-#  defaults: { _controller: SGLiveChatBundle:Admin:login }
-
-
-#sglc_admin_check_login:
-#  pattern: /admin/sglivechat/login/check
-#  defaults: { _controller: SGLiveChatBundle:Admin:checkLogin }
-  
-_security_login:
-  pattern: /admin/sglivechat/login
-  defaults: { _controller: SGLiveChatBundle:Admin:login }
-
-_security_check:
-  pattern: /admin/sglivechat/login/check
-  defaults: { _controller: SGLiveChatBundle:Admin:checkLogin }
-  requirements: { _method: post }
-
-sglc_admin_operator:
-  pattern: /admin/sglivechat/operator
-  defaults: { _controller: SGLiveChatBundle:Admin:operator }
-
-sglc_admin_operator_departments:
-  pattern: /admin/sglivechat/operator/departments/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:operatorDepartments, page: 1 }
-
-sglc_admin_operator_department:
-  pattern: /admin/sglivechat/operator/department
-  defaults: { _controller: SGLiveChatBundle:Admin:operatorDepartment }
-  
-
-sglc_admin_operator_department_edit:
-  pattern: /admin/sglivechat/operator/department/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:operatorDepartment }
-
-sglc_admin_operator_edit:
-  pattern: /admin/sglivechat/operator/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:operator }
-
-sglc_admin_operators:
-  pattern: /admin/sglivechat/operators/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:operators, page: 1 }
-  requirements: { page: \d+ }
-
-sglc_admin_canned_message:
-  pattern: /admin/sglivechat/canned-message
-  defaults: { _controller: SGLiveChatBundle:Admin:cannedMessage }
-
-sglc_admin_canned_message_edit:
-  pattern: /admin/sglivechat/canned-message/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:cannedMessage }
-  
-sglc_admin_canned_messages:
-  pattern: /admin/sglivechat/canned-messages/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:cannedMessages, page: 1}
-  requirements: { page: \d+ }
-
-sglc_admin_console_sessions:
-  pattern: /admin/sglivechat/console/sessions
-  defaults: { _controller: SGLiveChatBundle:Admin:sessions }
-  
-sglc_admin_chat_session:
-  pattern: /admin/sglivechat/console/chat-session/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:chatSession }
-
-sglc_admin_chat_sessions:
-  pattern: /admin/sglivechat/console/chat-sessions/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:chatSessions, page: 1 }
-  requirements: { page: \d+ }
-  
-sglc_admin_visitors:
-  pattern: /admin/sglivechat/visitors/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:visitors, page: 1}
-  requirements: { page: \d+ }
-
-sglc_admin_visitor:
-  pattern: /admin/sglivechat/visitor/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:visitor}
-
-sglc_admin_visits:
-  pattern: /admin/sglivechat/visits/{page}
-  defaults: { _controller: SGLiveChatBundle:Admin:visits, page: 1}
-  requirements: { page: \d+ }
-
-sglc_admin_console_requested_chats:
-  pattern: /admin/sglivechat/console/requested-chats.{_format}
-  defaults: { _controller: SGLiveChatBundle:Admin:requestedChats, _format: html }
-
-sglc_admin_console_current_visits:
-  pattern: /admin/sglivechat/console/current-visits.{_format}
-  defaults: { _controller: SGLiveChatBundle:Admin:currentVisits, _format: html }
-
-sglc_admin_console_sessions_service:
-  pattern: /admin/sglivechat/console/sessions-service.json
-  defaults: { _controller: SGLiveChatBundle:Admin:sessionsService }
-
-sglc_admin_console_close:
-  pattern: /admin/sglivechat/console/close/{id}
-  defaults: { _controller: SGLiveChatBundle:Admin:closeChat }

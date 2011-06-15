@@ -21,6 +21,7 @@ use Symfony\Component\Form\TextField;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 
 /**
  * Description of AdminController
@@ -31,6 +32,10 @@ class AdminController extends BaseController
 {
     const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
+    /**
+     * @Route("/admin/sglivechat/canned-message", name="sglc_admin_canned_message")
+     * @Route("/admin/sglivechat/canned-message/{id}", name="sglc_admin_canned_message_edit")
+     */
     public function cannedMessageAction($id = null)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -70,11 +75,17 @@ class AdminController extends BaseController
         ));
     }
 
+    /**
+     * @Route("/admin/sglivechat/canned-messages/{page}", name="sglc_admin_canned_messages", defaults={"page"="1"})
+     */
     public function cannedMessagesAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/chat-session/{id}", name="sglc_admin_chat_session")
+     */
     public function chatSessionAction($id)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -90,12 +101,17 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:chat-session.html.twig', array('session' => $chatSession));
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/chat-sessions/{page}", name="sglc_admin_chat_sessions", defaults={"page"="1"})
+     */
     public function chatSessionsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Session', 'sessions', 'chat-sessions');
     }
 
     /**
+     * @Route("/admin/sglivechat/login/check", name="_security_check", requirements={"_method"="post"})
+     *
      * @todo Search about security in Symfony2
      */
     public function checkLoginAction()
@@ -138,6 +154,9 @@ class AdminController extends BaseController
         return new RedirectResponse($this->generateUrl("sglc_admin_index"));
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/close/{id}", name="sglc_admin_console_close")
+     */
     public function closeChatAction($id)
     {
         if (($chat = $this->getChatSession($id)) !== false) {
@@ -149,6 +168,9 @@ class AdminController extends BaseController
         return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/current-visits.{_format}", name="sglc_admin_console_current_visits", defaults={"_format"="html"})
+     */
     public function currentVisitsAction($_format)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -169,6 +191,11 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:currentVisits.' . $_format . '.twig', array('visits' => $visits));
     }
 
+    /**
+     * @Route("/admin/sglivechat", name="sglc_admin_index")
+     * 
+     * @return RedirectResponse
+     */
     public function indexAction()
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -178,6 +205,9 @@ class AdminController extends BaseController
         return new RedirectResponse($this->generateUrl('sglc_admin_console_sessions'));
     }
 
+    /**
+     * @Route("/admin/sglivechat/login", name="_security_login")
+     */
     public function loginAction()
     {
         $errorMsg = $this->getSessionStorage()->getFlash('_error');
@@ -192,6 +222,9 @@ class AdminController extends BaseController
         ));
     }
 
+    /**
+     * @Route("/admin/sglivechat/logout", name="sglc_admin_logout")
+     */
     public function logoutAction()
     {
         if ($this->isLogged()) {
@@ -211,6 +244,10 @@ class AdminController extends BaseController
         return new RedirectResponse($this->generateUrl("_security_login"));
     }
 
+    /**
+     * @Route("/admin/sglivechat/operator/department", name="sglc_admin_operator_department")
+     * @Route("/admin/sglivechat/operator/department/{id}", name="sglc_admin_operator_department_edit")
+     */
     public function operatorDepartmentAction($id = null)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -251,13 +288,17 @@ class AdminController extends BaseController
         ));
     }
 
+    /**
+     * @Route("/admin/sglivechat/operators/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
+     */
     public function operatorDepartmentsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
     }
 
     /**
-     *
+     * @Route("/admin/sglivechat/operator", name="sglc_admin_operator")
+     * @Route("/admin/sglivechat/operator/{id}", name="sglc_admin_operator_edit")
      */
     public function operatorAction($id = null)
     {
@@ -305,11 +346,17 @@ class AdminController extends BaseController
         ));
     }
 
+    /**
+     * @Route("/admin/sglivechat/operators/{page}", name="sglc_admin_operators", defaults={"page"="1"})
+     */
     public function operatorsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Operator', 'operators');
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/requested-chats.{_format}", name="sglc_admin_console_requested_chats", defaults={"_format"="html"})
+     */
     public function requestedChatsAction($_format)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -332,6 +379,9 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array('chats' => $chats));
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/sessions", name="sglc_admin_console_sessions")
+     */
     public function sessionsAction()
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -348,6 +398,9 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:Sessions.' . $_format . '.twig');
     }
 
+    /**
+     * @Route("/admin/sglivechat/console/sessions-service.json", name="sglc_admin_console_sessions_service")
+     */
     public function sessionsServiceAction()
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -372,6 +425,9 @@ class AdminController extends BaseController
         return $this->getResponse();
     }
 
+    /**
+     * @Route("/admin/sglivechat/visitor/{id}", name="sglc_admin_visitor")
+     */
     public function visitorAction($id)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -387,11 +443,17 @@ class AdminController extends BaseController
         return $this->renderTemplate('SGLiveChatBundle:Admin:visitor.html.twig', array('visitor' => $visitor, 'visits' => $this->getDocumentManager()->getRepository('SGLiveChatBundle:Visit')->toArray($visitor->getVisits())));
     }
 
+    /**
+     * @Route("/admin/sglivechat/visitors/{page}", name="sglc_admin_visitors", defaults={"page"="1"})
+     */
     public function visitorsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Visitor', 'visitors');
     }
 
+    /**
+     * @Route("/admin/sglivechat/visits/{page}", name="sglc_admin_visits", defaults={"page"="1"})
+     */
     public function visitsAction($page)
     {
         return $this->simpleListAction($page, 'SGLiveChatBundle:Visit', 'visits');
