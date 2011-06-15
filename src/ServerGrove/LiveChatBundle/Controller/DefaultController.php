@@ -8,6 +8,6 @@ class DefaultController extends Controller
 {
     public function indexAction()
     {
-        return $this->render('ServerGroveLiveChatBundle:Default:index.html.twig');
+        return new \Symfony\Component\HttpFoundation\RedirectResponse($this->generateUrl('sglc_chat_homepage'));
     }
 }
