@@ -2,9 +2,7 @@
 namespace ServerGrove\LiveChatBundle\Form;
 
 use Symfony\Component\Form\FormBuilder;
-
 use Symfony\Component\Form\AbstractType;
-
 use Symfony\Component\DomCrawler\Field\TextareaFormField;
 
 class ChatRequestType extends AbstractType
@@ -22,5 +20,15 @@ class ChatRequestType extends AbstractType
     {
         return array(
             'data_class' => 'ServerGrove\\LiveChatBundle\\Chat\\ChatRequest');
+    }
+
+    /**
+     * Returns the name of this type.
+     *
+     * @return string The name of this type
+     */
+    function getName()
+    {
+        return 'chat_request';
     }
 }
