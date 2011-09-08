@@ -6,31 +6,12 @@ use Symfony\Bundle\DoctrineMongoDBBundle\DependencyInjection\DoctrineMongoDBExte
 use ServerGrove\LiveChatBundle\DependencyInjection\ServerGroveLiveChatExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-abstract class TestCase extends \PHPUnit_Framework_TestCase
+abstract class TestCase extends WebTestCase
 {
 
-    private $kernel, $cacheEngineName;
-
-    public function __construct($name = NULL, array $data = array(), $dataName = '')
-    {
-        parent::__construct($name, $data, $dataName);
-        $this->kernel = new TestKernel('test', false);
-        $this->kernel->boot();
-    }
-
-    protected function preSetup()
-    {
-        $this->setCacheEngineName('mongo');
-    }
-
-    /**
-     * @return \Symfony\Component\DependencyInjection\ContainerBuilder
-     */
-    protected function getContainer()
-    {
-        return $this->kernel->getContainer();
-    }
+    private $cacheEngineName;
 
     /**
      * Prepares the environment before running a test.
@@ -39,6 +20,18 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     {
         $this->preSetup();
         parent::setUp();
+        self::$kernel = self::createKernel();
+        self::$kernel->boot();
+    }
+
+    protected function preSetup()
+    {
+        $this->setCacheEngineName('mongo');
+    }
+
+    protected function getContainer()
+    {
+        return self::$kernel->getContainer();
     }
 
     protected function setCacheEngineName($name)
