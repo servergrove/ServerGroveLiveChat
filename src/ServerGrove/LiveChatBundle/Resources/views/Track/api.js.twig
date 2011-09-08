@@ -162,7 +162,7 @@ if (typeof(SGChatTracker) == 'undefined') {
                 jQuery('#chatDiv').fadeOut("slow", function(){
                     SGChatTracker.Chat.removeInvite()
                 });
-                jQuery.get('{{path("sglc_chat_reject", {"id": "__idchat__"})}}'.replace("__idchat__", id));
+                jQuery.get('{{path("sglc_chat_invite_reject", {"id": "__idchat__"})}}'.replace("__idchat__", id));
             },
             createInvite: function(){
                 jQuery(document.createElement("div")).attr({id: "chatDiv"}).hide().appendTo("body");
