@@ -10,7 +10,7 @@ abstract class ManagerTestAbstract extends TestCase
 {
 
     /**
-     * @var Manager
+     * @var \ServerGrove\LiveChatBundle\Cache\Manager
      */
     private $Manager;
 
@@ -24,7 +24,7 @@ abstract class ManagerTestAbstract extends TestCase
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Cache\Manager
+     * @return \ServerGrove\LiveChatBundle\Cache\Manager
      */
     protected abstract function createManager();
 
@@ -51,8 +51,8 @@ abstract class ManagerTestAbstract extends TestCase
     public function testSet()
     {
         $className = get_class($this);
-        $this->Manager->set(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar', $className);
-        $this->assertEquals($className, $this->Manager->get(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'), $this->Manager->get(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'));
+        $this->Manager->set($key = $className . __FUNCTION__ . 'MyVar', $className);
+        $this->assertEquals($className, $this->Manager->get($key), $this->Manager->get($key));
     }
 
     /**
@@ -60,7 +60,8 @@ abstract class ManagerTestAbstract extends TestCase
      */
     public function testGet()
     {
-        $this->assertEquals(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar', $this->Manager->get(md5(microtime()), __NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'));
+        $className = get_class($this);
+        $this->assertEquals($className . __FUNCTION__ . 'MyVar', $this->Manager->get(md5(microtime()), $className . __FUNCTION__ . 'MyVar'));
     }
 
     /**
@@ -68,9 +69,10 @@ abstract class ManagerTestAbstract extends TestCase
      */
     public function testHas()
     {
+        $className = get_class($this);
         $this->assertFalse($this->Manager->has(md5(microtime())));
-        $this->Manager->set(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar', true);
-        $this->assertTrue($this->Manager->has(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'));
+        $this->Manager->set($className . __FUNCTION__ . 'MyVar', true);
+        $this->assertTrue($this->Manager->has($className . __FUNCTION__ . 'MyVar'));
     }
 
     /**
@@ -78,10 +80,11 @@ abstract class ManagerTestAbstract extends TestCase
      */
     public function testRemove()
     {
-        $this->Manager->set(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar', true);
-        $this->assertTrue($this->Manager->has(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'));
-        $this->Manager->remove(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar');
-        $this->assertFalse($this->Manager->has(__NAMESPACE__ . __CLASS__ . __FUNCTION__ . 'MyVar'));
+        $className = get_class($this);
+        $this->Manager->set($className . __FUNCTION__ . 'MyVar', true);
+        $this->assertTrue($this->Manager->has($className . __FUNCTION__ . 'MyVar'));
+        $this->Manager->remove($className . __FUNCTION__ . 'MyVar');
+        $this->assertFalse($this->Manager->has($className . __FUNCTION__ . 'MyVar'));
     }
 
 }
