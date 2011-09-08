@@ -40,9 +40,11 @@ abstract class ControllerTest extends WebTestCase
                     $doc = new \DOMDocument();
                     $doc->loadHTML($response->getContent());
                     return trim($doc->getElementsByTagName('h1')->item(0)->nodeValue);
+                } else if (200 != $response->getStatusCode()) {
+                    return current(explode("\r\n", $response->__toString()));
                 }
         }
 
-        return '';
+        return null;
     }
 }
