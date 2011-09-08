@@ -18,8 +18,7 @@ class ChatRequestType extends AbstractType
 
     public function getDefaultOptions(array $options)
     {
-        return array(
-            'data_class' => 'ServerGrove\\LiveChatBundle\\Chat\\ChatRequest');
+        return array('data_class' => 'ServerGrove\LiveChatBundle\Chat\ChatRequest');
     }
 
     /**
@@ -27,7 +26,7 @@ class ChatRequestType extends AbstractType
      *
      * @return string The name of this type
      */
-    function getName()
+    public function getName()
     {
         return 'chat_request';
     }
