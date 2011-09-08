@@ -98,6 +98,25 @@ class Session
      */
     private $rating;
 
+    /**
+     * @param Visit $visit
+     * @param string $question
+     * @param int $status
+     * @return Session
+     */
+    public static function create(Visit $visit, $question, $status)
+    {
+        $session = new self();
+
+        $session->setVisit($visit);
+        $session->setVisitor($visit->getVisitor());
+        $session->setQuestion($question);
+        $session->setStatusId($status);
+        $session->setRemoteAddr($visit->getVisitor()->getRemoteAddr());
+
+        return $session;
+    }
+
     public function __construct()
     {
         $this->setStatusId(self::STATUS_WAITING);
