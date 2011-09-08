@@ -15,7 +15,7 @@ abstract class PublicController extends BaseController
 {
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\VisitorRepository
+     * @return \ServerGrove\LiveChatBundle\Document\VisitorRepository
      */
     protected function getVisitorRepository()
     {
@@ -23,7 +23,7 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Visitor
+     * @return \ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function getVisitorByKey()
     {
@@ -46,7 +46,7 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\VisitRepository
+     * @return \ServerGrove\LiveChatBundle\Document\VisitRepository
      */
     protected function getVisitRepository()
     {
@@ -54,7 +54,8 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Visit
+     * @param \ServerGrove\LiveChatBundle\Document\Visitor $visitor
+     * @return \ServerGrove\LiveChatBundle\Document\Visit
      */
     protected function getVisitByKey(Visitor $visitor)
     {
@@ -73,7 +74,8 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Visitor
+     * @param \ServerGrove\LiveChatBundle\Document\Visitor $visitor
+     * @return \ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function createVisit(Visitor $visitor)
     {
@@ -89,7 +91,7 @@ abstract class PublicController extends BaseController
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Visitor
+     * @return \ServerGrove\LiveChatBundle\Document\Visitor
      */
     protected function createVisitor()
     {

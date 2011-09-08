@@ -22,7 +22,7 @@ abstract class BaseController extends Controller
     private $request, $response, $session, $dm;
 
     /**
-     * @return Symfony\Component\HttpFoundation\Request
+     * @return \Symfony\Component\HttpFoundation\Request
      */
     public function getRequest()
     {
@@ -33,7 +33,7 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function getResponse()
     {
@@ -44,7 +44,7 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return Symfony\Component\HttpFoundation\Session
+     * @return \Symfony\Component\HttpFoundation\Session
      */
     public function getSessionStorage()
     {
@@ -55,7 +55,7 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return Doctrine\ODM\MongoDB\DocumentManager
+     * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
     public function getDocumentManager()
     {
@@ -66,7 +66,9 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return Symfony\Component\HttpFoundation\Response
+     * @param string $view
+     * @param array $parameters
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function renderTemplate($view, array $parameters = array())
     {
@@ -74,7 +76,7 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Operator
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
      */
     protected function getOperator()
     {
@@ -85,7 +87,7 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * @return Symfony\Bundle\ZendBundle\Logger\Logger
+     * @return \Symfony\Bundle\ZendBundle\Logger\Logger
      */
     protected function getLogger()
     {
