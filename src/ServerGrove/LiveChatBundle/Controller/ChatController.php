@@ -204,6 +204,8 @@ class ChatController extends PublicController
 
                 return new RedirectResponse($this->generateUrl('sglc_chat_load', array(
                             'id' => $chatSession->getId())));
+            } else {
+                $this->getResponse()->setStatusCode(403);
             }
         }
 
