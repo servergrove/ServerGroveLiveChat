@@ -34,8 +34,7 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
      */
     public function loadUserByUsername($username)
     {
-        $operator = $this->findOneBy(array(
-                    'email' => $username));
+        $operator = $this->findOneBy(array('email' => $username));
         if (!$operator) {
             throw new UsernameNotFoundException('Invalid username');
         }
@@ -50,22 +49,33 @@ class OperatorRepository extends DocumentRepository implements UserProviderInter
 
     public function closeOldLogins()
     {
-        $this->createQueryBuilder()->field('isOnline')->set(false)->field('isOnline')->equals(true)->field('updatedAt')->lt(new MongoDate(time() - 86400))->update()->getQuery()->execute();
+        $this->createQueryBuilder()
+                ->field('isOnline')->set(false)
+                ->field('isOnline')->equals(true)
+                ->field('updatedAt')->lt(new MongoDate(time() - 86400))
+                ->update()->getQuery()
+                ->execute();
     }
 
     public function supportsClass($class)
     {
-        return $class == 'Operator';
+        return 'Operator' == $class;
     }
 
-    /* (non-PHPdoc)
-     * @see Symfony\Component\Security\Core\User.UserProviderInterface::loadUser()
+    /**
+     * Refreshes the user for the account interface.
+     *
+     * It is up to the implementation if it decides to reload the user data
+     * from the database, or if it simply merges the passed User into the
+     * identity map of an entity manager.
+     *
+     * @throws UnsupportedUserException if the account is not supported
+     * @param UserInterface $user
+     *
+     * @return UserInterface
      */
-
-    public function loadUser(UserInterface $user)
+    function refreshUser(UserInterface $user)
     {
-        // TODO
+        // TODO: Implement refreshUser() method.
     }
-
-
 }
