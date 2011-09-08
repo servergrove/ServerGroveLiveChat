@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Cookie;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-class AdminControllerTest extends WebTestCase
+class AdminControllerTest extends ControllerTest
 {
 
     public function testIndex()
@@ -43,7 +43,7 @@ class AdminControllerTest extends WebTestCase
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
         $crawler = $client->request('GET', '/admin/sglivechat');
-        $this->assertTrue($client->getResponse()->isRedirect(), $client->getResponse()->getContent());
+        $this->assertTrue($client->getResponse()->isRedirect(), $this->getErrorMessage($client->getResponse()));
 
         $this->logout($client);
 
@@ -95,7 +95,7 @@ class AdminControllerTest extends WebTestCase
 
 
         $form = $crawler->selectButton('Submit')->form();
-        $newTitle = $form['cannedmessage[title]'] = 'New Title of canned message';
+        $newTitle = $form['canned_message[title]'] = 'New Title of canned message';
         $crawler = $client->submit($form);
 
         $this->assertPostRedirect($client);
@@ -125,8 +125,8 @@ class AdminControllerTest extends WebTestCase
 
 
         $form = $crawler->selectButton('Submit')->form();
-        $title = $form['cannedmessage[title]'] = 'Title of canned message';
-        $form['cannedmessage[content]'] = 'Content of canned message';
+        $title = $form['canned_message[title]'] = 'Title of canned message';
+        $form['canned_message[content]'] = 'Content of canned message';
         $crawler = $client->submit($form);
 
         $this->assertPostRedirect($client);
@@ -277,7 +277,7 @@ class AdminControllerTest extends WebTestCase
 
         $form = $crawler->selectButton('Submit')->form();
 
-        $form['operatordepartment[name]'] = 'Test Department';
+        $form['operator_department[name]'] = 'Test Department';
 
         $crawler = $client->submit($form);
 
@@ -326,7 +326,7 @@ class AdminControllerTest extends WebTestCase
 
         $form = $crawler->selectButton('Submit')->form();
 
-        $form['operatordepartment[name]'] = 'My test department';
+        $form['operator_department[name]'] = 'My test department';
 
         $crawler = $client->submit($form);
 
@@ -407,7 +407,7 @@ class AdminControllerTest extends WebTestCase
 
     private function assertGetSuccessful(Client $client)
     {
-        $this->assertTrue($client->getResponse()->isOk(), 'GET response not successful. Code: ' . $client->getResponse()->getStatusCode().'_'.$client->getResponse()->getContent());
+        $this->assertTrue($client->getResponse()->isOk(), 'GET response not successful. Code: ' . $client->getResponse()->getStatusCode().'_'.$this->getErrorMessage($client->getResponse()));
     }
 
     private function assertPostRedirect(Client $client)
@@ -418,8 +418,8 @@ class AdminControllerTest extends WebTestCase
 
     private function fillLoginFormFields($form)
     {
-        $form['operatorlogin[email]'] = 'ismael@servergrove.com';
-        $form['operatorlogin[passwd]'] = 'ismapass';
+        $form['login[email]'] = 'ismael@servergrove.com';
+        $form['login[passwd]'] = 'ismapass';
     }
 
     private function getDocumentManager()
