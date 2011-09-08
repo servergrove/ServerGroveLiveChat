@@ -2,12 +2,12 @@
 
 namespace ServerGrove\LiveChatBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\Command;
+use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 
 /**
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-abstract class BaseCommand extends Command
+abstract class BaseCommand extends ContainerAwareCommand
 {
 
     /**
@@ -15,7 +15,7 @@ abstract class BaseCommand extends Command
      */
     protected function getDocumentManager()
     {
-        return $this->container->get('doctrine.odm.mongodb.document_manager');
+        return $this->getContainer()->get('doctrine.odm.mongodb.document_manager');
     }
 
     protected function getOperatorRepository()
