@@ -21,6 +21,10 @@ class APCCacheManagerTest extends ManagerTestAbstract
             $this->markTestSkipped('APC not found');
         }
 
+        if (!ini_get('apc.enable_cli')) {
+            $this->markTestSkipped('APC not enabled for cli');
+        }
+
         $this->setCacheEngineName('apc');
     }
 
