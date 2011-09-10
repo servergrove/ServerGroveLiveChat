@@ -4,7 +4,6 @@ namespace ServerGrove\LiveChatBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 
@@ -16,50 +15,19 @@ use Symfony\Component\Config\FileLocator;
 class ServerGroveLiveChatExtension extends Extension
 {
 
-    public function load(array $config, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
-        $this->loadDefaults($config, $container);
-    }
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
 
-    /**
-     * Loads the default configuration.
-     *
-     * @param array $config An array of configuration settings
-     * @param ContainerBuilder $container A ContainerBuilder instance
-     */
-    protected function loadDefaults(array $config, ContainerBuilder $container)
-    {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('livechat.xml');
 
-        // Allow these application configuration options to override the defaults
-        $options = array(
-            'cache_engine');
-        foreach ($options as $key) {
-            if (isset($config[$key])) {
-                $container->setParameter('livechat.' . $key, $config[$key]);
-            }
-
-            $nKey = str_replace('_', '-', $key);
-            if (isset($config[$nKey])) {
-                $container->setParameter('livechat.' . $key, $config[$nKey]);
-            }
-        }
-
-        $engine = $container->getParameter('livechat.cache_engine');
-
-        $container->setAlias('livechat.cache.default_engine', 'livechat.cache.engine.' . $engine);
-
+        $this->loadCacheEngine($config, $container);
     }
 
-    public function getNamespace()
+    private function loadCacheEngine(array $config, ContainerBuilder $container)
     {
-        return 'http://symfony.com/schema/dic/symfony';
+        $container->setAlias('livechat.cache.default_engine', 'livechat.cache.engine.' . $config['cache_engine']);
     }
-
-    public function getXsdValidationBasePath()
-    {
-        return null;
-    }
-
 }
