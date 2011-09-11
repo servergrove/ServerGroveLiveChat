@@ -6,7 +6,7 @@ use Doctrine\ODM\MongoDB\Mapping\Date;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
- * Description of Message
+ * Represents a User message
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\EmbeddedDocument
@@ -15,31 +15,35 @@ class Message
 {
 
     /**
-     * @var integer
+     * @var Integer
      * @MongoDB\Id
      */
     private $id;
+
     /**
      * @var User
      * @MongoDB\ReferenceOne(
-     * 	discriminatorMap={
-     * 		"operator"="Operator",
-     * 		"visitor"="Visitor",
-     * 		"admin"="Administrator"
-     * 	}
+     *     discriminatorMap={
+     *         "operator"="Operator",
+     *         "visitor"="Visitor",
+     *         "admin"="Administrator"
+     *     }
      * )
      */
     private $sender;
+
     /**
      * @var Session
      * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Session")
      */
     private $session;
+
     /**
      * @var string
      * @MongoDB\Date
      */
     private $createdAt;
+
     /**
      * @var string
      * @MongoDB\String
@@ -55,7 +59,7 @@ class Message
     }
 
     /**
-     * @return the $id
+     * @return Integer
      */
     public function getId()
     {
@@ -63,7 +67,7 @@ class Message
     }
 
     /**
-     * @return the $sender
+     * @return \ServerGrove\LiveChatBundle\Document\User
      */
     public function getSender()
     {
@@ -71,13 +75,16 @@ class Message
     }
 
     /**
-     * @param User $sender
+     * @param \ServerGrove\LiveChatBundle\Document\User $sender
      */
     public function setSender($sender)
     {
         $this->sender = $sender;
     }
 
+    /**
+     * @return Integer
+     */
     public function getSenderId()
     {
         if ($this->getSender()) {
@@ -87,27 +94,37 @@ class Message
         return null;
     }
 
+    /**
+     * @return string
+     */
     public function getSenderName()
     {
-        if (!$this->getSender()->getId()) {
+        $name = $this->getSender()->getName();
+        if (empty($name)) {
             return $this->isOperator() ? 'Operator' : 'Visitor';
         }
 
-        return $this->getSender()->getName();
+        return $name;
     }
 
+    /**
+     * @return bool
+     */
     public function isOperator()
     {
         return $this->getSender() instanceof Operator;
     }
 
+    /**
+     * @return bool
+     */
     public function isVisitor()
     {
         return $this->getSender() instanceof Visitor;
     }
 
     /**
-     * @return the $session
+     * @return \ServerGrove\LiveChatBundle\Document\Session
      */
     public function getSession()
     {
@@ -115,7 +132,7 @@ class Message
     }
 
     /**
-     * @param Integer $session
+     * @param \ServerGrove\LiveChatBundle\Document\Session $session
      */
     public function setSession($session)
     {
@@ -123,7 +140,7 @@ class Message
     }
 
     /**
-     * @return the $createdAt
+     * @return string
      */
     public function getCreatedAt()
     {
@@ -139,7 +156,7 @@ class Message
     }
 
     /**
-     * @return the $content
+     * @return string
      */
     public function getContent()
     {
