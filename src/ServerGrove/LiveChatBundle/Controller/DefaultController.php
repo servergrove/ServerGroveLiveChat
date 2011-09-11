@@ -8,6 +8,6 @@ class DefaultController extends Controller
 {
     public function indexAction()
     {
-        $this->redirect($this->generateUrl('sglc_chat_homepage'));
+        return $this->redirect($this->generateUrl('sglc_chat_homepage'));
     }
 }
