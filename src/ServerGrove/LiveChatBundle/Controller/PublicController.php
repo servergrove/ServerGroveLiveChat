@@ -13,14 +13,8 @@ use ServerGrove\LiveChatBundle\Controller\BaseController;
  */
 abstract class PublicController extends BaseController
 {
-
-    /**
-     * @return \ServerGrove\LiveChatBundle\Document\VisitorRepository
-     */
-    protected function getVisitorRepository()
-    {
-        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visitor');
-    }
+    private $visit;
+    private $visitor;
 
     /**
      * @return \ServerGrove\LiveChatBundle\Document\Visitor
@@ -39,18 +33,10 @@ abstract class PublicController extends BaseController
         }
 
         if (!$this->getRequest()->cookies->has('vtrid') || $key != $visitor->getKey()) {
-            $this->getResponse()->headers->setCookie(new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
+            $this->get('livechat.cookies')->set('vtrid', new Cookie('vtrid', $visitor->getKey(), mktime(0, 0, 0, 12, 31, 2020), '/'));
         }
 
         return $visitor;
-    }
-
-    /**
-     * @return \ServerGrove\LiveChatBundle\Document\VisitRepository
-     */
-    protected function getVisitRepository()
-    {
-        return $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Visit');
     }
 
     /**
@@ -67,7 +53,7 @@ abstract class PublicController extends BaseController
         }
 
         if (!$this->getRequest()->cookies->has('vsid') || $key != $visit->getKey()) {
-            $this->getResponse()->headers->setCookie(new Cookie('vsid', $visit->getKey(), time() + 86400, '/'));
+            $this->get('livechat.cookies')->set('vsid', new Cookie('vsid', $visit->getKey(), time() + 86400, '/'));
         }
 
         return $visit;
@@ -96,11 +82,11 @@ abstract class PublicController extends BaseController
     protected function createVisitor()
     {
         return $this->getVisitorRepository()->create(
-                array(
-                    'agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'),
-                    'remoteAddr' => $this->getRequest()->getClientIp(),
-                    'languages' => implode(';', $this->getRequest()->getLanguages())
-                )
+            array(
+                 'agent' => $this->getRequest()->server->get('HTTP_USER_AGENT'),
+                 'remoteAddr' => $this->getRequest()->getClientIp(),
+                 'languages' => implode(';', $this->getRequest()->getLanguages())
+            )
         );
     }
 
