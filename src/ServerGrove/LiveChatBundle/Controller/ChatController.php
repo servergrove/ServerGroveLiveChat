@@ -328,7 +328,7 @@ class ChatController extends PublicController
             foreach ($messages as $message) {
                 $json['messages'][] = array(
                     'content' => $message->getContent(),
-                    'name' => $message->getSender()->getKind(),
+                    'name' => $message->getSender()->getName(),
                     'dt' => $message->getCreatedAt(),
                     'isOperator' => $message->getSender() instanceof Operator
                 );
@@ -336,7 +336,7 @@ class ChatController extends PublicController
 
             if ($this->theOtherMemberIsTyping($chatSession)) {
                 $user = $this->getUserForSession($chatSession);
-                $json['action'] = $chatSession->getOtherMember($user)->getKind() . ' is typing';
+                $json['action'] = $chatSession->getOtherMember($user)->getName() . ' is typing';
             }
 
             $user = $this->getUserForSession($chatSession);
