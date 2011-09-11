@@ -57,6 +57,10 @@ class SessionRepository extends DocumentRepository
                     'status' => array(
                         'id' => $chat->getStatusId(),
                         'name' => $chat->getStatus()
+                    ),
+                    'rating' => array(
+                        'grade' => $chat->getRating()->getGrade(),
+                        'comments' => $chat->getRating()->getComments()
                     )
                 );
             }, $this->getRequestedChats()->toArray());
