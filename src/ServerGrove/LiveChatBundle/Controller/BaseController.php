@@ -14,33 +14,28 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 /**
  * Chat's base controller
  *
+ * @method \ServerGrove\LiveChatBundle\Document\OperatorRepository getOperatorRepository
+ * @method \ServerGrove\LiveChatBundle\Document\Operator\DepartmentRepository getOperatorDepartmentRepository
+ * @method \ServerGrove\LiveChatBundle\Document\CannedMessageRepository getCannedMessageRepository
+ * @method \ServerGrove\LiveChatBundle\Document\SessionRepository getSessionRepository
+ * @method \ServerGrove\LiveChatBundle\Document\Operator\RatingRepository getRatingRepository
+ * @method \ServerGrove\LiveChatBundle\Document\VisitRepository getVisitRepository
+ * @method \ServerGrove\LiveChatBundle\Document\VisitorRepository getVisitorRepository
+ * @method \ServerGrove\LiveChatBundle\Document\VisitLinkRepository getVisitLinkRepository
+ *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
 abstract class BaseController extends Controller
 {
 
-    private $request, $response, $session, $dm;
+    private $request, $dm;
 
     /**
      * @return \Symfony\Component\HttpFoundation\Request
      */
     public function getRequest()
     {
-        if (is_null($this->request)) {
-            $this->request = $this->get('request');
-        }
-        return $this->request;
-    }
-
-    /**
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function getResponse()
-    {
-        if (is_null($this->response)) {
-            $this->response = new Response();
-        }
-        return $this->response;
+        return $this->get('request');
     }
 
     /**
@@ -48,10 +43,7 @@ abstract class BaseController extends Controller
      */
     public function getSessionStorage()
     {
-        if (is_null($this->session)) {
-            $this->session = $this->getRequest()->getSession();
-        }
-        return $this->session;
+        return $this->getRequest()->getSession();
     }
 
     /**
@@ -62,17 +54,21 @@ abstract class BaseController extends Controller
         if (is_null($this->dm)) {
             $this->dm = $this->get('doctrine.odm.mongodb.document_manager');
         }
+
         return $this->dm;
     }
 
-    /**
-     * @param string $view
-     * @param array $parameters
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function renderTemplate($view, array $parameters = array())
+    public function __call($name, $args)
     {
-        return $this->render($view, $parameters, $this->getResponse());
+        $out = null;
+        if (preg_match('/^get([\w]+)Repository$/', $name, $out)) {
+            $repository = $this->getDocumentManager()->getRepository(sprintf('ServerGroveLiveChatBundle:%s', $out[1]));
+            if ($repository instanceof \Doctrine\ODM\MongoDB\DocumentRepository) {
+                return $repository;
+            }
+        }
+
+        throw new \BadFunctionCallException(sprintf('Call to non existent function "%s->%s()"', get_class($this), $name));
     }
 
     /**
@@ -83,7 +79,8 @@ abstract class BaseController extends Controller
         if (!$this->getSessionStorage()->has('_operator')) {
             return null;
         }
-        return $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator', $this->getSessionStorage()->get('_operator'));
+
+        return $this->getOperatorRepository()->find($this->getSessionStorage()->get('_operator'));
     }
 
     /**
