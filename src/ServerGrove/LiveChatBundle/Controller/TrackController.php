@@ -7,7 +7,7 @@ use ServerGrove\LiveChatBundle\Document\VisitHit;
 use ServerGrove\LiveChatBundle\Controller\BaseController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use MongoDate;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Chat's tracker controller
@@ -19,10 +19,11 @@ class TrackController extends PublicController
 
     /**
      * @Route("/js/sglivechat-tracker", name="sglc_track_index")
+     * @Template
      */
     public function indexAction()
     {
-        return $this->renderTemplate('ServerGroveLiveChatBundle:Track:index.html.twig');
+        return array();
     }
 
     /**
@@ -30,9 +31,7 @@ class TrackController extends PublicController
      */
     public function apiAction()
     {
-        return array(
-            'hostname' => $this->getRequest()->server->get('HTTP_HOST')
-        );
+        return array('hostname' => $this->getRequest()->server->get('HTTP_HOST'));
     }
 
     /**
@@ -40,16 +39,17 @@ class TrackController extends PublicController
      */
     public function updateAction()
     {
-        $this->getResponse()->setContent('1');
-        $this->getResponse()->headers->set('Content-type', 'text/plain');
+        $response = new Response(1);
+        $response->headers->set('Content-type', 'text/plain');
+
         if ($this->getOperator()) {
-            return $this->getResponse();
+            return $response;
         }
 
         $visitor = $this->getVisitorByKey();
         $visit = $this->getVisitByKey($visitor);
 
-        $visit->setUpdatedAt(new MongoDate(time()));
+        $visit->setUpdatedAt(new \MongoDate(time()));
 
         if ('POST' == $this->getRequest()->getMethod()) {
             if ($this->getRequest()->request->has('lt')) {
@@ -68,12 +68,12 @@ class TrackController extends PublicController
 
         $remote = ($this->getRequest()->query->has('remote') && 1 == $this->getRequest()->get('remote'));
         if ($remote) {
-            $this->getResponse()->setContent('SGChatTracker.loadUpdater();');
-            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+            $response->setContent('SGChatTracker.loadUpdater();');
+            $response->headers->set('Content-type', 'text/javascript');
         }
 
         $firstRequest = 'POST' == $this->getRequest()->getMethod() || ($this->getRequest()->query->has('first') && 1 == $this->getRequest()->get('first'));
-        ;
+
         if ($firstRequest) {
             $hit = new VisitHit();
             $visit->addHit($hit);
@@ -85,7 +85,7 @@ class TrackController extends PublicController
             $this->getDocumentManager()->persist($hit);
             $this->getDocumentManager()->flush();
 
-            return $this->getResponse();
+            return $response;
         }
 
         $chats = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session')->getOpenInvitesForVisitor($visitor);
@@ -99,30 +99,29 @@ class TrackController extends PublicController
                 $this->getSessionStorage()->set('chat_invite', $chat->getId());
             }
 
-            $this->getResponse()->headers->set('Content-type', 'text/javascript');
+            $response->headers->set('Content-type', 'text/javascript');
 
-            return $this->renderTemplate('ServerGroveLiveChatBundle:Track:create-invite-box.js.twig', array(
-                'chat' => $chat));
+            return $this->renderTemplate('ServerGroveLiveChatBundle:Track:create-invite-box.js.twig', array('chat' => $chat));
         } else {
             if ($this->getSessionStorage()->get('chat_invite')) {
                 $this->getSessionStorage()->set('chat_invite', null);
 
-                $this->getResponse()->headers->set('Content-type', 'text/javascript');
-
-                return $this->renderTemplate('ServerGroveLiveChatBundle:Track:close-invite-box.js.twig');
+                return $this->render('ServerGroveLiveChatBundle:Track:close-invite-box.js.twig');
             }
         }
 
-        return $this->getResponse();
+        return $response;
     }
 
     /**
      * @Route("/js/sglivechat-tracker/status.{_format}", name="sglc_track_status", defaults={"_format"="html"})
+     * @Template
      */
     public function statusAction($_format)
     {
         $online = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Operator')->getOnlineOperatorsCount() > 0;
-        return $this->renderTemplate('ServerGroveLiveChatBundle:Track:status.' . $_format . '.twig', array('online' => $online));
+
+        return array('online' => $online);
     }
 
     /**
@@ -130,10 +129,9 @@ class TrackController extends PublicController
      */
     public function resetAction()
     {
-        $this->getResponse()->headers->setCookie(new Cookie('vtrid', null, mktime(0, 0, 0, 12, 31, 2020), '/'));
-        $this->getResponse()->headers->setCookie(new Cookie('vsid', null, mktime(0, 0, 0, 12, 31, 2020), '/'));
+        $this->get('livechat.cookies')->set(new Cookie('vtrid', null, mktime(0, 0, 0, 12, 31, 2020), '/'));
+        $this->get('livechat.cookies')->set(new Cookie('vsid', null, mktime(0, 0, 0, 12, 31, 2020), '/'));
 
-        //return $this->forward('ServerGroveLiveChatBundle:Track:update'); # @todo Forward creates new response, so the cookies are erased
         return $this->updateAction();
     }
 
