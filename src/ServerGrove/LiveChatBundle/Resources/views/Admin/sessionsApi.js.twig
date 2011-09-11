@@ -230,6 +230,14 @@ var SessionToolkit = {
 				
                 var actionsCell = document.createElement('td');
                 var newWindowAttributes = 'width=700,height=600,toolbar=no,location=no';
+
+                if (item.status.id == '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED")}}') {
+                    for (var i = 1; i <= item.rating.grade; i++) {
+                        jQuery(actionsCell).append('*');
+                    }
+                    jQuery(actionsCell).append(" - " + item.rating.comments);
+                }
+
                 if (typeof(item.operator.id) == 'undefined' && (item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED")}}' && item.status.id != '{{constant("ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED")}}')) {
                     var _link1 = document.createElement('a');
                     jQuery(_link1).click(function() {

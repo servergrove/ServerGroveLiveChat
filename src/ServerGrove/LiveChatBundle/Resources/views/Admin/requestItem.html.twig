@@ -12,6 +12,9 @@
     <td>&nbsp;</td>
     {% endif %}
     <td>
+        {% if chat.getStatusId() is constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
+        {% for i in 1..chat.getRating().getGrade() %}*{% endfor %}&nbsp;-&nbsp;{{ chat.getRating().getComments()}}
+        {% endif %}
         {% if not chat.getOperator() and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CANCELED') and chat.getStatusId() is not constant('ServerGrove\\\LiveChatBundle\\Document\\Session::STATUS_CLOSED') %}
         <a href="javascript:void(0);" onclick="window.open('{{path('sglc_chat_accept', {'id': chat.getId()})}}','livechat{{chat.getId()}}','width=700,height=575,toolbar=no,location=no');">
             Accept
