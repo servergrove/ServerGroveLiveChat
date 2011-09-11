@@ -2,10 +2,10 @@
 
 namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use ServerGrove\LiveChatBundle\Tests\TestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-abstract class ControllerTest extends WebTestCase
+abstract class ControllerTest extends TestCase
 {
     /**
      * @param \Symfony\Component\HttpFoundation\Response $response
