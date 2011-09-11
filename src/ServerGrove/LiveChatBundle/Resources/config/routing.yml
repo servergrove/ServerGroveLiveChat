@@ -10,7 +10,6 @@ sglc_tracker:
   resource: "@ServerGroveLiveChatBundle/Controller/TrackController.php"
   type:     annotation
 
-
-homepage:
-  pattern:  /
-  defaults: { _controller: ServerGroveLiveChatBundle:Default:index }
+sglc_default:
+  resource: "@ServerGroveLiveChatBundle/Controller/DefaultController.php"
+  type:     annotation
