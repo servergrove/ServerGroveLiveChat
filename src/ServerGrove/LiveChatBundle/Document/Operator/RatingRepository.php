@@ -1,12 +1,12 @@
 <?php
 
-namespace ServerGrove\LiveChatBundle\Document;
+namespace ServerGrove\LiveChatBundle\Document\Operator;
 
 use ServerGrove\LiveChatBundle\Document\DocumentRepository;
 use ServerGrove\LiveChatBundle\Document\Operator;
 
 /**
- * Description of RatingRepository
+ * Rating repository class
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
