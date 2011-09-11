@@ -2,6 +2,7 @@
 
 namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
+use ServerGrove\LiveChatBundle\Document;
 use ServerGrove\LiveChatBundle\Document\CannedMessage;
 use ServerGrove\LiveChatBundle\Document\Operator;
 use ServerGrove\LiveChatBundle\Document\Operator\Department;
@@ -17,162 +18,146 @@ use Symfony\Component\HttpFoundation\Cookie;
 class AdminControllerTest extends ControllerTest
 {
 
-    public function testIndex()
+    /**
+     * @var \Symfony\Bundle\FrameworkBundle\Client
+     */
+    private $client;
+
+    public function testIndexAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat');
 
-        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/admin/sglivechat');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Please enter your e-mail and password to access the admin panel")')->count(), 'HTML not contains Login description');
 
         # Test Login
         $form = $crawler->selectButton('Login')->form();
         $this->fillLoginFormFields($form);
-        $client->submit($form);
+        $this->client->submit($form);
 
-        $this->assertTrue($client->getResponse()->isRedirection(), 'Is not redirecting');
+        $this->assertTrue($this->client->getResponse()->isRedirection(), 'Is not redirecting');
 
-        $this->logout($client);
+        $this->logout();
 
-        $this->login($client);
+        $this->login();
 
-        $client->followRedirects(false);
+        $this->client->followRedirects(false);
 
-        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/admin/sglivechat');
-        $this->assertTrue($client->getResponse()->isRedirect(), $this->getErrorMessage($client->getResponse()));
+        $crawler = $this->client->request('GET', '/admin/sglivechat');
+        $this->assertTrue($this->client->getResponse()->isRedirect(), $this->getErrorMessage($this->client->getResponse()));
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
-    public function testCannedMessages()
+    public function testCannedMessagesAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-messages');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/canned-messages');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Canned Messages list")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
-    public function testEditCannedMessage()
+    public function testEditCannedMessageAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
-
-        $cannedMessage = new CannedMessage();
-        $cannedMessage->setTitle('Canned message title');
-        $cannedMessage->setContent('Canned message content');
-
-        /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
+        $cannedMessage = $this->getTestCannedMessage();
         $dm = $this->getDocumentManager();
-        $dm->persist($cannedMessage);
         $dm->flush();
 
-        $cannedMessageId = $cannedMessage->getId();
-        $dm->detach($cannedMessage);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message/' . $cannedMessage->getId());
 
-        unset($cannedMessage);
-
-        $crawler = $client->request('GET', '/admin/sglivechat/canned-message/' . $cannedMessageId);
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit canned message")')->count());
-
 
         $form = $crawler->selectButton('Submit')->form();
         $newTitle = $form['canned_message[title]'] = 'New Title of canned message';
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
-        $cannedMessage = $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->find($cannedMessageId);
+        $dm->refresh($cannedMessage);
         $this->assertEquals($newTitle, $cannedMessage->getTitle());
 
         $dm->remove($cannedMessage);
         $dm->flush();
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
     public function testNewCannedMessage()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/canned-message');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
-
 
         $form = $crawler->selectButton('Submit')->form();
         $title = $form['canned_message[title]'] = 'Title of canned message';
         $form['canned_message[content]'] = 'Content of canned message';
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
         $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Unexistent canned message after form submit');
 
-        $dm->createQueryBuilder('ServerGroveLiveChatBundle:CannedMessage')->remove()->field('title')->equals($title)->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:CannedMessage')
+                ->remove()
+                ->field('title')
+                ->equals($title)
+                ->getQuery()
+                ->execute();
 
         $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:CannedMessage')->findBy(array('title' => $title))->count(), 'Canned message still exists after removal');
 
         $dm->flush();
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
-    public function testOperators()
+    public function testOperatorsAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operators');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/operators');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Operators list")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
     public function testNewOperator()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operator');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/operator');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new operator")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
@@ -181,22 +166,27 @@ class AdminControllerTest extends ControllerTest
         $form['operator[email][first]'] = $form['operator[email][second]'] = 'john@doe.com';
         $form['operator[passwd][first]'] = $form['operator[passwd][second]'] = 'johnpass';
 
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
         $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'Unexistent operator after form submit');
 
-        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator')->remove()->field('email')->equals('john@doe.com')->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator')
+                ->remove()
+                ->field('email')
+                ->equals('john@doe.com')
+                ->getQuery()
+                ->execute();
         $dm->flush();
 
         $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findBy(array('email' => 'john@doe.com'))->count(), 'operator still exists after removal');
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($dm, $client, $crawler);
+        unset($dm, $crawler);
     }
 
     public function testEditOperator()
@@ -212,93 +202,90 @@ class AdminControllerTest extends ControllerTest
         $dm->persist($operator);
         $dm->flush();
 
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
-
-        $operatorId = $operator->getId();
-
-        $dm->detach($operator);
-
-        unset($operator);
-
-        $crawler = $client->request('GET', '/admin/sglivechat/operator/' . $operatorId);
-        $this->assertGetSuccessful($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/' . $operator->getId());
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit operator ")')->count());
-
 
         $form = $crawler->selectButton('Submit')->form();
 
         $form['operator[name]'] = 'John J. Doe';
 
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
-        $operator = $dm->getRepository('ServerGroveLiveChatBundle:Operator')->find($operatorId);
+        $dm->refresh($operator);
         $this->assertEquals('John J. Doe', $operator->getName());
 
         $dm->remove($operator);
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($dm, $operator, $client, $crawler);
+        unset($dm, $operator, $crawler);
     }
 
-    public function testDepartments()
+    /**
+     * @return void
+     */
+    public function testOperatorDepartmentsAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/departments');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/operator/departments');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Departments list")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
     public function testNewOperatorDepartment()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/department');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/operator/department');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new department")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
 
         $form['operator_department[name]'] = 'Test Department';
 
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
         $this->assertGreaterThan(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator\\Department')->findBy(array('name' => 'Test Department'))->count(), 'Unexistent department after form submit');
 
-        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator:Department')->remove()->field('name')->equals('Test Department')->getQuery()->execute();
+        $dm->createQueryBuilder('ServerGroveLiveChatBundle:Operator:Department')
+                ->remove()
+                ->field('name')
+                ->equals('Test Department')
+                ->getQuery()
+                ->execute();
         $dm->flush();
 
         $this->assertEquals(0, $dm->getRepository('ServerGroveLiveChatBundle:Operator:Department')->findBy(array('name' => 'Test Department'))->count(), 'Department still exists after removal');
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($dm, $operator, $client, $crawler);
+        unset($dm, $operator, $crawler);
     }
 
     public function testEditOperatorDepartment()
     {
+        $this->login();
+
         /* @var $dm Doctrine\ODM\MongoDB\DocumentManager */
         $dm = $this->getDocumentManager();
 
@@ -308,173 +295,205 @@ class AdminControllerTest extends ControllerTest
         $dm->persist($department);
         $dm->flush();
 
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
-
-        $this->login($client);
-
-        $departmentId = $department->getId();
-
-        $dm->detach($department);
-
-        unset($department);
-
-        $crawler = $client->request('GET', '/admin/sglivechat/operator/department/' . $departmentId);
-        $this->assertGetSuccessful($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/department/' . $department->getId());
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit department ")')->count());
-
 
         $form = $crawler->selectButton('Submit')->form();
 
         $form['operator_department[name]'] = 'My test department';
 
-        $crawler = $client->submit($form);
+        $crawler = $this->client->submit($form);
 
-        $this->assertPostRedirect($client);
+        $this->assertPostRedirect($this->client);
 
-        $department = $dm->getRepository('ServerGroveLiveChatBundle:Operator\\Department')->find($departmentId);
+        $dm->refresh($department);
         $this->assertEquals('My test department', $department->getName());
 
         $dm->remove($department);
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($dm, $operator, $client, $crawler);
+        unset($dm, $operator, $crawler);
     }
 
-    public function testSessions()
+    public function testSessionsAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/console/sessions');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/console/sessions');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Current Sessions:")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
-    public function testVisitors()
+    public function testVisitorsAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/visitors');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/visitors');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visitors list")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
     }
 
-    public function testVisits()
+    public function testVisitsAction()
     {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = $this->createClient();
+        $this->login();
 
-        $this->login($client);
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/visits');
 
-        $crawler = $client->request('GET', '/admin/sglivechat/visits');
-
-        $this->assertGetSuccessful($client);
+        $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visits list")')->count());
 
-        $this->logout($client);
+        $this->logout();
 
-        unset($client, $crawler);
+        unset($crawler);
+    }
+
+    public function testCannedMessageAction()
+    {
+        $this->login();
+
+        $this->client->request('GET', '/admin/sglivechat/canned-message');
+        $this->assertGetSuccessful();
+
+        $this->logout();
+    }
+
+
+    public function testChatSessionAction()
+    {
+        $chatSession = $this->getTestSession();
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/chat-session/' . $chatSession->getId());
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testChatSessionsAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/chat-sessions');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testCloseChatAction()
+    {
+        $dm = $this->getDocumentManager();
+        $chatSession = $this->getTestSession();
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/close/' . $chatSession->getId());
+        $this->assertTrue($this->client->getResponse()->isRedirect());
+        $dm->refresh($chatSession);
+        $this->assertEquals(Document\Session::STATUS_CLOSED, $chatSession->getStatusId());
+        $this->logout();
+    }
+
+    public function testCurrentVisitsAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/current-visits.json');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testLoginAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/login');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testRequestedChatsAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/requested-chats');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testRequestsAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/sessions');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testSessionsServiceAction()
+    {
+        $this->login();
+        $this->client->request('GET', '/admin/sglivechat/console/sessions-service.json');
+        $this->assertGetSuccessful();
+        $this->logout();
+    }
+
+    public function testVisitorAction()
+    {
+        $this->login();
+        $visitor = $this->getTestVisitor();
+        $this->getDocumentManager()->flush();
+        $this->client->request('GET', '/admin/sglivechat/visitor/' . $visitor->getId());
+        $this->assertGetSuccessful();
+        $this->logout();
     }
 
     protected function setUp()
     {
         parent::setUp();
-        $this->loadFixtures();
+        $this->client = static::createClient();
     }
 
-    protected function tearDown()
+    private function assertGetSuccessful()
     {
-        $this->unloadFixtures();
-        parent::tearDown();
+        $this->assertTrue($this->client->getResponse()->isOk(), 'GET response not successful. Code: ' . $this->client->getResponse()->getStatusCode() . '_' . $this->getErrorMessage($this->client->getResponse()));
     }
 
-    private function assertGetSuccessful(Client $client)
+    private function assertPostRedirect()
     {
-        $this->assertTrue($client->getResponse()->isOk(), 'GET response not successful. Code: ' . $client->getResponse()->getStatusCode().'_'.$this->getErrorMessage($client->getResponse()));
-    }
-
-    private function assertPostRedirect(Client $client)
-    {
-        $this->assertEquals('POST', $client->getRequest()->getMethod(), 'Request type is not POST');
-        $this->assertTrue($client->getResponse()->isRedirect(), 'POST request is redirecting');
+        $this->assertEquals('POST', $this->client->getRequest()->getMethod(), 'Request type is not POST');
+        $this->assertTrue($this->client->getResponse()->isRedirect(), 'POST request is redirecting');
     }
 
     private function fillLoginFormFields($form)
     {
-        $form['login[email]'] = 'ismael@servergrove.com';
+        $operator = $this->getTestOperator();
+        $form['login[email]'] = $operator->getEmail();
         $form['login[passwd]'] = 'ismapass';
     }
 
-    private function getDocumentManager()
+    private function login()
     {
-        return $this->getNewKernel()->getContainer()->get('doctrine.odm.mongodb.document_manager');
-    }
+        $crawler = $this->client->request('GET', '/admin/sglivechat');
 
-    private function getNewKernel()
-    {
-        $kernel = $this->createKernel(array());
-        $kernel->boot();
-
-        return $kernel;
-    }
-
-    private function loadFixtures()
-    {
-        $dm = $this->getDocumentManager();
-
-        $operator = new Operator();
-        $operator->setName('Ismael Ambrosi');
-        $operator->setEmail('ismael@servergrove.com');
-        $operator->setPasswd('ismapass');
-
-        $dm->persist($operator);
-        $dm->flush();
-    }
-
-    private function login(Client $client)
-    {
-        $crawler = $client->request('GET', '/admin/sglivechat');
-
-        if ($client->getResponse()->isSuccessful()) {
+        if ($this->client->getResponse()->isSuccessful()) {
             $form = $crawler->selectButton('Login')->form();
             $this->fillLoginFormFields($form);
 
-            return $client->submit($form);
+            return $this->client->submit($form);
         }
 
         return false;
     }
 
-    private function logout(Client $client)
+    private function logout()
     {
-        return $client->request('GET', '/admin/sglivechat/logout');
-    }
-
-    private function unloadFixtures()
-    {
-        $dm = $this->getDocumentManager();
-
-        $operator = $dm->getRepository('ServerGroveLiveChatBundle:Operator')->findOneBy(array('email' => 'ismael@servergrove.com'));
-
-        $dm->remove($operator);
-        $dm->flush();
+        return $this->client->request('GET', '/admin/sglivechat/logout');
     }
 
 }
