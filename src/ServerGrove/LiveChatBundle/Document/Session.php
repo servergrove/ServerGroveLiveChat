@@ -5,7 +5,7 @@ namespace ServerGrove\LiveChatBundle\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 
 /**
- * Description of Session
+ * Represents a chat session
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
@@ -26,80 +26,98 @@ class Session
     const STATUS_INVITE = 5;
 
     private static $statuses = array(
-        1 => 'Waiting',
-        2 => 'In Progress',
-        3 => 'Closed',
-        4 => 'Canceled',
-        5 => 'Invite');
+        self::STATUS_WAITING => 'Waiting',
+        self::STATUS_IN_PROGRESS => 'In Progress',
+        self::STATUS_CLOSED => 'Closed',
+        self::STATUS_CANCELED => 'Canceled',
+        self::STATUS_INVITE => 'Invite'
+    );
 
+    /**
+     * Returns a string representation of the status
+     * @return string
+     */
     public function getStatus()
     {
         return self::$statuses[$this->getStatusId()];
     }
 
     /**
-     * @var integer
+     * @var Integer
      * @MongoDB\Id
      */
     private $id;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $sessionId;
+
     /**
      * @var string
      * @MongoDB\Date
      */
     private $createdAt;
+
     /**
      * @var string
      * @MongoDB\Date
      */
     private $updatedAt;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $remoteAddr;
+
     /**
-     * @var Operator
+     * @var \ServerGrove\LiveChatBundle\Document\Operator
      * @MongoDB\ReferenceOne(targetDocument="Visitor")
      */
     private $visitor;
+
     /**
-     * @var Operator
+     * @var \ServerGrove\LiveChatBundle\Document\Operator
      * @MongoDB\ReferenceOne(targetDocument="Operator")
      */
     private $operator;
+
     /**
-     * @var Operator
+     * @var \ServerGrove\LiveChatBundle\Document\Operator
      * @MongoDB\ReferenceOne(targetDocument="Visit")
      */
     private $visit;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $question;
+
     /**
-     * @var integer
+     * @var Integer
      * @MongoDB\Field(type="int")
      */
     private $statusId;
+
     /**
-     * @var ChatMessage[]
+     * @var array
      * @MongoDB\EmbedMany(targetDocument="Message")
      */
     private $messages = array();
+
     /**
-     * @var ServerGrove\LiveChatBundle\Document\Operator\Rating
+     * @var \ServerGrove\LiveChatBundle\Document\Operator\Rating
      * @MongoDB\ReferenceOne(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
     private $rating;
 
     /**
-     * @param Visit $visit
+     * Creates a new instance of a chat session
+     *
+     * @param \ServerGrove\LiveChatBundle\Document\Visit $visit
      * @param string $question
      * @param int $status
      * @return Session
@@ -125,7 +143,7 @@ class Session
     /**
      * @MongoDB\PrePersist
      */
-    public function registerFirstMessage()
+    public function registerCreatedDate()
     {
         $this->setCreatedAt(date('Y-m-d H:i:s'));
         $this->registerUpdatedDate();
@@ -142,7 +160,7 @@ class Session
     /**
      * @MongoDB\PrePersist
      */
-    public function registerCreatedDate()
+    public function registerFirstMessage()
     {
         $question = $this->getQuestion();
         if (!empty($question) && $this->getVisitor()) {
@@ -150,6 +168,11 @@ class Session
         }
     }
 
+    /**
+     * @param $content
+     * @param \ServerGrove\LiveChatBundle\Document\User $sender
+     * @return void
+     */
     public function addChatMessage($content, User $sender)
     {
         $m = new Message();
@@ -159,28 +182,46 @@ class Session
         $this->messages[] = $m;
     }
 
+    /**
+     * Starts a chat session
+     *
+     * @return void
+     */
     public function start()
     {
         $this->setStatusId(self::STATUS_IN_PROGRESS);
     }
 
+    /**
+     * Closes a chat session
+     *
+     * @return void
+     */
     public function close()
     {
         $this->setStatusId(self::STATUS_CLOSED);
     }
 
+    /**
+     * Cancel a chat session
+     *
+     * @return void
+     */
     public function cancel()
     {
         $this->setStatusId(self::STATUS_CANCELED);
     }
 
+    /**
+     * @return array
+     */
     public function getMessages()
     {
         return $this->messages;
     }
 
     /**
-     * @return string $sessionId
+     * @return string
      */
     public function getSessionId()
     {
@@ -197,7 +238,7 @@ class Session
     }
 
     /**
-     * @return string $createdAt
+     * @return string
      */
     public function getCreatedAt()
     {
@@ -214,7 +255,7 @@ class Session
     }
 
     /**
-     * @return string $updatedAt
+     * @return string
      */
     public function getUpdatedAt()
     {
@@ -248,7 +289,7 @@ class Session
     }
 
     /**
-     * @return Visitor $visitor
+     * @return \ServerGrove\LiveChatBundle\Document\Visitor $visitor
      */
     public function getVisitor()
     {
@@ -256,7 +297,7 @@ class Session
     }
 
     /**
-     * @param Visitor $visitorId
+     * @param \ServerGrove\LiveChatBundle\Document\Visitor $visitor
      * @return void
      */
     public function setVisitor($visitor)
@@ -265,7 +306,7 @@ class Session
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Operator
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
      */
     public function getOperator()
     {
@@ -273,7 +314,7 @@ class Session
     }
 
     /**
-     * @param ServerGrove\LiveChatBundle\Document\Operator $operator
+     * @param \ServerGrove\LiveChatBundle\Document\Operator $operator
      * @return void
      */
     public function setOperator($operator)
@@ -281,6 +322,10 @@ class Session
         $this->operator = $operator;
     }
 
+    /**
+     * @param \ServerGrove\LiveChatBundle\Document\User $user
+     * @return \ServerGrove\LiveChatBundle\Document\User
+     */
     public function getOtherMember(User $user)
     {
         if ($user->getKind() == 'Operator') {
@@ -291,7 +336,7 @@ class Session
     }
 
     /**
-     * @return Visit $visit
+     * @return \ServerGrove\LiveChatBundle\Document\Visit $visit
      */
     public function getVisit()
     {
@@ -299,7 +344,7 @@ class Session
     }
 
     /**
-     * @param Visit $visit
+     * @param \ServerGrove\LiveChatBundle\Document\Visit $visit
      * @return void
      */
     public function setVisit($visit)
@@ -307,18 +352,25 @@ class Session
         $this->visit = $visit;
     }
 
+    /**
+     * @return string
+     */
     public function getQuestion()
     {
         return $this->question;
     }
 
+    /**
+     * @param string $question
+     * @return void
+     */
     public function setQuestion($question)
     {
         $this->question = $question;
     }
 
     /**
-     * @return integer $statusId
+     * @return Integer
      */
     public function getStatusId()
     {
@@ -326,7 +378,7 @@ class Session
     }
 
     /**
-     * @param integer $statusId
+     * @param Integer $statusId
      * @return void
      */
     public function setStatusId($statusId)
@@ -335,7 +387,7 @@ class Session
     }
 
     /**
-     * @return integer $id
+     * @return Integer
      */
     public function getId()
     {
@@ -343,21 +395,19 @@ class Session
     }
 
     /**
-     * @return ServerGrove\LiveChatBundle\Document\Rating
+     * @return \ServerGrove\LiveChatBundle\Document\Operator\Rating
      */
     public function getRating()
     {
         if (!$this->rating) {
-            $this->rating = new Operator\Rating();
-            $this->rating->setOperator($this->getOperator());
-            $this->rating->setSession($this);
+            $this->rating = new Operator\Rating($this);
         }
 
         return $this->rating;
     }
 
     /**
-     * @param ServerGrove\LiveChatBundle\Document\Rating $rating
+     * @param \ServerGrove\LiveChatBundle\Document\Operator\Rating $rating
      * @return void
      */
     public function setRating($rating)

@@ -20,32 +20,37 @@ class Visitor extends User
      * @MongoDB\String
      */
     private $agent;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $key;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $remoteAddr;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $languages;
+
     /**
      * @MongoDB\ReferenceMany(targetDocument="Visit")
      */
     private $visits = array();
+
     /**
      * @MongoDB\ReferenceOne(targetDocument="Visit", mappedBy="visitor", sort={"createdAt"="desc"})
      */
     private $lastVisit;
 
     /**
-     * @return the $agent
+     * @return string
      */
     public function getAgent()
     {
@@ -61,7 +66,7 @@ class Visitor extends User
     }
 
     /**
-     * @return the $key
+     * @return string
      */
     public function getKey()
     {
@@ -77,7 +82,7 @@ class Visitor extends User
     }
 
     /**
-     * @return the $remoteAddr
+     * @return string
      */
     public function getRemoteAddr()
     {
@@ -85,7 +90,7 @@ class Visitor extends User
     }
 
     /**
-     * @return the $remoteAddr
+     * @return string
      */
     public function getHostname()
     {
@@ -101,7 +106,7 @@ class Visitor extends User
     }
 
     /**
-     * @return the $languages
+     * @return string
      */
     public function getLanguages()
     {
@@ -116,21 +121,34 @@ class Visitor extends User
         $this->languages = $languages;
     }
 
+    /**
+     * @return array
+     */
     public function getVisits()
     {
         return $this->visits;
     }
 
+    /**
+     * @param Visit $visit
+     * @return void
+     */
     public function addVisit(Visit $visit)
     {
         $this->visits[] = $visit;
     }
 
+    /**
+     * @return \ServerGrove\LiveChatBundle\Document\Visit;
+     */
     public function getLastVisit()
     {
         return $this->lastVisit;
     }
 
+    /**
+     * @return string
+     */
     public function getKind()
     {
         return 'Client';
