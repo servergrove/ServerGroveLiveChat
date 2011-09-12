@@ -54,7 +54,7 @@ Installation
 
 8. Launch launch administration interface and login with the administration information entered in step 6
 
-        http://livechat.example.com/admin/sglivechat
+        http://livechat.example.com/sglivechat/admin/
 
 9. Add the livechat button and status indicator to your website:
 
