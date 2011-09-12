@@ -367,8 +367,11 @@ class AdminControllerTest extends ControllerTest
     {
         $this->login();
 
-        $this->client->request('GET', '/admin/sglivechat/canned-message');
+        /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
+        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message');
+
         $this->assertGetSuccessful();
+        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
 
         $this->logout();
     }
