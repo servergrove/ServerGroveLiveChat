@@ -26,7 +26,7 @@ class AdminControllerTest extends ControllerTest
     public function testIndexAction()
     {
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_index'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Please enter your e-mail and password to access the admin panel")')->count(), 'HTML not contains Login description');
@@ -44,7 +44,7 @@ class AdminControllerTest extends ControllerTest
 
         $this->client->followRedirects(false);
 
-        $crawler = $this->client->request('GET', '/admin/sglivechat');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_index'));
         $this->assertTrue($this->client->getResponse()->isRedirect(), $this->getErrorMessage($this->client->getResponse()));
 
         $this->logout();
@@ -57,7 +57,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-messages');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_messages'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Canned Messages list")')->count());
@@ -76,7 +76,7 @@ class AdminControllerTest extends ControllerTest
         $dm->flush();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message/' . $cannedMessage->getId());
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message_edit', array('id' => $cannedMessage->getId())));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit canned message")')->count());
@@ -103,7 +103,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
@@ -140,7 +140,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operators');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operators'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Operators list")')->count());
@@ -155,7 +155,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operator');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new operator")')->count());
@@ -205,7 +205,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/' . $operator->getId());
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_edit', array('id' => $operator->getId())));
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit operator ")')->count());
 
@@ -235,7 +235,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/departments');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_departments'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Departments list")')->count());
@@ -250,7 +250,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/department');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_department'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new department")')->count());
@@ -296,7 +296,7 @@ class AdminControllerTest extends ControllerTest
         $dm->flush();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/operator/department/' . $department->getId());
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_department_edit', array('id' => $department->getId())));
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit department ")')->count());
 
@@ -323,7 +323,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/console/sessions');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_console_sessions'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Current Sessions:")')->count());
@@ -338,7 +338,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/visitors');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_visitors'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visitors list")')->count());
@@ -353,7 +353,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/visits');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_visits'));
 
         $this->assertGetSuccessful($this->client);
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Visits list")')->count());
@@ -368,7 +368,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $this->client->request('GET', '/admin/sglivechat/canned-message');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message'));
 
         $this->assertGetSuccessful();
         $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
@@ -381,7 +381,7 @@ class AdminControllerTest extends ControllerTest
     {
         $chatSession = $this->getTestSession();
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/chat-session/' . $chatSession->getId());
+        $this->client->request('GET', $this->getUrl('sglc_admin_chat_session', array('id' => $chatSession->getId())));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -389,7 +389,7 @@ class AdminControllerTest extends ControllerTest
     public function testChatSessionsAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/chat-sessions');
+        $this->client->request('GET', $this->getUrl('sglc_admin_chat_sessions'));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -399,7 +399,7 @@ class AdminControllerTest extends ControllerTest
         $dm = $this->getDocumentManager();
         $chatSession = $this->getTestSession();
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/close/' . $chatSession->getId());
+        $this->client->request('GET', $this->getUrl('sglc_admin_console_close', array('id' => $chatSession->getId())));
         $this->assertTrue($this->client->getResponse()->isRedirect());
         $dm->refresh($chatSession);
         $this->assertEquals(Document\Session::STATUS_CLOSED, $chatSession->getStatusId());
@@ -409,7 +409,7 @@ class AdminControllerTest extends ControllerTest
     public function testCurrentVisitsAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/current-visits.json');
+        $this->client->request('GET', $this->getUrl('sglc_admin_console_current_visits', array('_format' => 'json')));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -417,7 +417,7 @@ class AdminControllerTest extends ControllerTest
     public function testLoginAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/login');
+        $this->client->request('GET', $this->getUrl('_security_login'));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -425,7 +425,7 @@ class AdminControllerTest extends ControllerTest
     public function testRequestedChatsAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/requested-chats');
+        $this->client->request('GET', $this->getUrl('sglc_admin_console_requested_chats', array('_format' => 'json')));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -433,7 +433,7 @@ class AdminControllerTest extends ControllerTest
     public function testRequestsAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/sessions');
+        $this->client->request('GET', $this->getUrl('sglc_admin_console_sessions'));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -441,7 +441,7 @@ class AdminControllerTest extends ControllerTest
     public function testSessionsServiceAction()
     {
         $this->login();
-        $this->client->request('GET', '/admin/sglivechat/console/sessions-service.json');
+        $this->client->request('GET', $this->getUrl('sglc_admin_console_sessions_service'));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -451,7 +451,7 @@ class AdminControllerTest extends ControllerTest
         $this->login();
         $visitor = $this->getTestVisitor();
         $this->getDocumentManager()->flush();
-        $this->client->request('GET', '/admin/sglivechat/visitor/' . $visitor->getId());
+        $this->client->request('GET', $this->getUrl('sglc_admin_visitor', array('id' => $visitor->getId())));
         $this->assertGetSuccessful();
         $this->logout();
     }
@@ -482,7 +482,7 @@ class AdminControllerTest extends ControllerTest
 
     private function login()
     {
-        $crawler = $this->client->request('GET', '/admin/sglivechat');
+        $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_index'));
 
         if ($this->client->getResponse()->isSuccessful()) {
             $form = $crawler->selectButton('Login')->form();
@@ -496,7 +496,7 @@ class AdminControllerTest extends ControllerTest
 
     private function logout()
     {
-        return $this->client->request('GET', '/admin/sglivechat/logout');
+        return $this->client->request('GET', $this->getUrl('sglc_admin_logout'));
     }
 
 }
