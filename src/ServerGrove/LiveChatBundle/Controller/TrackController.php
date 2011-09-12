@@ -18,7 +18,7 @@ class TrackController extends PublicController
 {
 
     /**
-     * @Route("/js/sglivechat-tracker", name="sglc_track_index")
+     * @Route("", name="sglc_track_index")
      * @Template
      */
     public function indexAction()
@@ -35,7 +35,7 @@ class TrackController extends PublicController
     }
 
     /**
-     * @Route("/js/sglivechat-tracker/update", name="sglc_track_updater")
+     * @Route("/update", name="sglc_track_updater")
      */
     public function updateAction()
     {
@@ -114,7 +114,7 @@ class TrackController extends PublicController
     }
 
     /**
-     * @Route("/js/sglivechat-tracker/status.{_format}", name="sglc_track_status", defaults={"_format"="html"})
+     * @Route("/status.{_format}", name="sglc_track_status", defaults={"_format"="html"})
      * @Template
      */
     public function statusAction($_format)
@@ -125,7 +125,7 @@ class TrackController extends PublicController
     }
 
     /**
-     * @Route("/js/sglivechat-tracker/update", name="sglc_track_reset")
+     * @Route("/update", name="sglc_track_reset")
      */
     public function resetAction()
     {

@@ -8,6 +8,19 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class ControllerTest extends TestCase
 {
     /**
+     * @param string $name
+     * @param array $parameters
+     * @return string
+     */
+    protected function getUrl($name, array $parameters = array())
+    {
+        /* @var $router \Symfony\Bundle\FrameworkBundle\Routing\Router */
+        $router = $this->getContainer()->get('router');
+
+        return $router->generate($name, $parameters, false);
+    }
+
+    /**
      * @param \Symfony\Component\HttpFoundation\Response $response
      * @return string
      */

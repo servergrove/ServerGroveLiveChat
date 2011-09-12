@@ -19,7 +19,7 @@ class ChatControllerTest extends ControllerTest
         $client = self::createClient();
 
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/sglivechat');
+        $crawler = $client->request('GET', $this->getUrl('sglc_chat_homepage'));
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful: ' . $this->getErrorMessage($client->getResponse()));
         $this->assertGreaterThan(0, $crawler->filter('html:contains("Question")')->count(), 'HTML not contains "Question"');
@@ -40,7 +40,7 @@ class ChatControllerTest extends ControllerTest
         $client = self::createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/sglivechat');
+        $crawler = $client->request('GET', $this->getUrl('sglc_chat_homepage'));
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful: ' . $this->getErrorMessage($client->getResponse()));
 
@@ -60,7 +60,7 @@ class ChatControllerTest extends ControllerTest
     {
         /* @var $client Symfony\Bundle\FrameworkBundle\Client */
         $client = self::createClient();
-        $client->request('GET', '/sglivechat/faq');
+        $client->request('GET', $this->getUrl('sglc_chat_faq'));
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful: ' . $this->getErrorMessage($client->getResponse()));
     }
 
@@ -78,14 +78,14 @@ class ChatControllerTest extends ControllerTest
         $client = self::createClient();
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/sglivechat/123whatever321/load');
+        $crawler = $client->request('GET', $this->getUrl('sglc_chat_load', array('id' => '123whatever321')));
 
         $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting');
 
         $this->createSession($client);
 
         /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/sglivechat/' . $client->getRequest()->getSession()->get('chatsession') . '/load');
+        $crawler = $client->request('GET', $this->getUrl('sglc_chat_load', array('id' => $client->getRequest()->getSession()->get('chatsession'))));
 
         $this->assertTrue($crawler->filter('a:contains("submit a support ticket")')->count() > 0);
     }
@@ -97,7 +97,7 @@ class ChatControllerTest extends ControllerTest
     private function createSession(Client $client)
     {
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', '/sglivechat');
+        $crawler = $client->request('GET', $this->getUrl('sglc_chat_homepage'));
 
         $form = $crawler->selectButton('Start Chat')->form();
         $this->fillLoginFormFields($form);

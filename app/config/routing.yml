@@ -5,3 +5,4 @@
 
 sglivechat:
   resource: "@ServerGroveLiveChatBundle/Resources/config/routing.yml"
+  prefix: /sglivechat

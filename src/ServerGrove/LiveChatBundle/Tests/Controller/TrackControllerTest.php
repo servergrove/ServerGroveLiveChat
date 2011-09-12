@@ -28,7 +28,7 @@ class TrackControllerTest extends ControllerTest
         $client = $this->createClient();
         $this->createSession($client);
 
-        $client->request('GET', '/js/sglivechat-tracker/update');
+        $client->request('GET', $this->getUrl('sglc_track_updater'));
         $this->assertEquals('1', $client->getResponse()->getContent());
     }
 
@@ -40,7 +40,7 @@ class TrackControllerTest extends ControllerTest
         $client = $this->createClient();
         $this->createSession($client);
 
-        $crawler = $client->request('POST', '/js/sglivechat-tracker/update');
+        $crawler = $client->request('POST', $this->getUrl('sglc_track_updater'));
         $this->assertEquals('1', $client->getResponse()->getContent());
     }
 
@@ -50,7 +50,7 @@ class TrackControllerTest extends ControllerTest
     public function testIndexAction()
     {
         $client = $this->createClient();
-        $crawler = $client->request('GET', '/js/sglivechat-tracker');
+        $crawler = $client->request('GET', $this->getUrl('sglc_track_index'));
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), $this->getErrorMessage($client->getResponse()));
         $this->assertGreaterThan(0, $crawler->filter('html:contains("drawStatusLink")')->count(), '"drawStatusLink" not found un content');
         $this->assertGreaterThan(0, $crawler->filter('html:contains("callUpdater")')->count(), '"callUpdater" not found un content');
@@ -76,7 +76,7 @@ class TrackControllerTest extends ControllerTest
     public function testResetAction()
     {
         $client = $this->createClient();
-        $client->request('GET', '/js/sglivechat-tracker/reset');
+        $client->request('GET', $this->getUrl('sglc_track_reset'));
 
         $this->assertNull($client->getRequest()->cookies->get('vtrid'));
         $this->assertNull($client->getRequest()->cookies->get('vsid'));
@@ -84,7 +84,7 @@ class TrackControllerTest extends ControllerTest
 
     private function createSession(Client $client)
     {
-        return $client->request('GET', '/js/sglivechat-tracker/status.html');
+        return $client->request('GET', $this->getUrl('sglc_track_status', array('_format' => 'html')));
     }
 }
 

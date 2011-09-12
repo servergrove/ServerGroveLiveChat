@@ -44,21 +44,34 @@ abstract class TestCase extends WebTestCase
         static::$kernel->boot();
     }
 
+    /**
+     * @return void
+     */
     protected function preSetup()
     {
         $this->setCacheEngineName('mongo');
     }
 
+    /**
+     * @return \Symfony\Component\DependencyInjection\ContainerInterface
+     */
     protected function getContainer()
     {
         return self::$kernel->getContainer();
     }
 
+    /**
+     * @param string $name
+     * @return void
+     */
     protected function setCacheEngineName($name)
     {
         $this->cacheEngineName = $name;
     }
 
+    /**
+     * @return string
+     */
     protected function getCacheEngineName()
     {
         return $this->cacheEngineName;
@@ -76,6 +89,9 @@ abstract class TestCase extends WebTestCase
         return static::$kernel->getContainer()->get('doctrine.odm.mongodb.document_manager');
     }
 
+    /**
+     * @return \ServerGrove\LiveChatBundle\Document\Session
+     */
     protected function getTestSession()
     {
         $session = Document\Session::create($this->getTestVisit(), 'Test question', Document\Session::STATUS_WAITING);
@@ -148,6 +164,10 @@ abstract class TestCase extends WebTestCase
         return $operator;
     }
 
+    /**
+     * @param $document
+     * @return void
+     */
     protected function saveDocument($document)
     {
         $dm = $this->getDocumentManager();
@@ -155,6 +175,10 @@ abstract class TestCase extends WebTestCase
         $dm->flush();
     }
 
+    /**
+     * @param $document
+     * @return void
+     */
     protected function removeDocumentOnShutdown($document)
     {
         $dm = $this->getDocumentManager();
