@@ -442,6 +442,7 @@ class ChatController extends PublicController
             return $response;
         }
 
+        $chatSession->registerUpdatedDate();
         $this->getDocumentManager()->persist($chatSession);
         $this->getDocumentManager()->flush();
 
@@ -505,7 +506,7 @@ class ChatController extends PublicController
     private function getChatSession($id, $finished = true)
     {
         /* @var $repository \ServerGrove\LiveChatBundle\Document\SessionRepository */
-        $repository = $this->getDocumentManager()->getRepository('ServerGroveLiveChatBundle:Session');
+        $repository = $this->getSessionRepository();
         if ($finished) {
             return $repository->getSessionIfNotFinished($id);
         }
