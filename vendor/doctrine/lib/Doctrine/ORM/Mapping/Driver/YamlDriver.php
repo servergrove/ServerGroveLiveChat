@@ -49,6 +49,9 @@ class YamlDriver extends AbstractFileDriver
             $metadata->setCustomRepositoryClass(
                 isset($element['repositoryClass']) ? $element['repositoryClass'] : null
             );
+            if (isset($element['readOnly']) && $element['readOnly'] == true) {
+                $metadata->markReadOnly();
+            }
         } else if ($element['type'] == 'mappedSuperclass') {
             $metadata->isMappedSuperclass = true;
         } else {
@@ -61,6 +64,21 @@ class YamlDriver extends AbstractFileDriver
             $table['name'] = $element['table'];
         }
         $metadata->setPrimaryTable($table);
+
+        // Evaluate named queries
+        if (isset($element['namedQueries'])) {
+            foreach ($element['namedQueries'] as $name => $queryMapping) {
+                if (is_string($queryMapping)) {
+                    $queryMapping = array('query' => $queryMapping);
+                }
+
+                if ( ! isset($queryMapping['name'])) {
+                    $queryMapping['name'] = $name;
+                }
+
+                $metadata->addNamedQuery($queryMapping);
+            }
+        }
 
         /* not implemented specially anyway. use table = schema.table
         if (isset($element['schema'])) {
@@ -417,7 +435,7 @@ class YamlDriver extends AbstractFileDriver
                 }
 
                 if (isset($manyToManyElement['orphanRemoval'])) {
-                    $mapping['orphanRemoval'] = (bool)$manyToManyElement['orphan-removal'];
+                    $mapping['orphanRemoval'] = (bool)$manyToManyElement['orphanRemoval'];
                 }
 
                 if (isset($manyToManyElement['orderBy'])) {
@@ -488,6 +506,6 @@ class YamlDriver extends AbstractFileDriver
      */
     protected function _loadMappingFile($file)
     {
-        return \Symfony\Component\Yaml\Yaml::load($file);
+        return \Symfony\Component\Yaml\Yaml::parse($file);
     }
 }

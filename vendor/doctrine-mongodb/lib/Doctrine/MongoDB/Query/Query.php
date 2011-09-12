@@ -172,6 +172,9 @@ class Query implements IteratorAggregate
                 return $this->collection->insert($this->query['newObj']);
 
             case self::TYPE_UPDATE:
+                if ($this->query['upsert']) {
+                    $this->options['upsert'] = $this->query['upsert'];
+                }
                 return $this->collection->update($this->query['query'], $this->query['newObj'], $this->options);
 
             case self::TYPE_REMOVE:
@@ -181,8 +184,15 @@ class Query implements IteratorAggregate
                 return $this->collection->group($this->query['group']['keys'], $this->query['group']['initial'], $this->query['mapReduce']['reduce'], $this->query['query']);
 
             case self::TYPE_MAP_REDUCE:
-                $cursor = $this->collection->mapReduce($this->query['mapReduce']['map'], $this->query['mapReduce']['reduce'], $this->query['query'], $this->options);
-                $this->prepareCursor($cursor);
+                if (!isset($this->query['mapReduce']['out'])) {
+                    $this->query['mapReduce']['out'] = array('inline' => true);
+                }
+                $cursor = $this->collection->mapReduce($this->query['mapReduce']['map'], $this->query['mapReduce']['reduce'], $this->query['mapReduce']['out'], $this->query['query'], $this->options);
+
+                if ($cursor instanceof Cursor) {
+                    $this->prepareCursor($cursor);
+                }
+
                 return $cursor;
 
             case self::TYPE_DISTINCT_FIELD:

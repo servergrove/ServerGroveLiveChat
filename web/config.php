@@ -1,11 +1,15 @@
 <?php
 
-if (!in_array(@$_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1'))) {
-    die('This script is only accessible from localhost.');
+if (!isset($_SERVER['HTTP_HOST'])) {
+    exit('This script cannot be run from the CLI. Run it from a browser.');
 }
 
-if (!isset($_SERVER['HTTP_HOST'])) {
-    die('This script cannot be run from the CLI. Run it from a browser.');
+if (!in_array(@$_SERVER['REMOTE_ADDR'], array(
+    '127.0.0.1',
+    '::1',
+))) {
+    header('HTTP/1.0 403 Forbidden');
+    exit('This script is only accessible from localhost.');
 }
 
 $majorProblems = array();
@@ -45,6 +49,10 @@ if (!((function_exists('apc_store') && ini_get('apc.enabled')) || function_exist
     $minorProblems[] = 'Install and enable a <strong>PHP accelerator</strong> like APC (highly recommended).';
 }
 
+if (!(!(function_exists('apc_store') && ini_get('apc.enabled')) || version_compare(phpversion('apc'), '3.0.17', '>='))) {
+    $majorProblems[] = 'Upgrade your <strong>APC</strong> extension (3.0.17+)';
+}
+
 if (!function_exists('token_get_all')) {
     $minorProblems[] = 'Install and enable the <strong>Tokenizer</strong> extension.';
 }
@@ -61,16 +69,47 @@ if (!function_exists('utf8_decode')) {
     $minorProblems[] = 'Install and enable the <strong>XML</strong> extension.';
 }
 
-if (!function_exists('posix_isatty')) {
-    $minorProblems[] = 'Install and enable the <strong>php_posix</strong> extension (used to colorized the CLI output).';
+if (PHP_OS != 'WINNT' && !function_exists('posix_isatty')) {
+    $minorProblems[] = 'Install and enable the <strong>php_posix</strong> extension (used to colorize the CLI output).';
 }
 
 if (!class_exists('Locale')) {
     $minorProblems[] = 'Install and enable the <strong>intl</strong> extension.';
+} else {
+    $version = '';
+
+    if (defined('INTL_ICU_VERSION')) {
+        $version =  INTL_ICU_VERSION;
+    } else {
+        $reflector = new \ReflectionExtension('intl');
+
+        ob_start();
+        $reflector->info();
+        $output = strip_tags(ob_get_clean());
+
+        preg_match('/^ICU version (.*)$/m', $output, $matches);
+        $version = $matches[1];
+    }
+
+    if (!version_compare($version, '4.0', '>=')) {
+        $minorProblems[] = 'Upgrade your <strong>intl</strong> extension with a newer ICU version (4+).';
+    }
 }
 
-if (!function_exists('sqlite_open')) {
-    $majorProblems[] = 'Install and enable the <strong>SQLite</strong> or <strong>PDO_SQLite</strong> extension.';
+if (!class_exists('SQLite3') && !in_array('sqlite', PDO::getAvailableDrivers())) {
+    $majorProblems[] = 'Install and enable the <strong>SQLite3</strong> or <strong>PDO_SQLite</strong> extension.';
+}
+
+if (!function_exists('json_encode')) {
+    $majorProblems[] = 'Install and enable the <strong>json</strong> extension.';
+}
+
+if (!function_exists('session_start')) {
+    $majorProblems[] = 'Install and enable the <strong>session</strong> extension.';
+}
+
+if (!function_exists('ctype_alpha')) {
+    $majorProblems[] = 'Install and enable the <strong>ctype</strong> extension.';
 }
 
 // php.ini
@@ -103,7 +142,7 @@ if (ini_get('session.auto_start')) {
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <link href="bundles/symfonywebconfigurator/css/install.css" rel="stylesheet" type="text/css" media="all" />
+        <link href="bundles/sensiodistribution/webconfigurator/css/install.css" rel="stylesheet" type="text/css" media="all" />
         <title>Symfony Configuration</title>
     </head>
     <body>
@@ -111,13 +150,13 @@ if (ini_get('session.auto_start')) {
             <div id="symfony-content">
                 <div class="symfony-blocks-install">
                 <div class="symfony-block-logo">
-                    <img src="bundles/symfonywebconfigurator/images/logo-big.gif" alt="sf_symfony" />
+                    <img src="bundles/sensiodistribution/webconfigurator/images/logo-big.gif" alt="sf_symfony" />
                 </div>
 
                 <div class="symfony-block-content">
                     <h1>Welcome!</h1>
                     <p>Welcome to your new Symfony project.</p>
-                    <p>This script will guide you through the basic configuration of your project. You can also do the same by editing the ‘<strong>app/parameters.ini</strong>’ file directly.</p>
+                    <p>This script will guide you through the basic configuration of your project. You can also do the same by editing the ‘<strong>app/config/parameters.ini</strong>’ file directly.</p>
 
                     <?php if (count($majorProblems)): ?>
                         <h2>
@@ -132,13 +171,13 @@ if (ini_get('session.auto_start')) {
                     <?php endif ?>
 
                     <?php if (count($minorProblems)): ?>
-                        <h2>Recommandations</h2>
+                        <h2>Recommendations</h2>
                         <p>
                             <?php if ($majorProblems): ?>
                                 Additionally, to
                             <?php else: ?>
                                 To<?php endif; ?>
-                            enhance your Symfony experience, it’s recommended that you fixe the following :
+                            enhance your Symfony experience, it’s recommended that you fix the following :
                         </p>
                         <ol>
                             <?php foreach ($minorProblems as $problem): ?>
@@ -148,7 +187,7 @@ if (ini_get('session.auto_start')) {
                     <?php endif ?>
 
                     <?php if ($phpini): ?>
-                            <a name="phpini"></a>
+                            <a id="phpini"></a>
                                 <p>*
                                     <?php if (get_cfg_var('cfg_file_path')): ?>
                                         Changes to the <strong>php.ini</strong> file must be done in "<strong><?php echo get_cfg_var('cfg_file_path') ?></strong>".
@@ -169,6 +208,6 @@ if (ini_get('session.auto_start')) {
                 </div>
             </div>
         </div>
-        <div class="version">Symfony Standard Edition v.<?php echo file_get_contents(__DIR__.'/../VERSION') ?></div>
+        <div class="version">Symfony Standard Edition</div>
     </body>
 </html>

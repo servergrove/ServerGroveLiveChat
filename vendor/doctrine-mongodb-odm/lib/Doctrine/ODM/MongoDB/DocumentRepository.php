@@ -91,9 +91,10 @@ class DocumentRepository implements ObjectRepository
     }
 
     /**
-     * Finds a document by its identifier.
+     * Finds a document by its identifier
      *
-     * @param $id The identifier.
+     * @throws LockException
+     * @param string|object $id The identifier
      * @param int $lockMode
      * @param int $lockVersion
      * @return object The document.
@@ -143,9 +144,9 @@ class DocumentRepository implements ObjectRepository
      * @param array $criteria
      * @return array
      */
-    public function findBy(array $criteria)
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
     {
-        return $this->uow->getDocumentPersister($this->documentName)->loadAll($criteria);
+        return $this->uow->getDocumentPersister($this->documentName)->loadAll($criteria, $orderBy, $limit, $offset);
     }
 
     /**

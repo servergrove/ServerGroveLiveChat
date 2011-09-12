@@ -20,16 +20,16 @@ namespace Symfony\Component\DependencyInjection\Compiler;
  */
 class ServiceReferenceGraphEdge
 {
-    protected $sourceNode;
-    protected $destNode;
-    protected $value;
+    private $sourceNode;
+    private $destNode;
+    private $value;
 
     /**
      * Constructor.
      *
-     * @param ServiceReferenceGraphNode $sourceNode 
-     * @param ServiceReferenceGraphNode $destNode 
-     * @param string $value 
+     * @param ServiceReferenceGraphNode $sourceNode
+     * @param ServiceReferenceGraphNode $destNode
+     * @param string $value
      */
     public function __construct(ServiceReferenceGraphNode $sourceNode, ServiceReferenceGraphNode $destNode, $value = null)
     {

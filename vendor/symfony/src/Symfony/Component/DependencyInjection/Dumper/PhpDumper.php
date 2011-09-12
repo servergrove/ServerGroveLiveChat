@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Dumper;
 
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Variable;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,6 +25,8 @@ use Symfony\Component\DependencyInjection\Parameter;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @api
  */
 class PhpDumper extends Dumper
 {
@@ -39,14 +42,16 @@ class PhpDumper extends Dumper
      */
     const NON_FIRST_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789_';
 
-    protected $inlinedDefinitions;
-    protected $definitionVariables;
-    protected $referenceVariables;
-    protected $variableCount;
-    protected $reservedVariables = array('instance', 'class');
+    private $inlinedDefinitions;
+    private $definitionVariables;
+    private $referenceVariables;
+    private $variableCount;
+    private $reservedVariables = array('instance', 'class');
 
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function __construct(ContainerBuilder $container)
     {
@@ -66,6 +71,8 @@ class PhpDumper extends Dumper
      * @param  array  $options An array of options
      *
      * @return string A PHP class representing of the service container
+     *
+     * @api
      */
     public function dump(array $options = array())
     {
@@ -85,7 +92,6 @@ class PhpDumper extends Dumper
         $code .=
             $this->addServices().
             $this->addDefaultParametersMethod().
-            $this->addInterfaceInjectors().
             $this->endClass()
         ;
 
@@ -93,52 +99,13 @@ class PhpDumper extends Dumper
     }
 
     /**
-     * Returns applyInterfaceInjectors function for the dumper.
-     *
-     * @return string
-     */
-    protected function addInterfaceInjectors()
-    {
-        if ($this->container->isFrozen() || 0 === count($this->container->getInterfaceInjectors())) {
-            return;
-        }
-
-        $code = <<<EOF
-
-    /**
-     * Applies all known interface injection calls
-     *
-     * @param Object \$instance
-     */
-    protected function applyInterfaceInjectors(\$instance)
-    {
-
-EOF;
-        foreach ($this->container->getInterfaceInjectors() as $injector) {
-            $code .= sprintf("        if (\$instance instanceof \\%s) {\n", $injector->getClass());
-            foreach ($injector->getMethodCalls() as $call) {
-                foreach ($call[1] as $value) {
-                    $arguments[] = $this->dumpValue($value);
-                }
-                $code .= $this->wrapServiceConditionals($call[1], sprintf("            \$instance->%s(%s);\n", $call[0], implode(', ', $arguments)));
-            }
-            $code .= sprintf("        }\n");
-        }
-        $code .= <<<EOF
-    }
-
-EOF;
-        return $code;
-    }
-
-    /**
      * Generates Service local temp variables.
      *
-     * @param string $cId 
-     * @param string $definition 
+     * @param string $cId
+     * @param string $definition
      * @return string
      */
-    protected function addServiceLocalTempVariables($cId, $definition)
+    private function addServiceLocalTempVariables($cId, $definition)
     {
         static $template = "        \$%s = %s;\n";
 
@@ -151,6 +118,7 @@ EOF;
         foreach ($localDefinitions as $iDefinition) {
             $this->getServiceCallsFromArguments($iDefinition->getArguments(), $calls, $behavior);
             $this->getServiceCallsFromArguments($iDefinition->getMethodCalls(), $calls, $behavior);
+            $this->getServiceCallsFromArguments($iDefinition->getProperties(), $calls, $behavior);
         }
 
         $code = '';
@@ -182,10 +150,10 @@ EOF;
      * Generates the require_once statement for service includes.
      *
      * @param string $id The service id
-     * @param Definition $definition 
+     * @param Definition $definition
      * @return string
      */
-    protected function addServiceInclude($id, $definition)
+    private function addServiceInclude($id, $definition)
     {
         $template = "        require_once %s;\n";
         $code = '';
@@ -210,11 +178,11 @@ EOF;
     /**
      * Generates the inline definition of a service.
      *
-     * @param string $id 
-     * @param Definition $definition 
+     * @param string $id
+     * @param Definition $definition
      * @return string
      */
-    protected function addServiceInlinedDefinitions($id, $definition)
+    private function addServiceInlinedDefinitions($id, $definition)
     {
         $code = '';
         $variableMap = $this->definitionVariables;
@@ -238,7 +206,7 @@ EOF;
             $processed->offsetSet($sDefinition);
 
             $class = $this->dumpValue($sDefinition->getClass());
-            if ($nbOccurrences->offsetGet($sDefinition) > 1 || count($sDefinition->getMethodCalls()) > 0 || null !== $sDefinition->getConfigurator() || false !== strpos($class, '$')) {
+            if ($nbOccurrences->offsetGet($sDefinition) > 1 || count($sDefinition->getMethodCalls()) > 0 || $sDefinition->getProperties() || null !== $sDefinition->getConfigurator() || false !== strpos($class, '$')) {
                 $name = $this->getNextVariableName();
                 $variableMap->offsetSet($sDefinition, new Variable($name));
 
@@ -250,7 +218,7 @@ EOF;
                 // $a = new ServiceA(ServiceB $b);
                 // $b->setServiceA(ServiceA $a);
                 if ($this->hasReference($id, $sDefinition->getArguments())) {
-                    throw new \RuntimeException('Unresolvable reference detected in service definition for '.$id);
+                    throw new ServiceCircularReferenceException($id, array($id));
                 }
 
                 $arguments = array();
@@ -272,8 +240,9 @@ EOF;
                     $code .= sprintf("        \$%s = new \\%s(%s);\n", $name, substr(str_replace('\\\\', '\\', $class), 1, -1), implode(', ', $arguments));
                 }
 
-                if (!$this->hasReference($id, $sDefinition->getMethodCalls())) {
+                if (!$this->hasReference($id, $sDefinition->getMethodCalls()) && !$this->hasReference($id, $sDefinition->getProperties())) {
                     $code .= $this->addServiceMethodCalls(null, $sDefinition, $name);
+                    $code .= $this->addServiceProperties(null, $sDefinition, $name);
                     $code .= $this->addServiceConfigurator(null, $sDefinition, $name);
                 }
 
@@ -288,10 +257,10 @@ EOF;
      * Adds the service return statement.
      *
      * @param string $id Service id
-     * @param Definition $definition 
+     * @param Definition $definition
      * @return string
      */
-    protected function addServiceReturn($id, $definition)
+    private function addServiceReturn($id, $definition)
     {
         if ($this->isSimpleInstance($id, $definition)) {
             return "    }\n";
@@ -304,13 +273,13 @@ EOF;
      * Generates the service instance.
      *
      * @param string $id
-     * @param Definition $definition 
+     * @param Definition $definition
      * @return string
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
      */
-    protected function addServiceInstance($id, $definition)
+    private function addServiceInstance($id, $definition)
     {
         $class = $this->dumpValue($definition->getClass());
 
@@ -365,18 +334,18 @@ EOF;
     /**
      * Checks if the definition is a simple instance.
      *
-     * @param string $id 
-     * @param Definition $definition 
-     * @return boolean
+     * @param string $id
+     * @param Definition $definition
+     * @return Boolean
      */
-    protected function isSimpleInstance($id, $definition)
+    private function isSimpleInstance($id, $definition)
     {
         foreach (array_merge(array($definition), $this->getInlinedDefinitions($definition)) as $sDefinition) {
             if ($definition !== $sDefinition && !$this->hasReference($id, $sDefinition->getMethodCalls())) {
                 continue;
             }
 
-            if ($sDefinition->getMethodCalls() || $sDefinition->getConfigurator()) {
+            if ($sDefinition->getMethodCalls() || $sDefinition->getProperties() || $sDefinition->getConfigurator()) {
                 return false;
             }
         }
@@ -387,12 +356,12 @@ EOF;
     /**
      * Adds method calls to a service definition.
      *
-     * @param string $id 
-     * @param Definition $definition 
-     * @param string $variableName 
+     * @param string $id
+     * @param Definition $definition
+     * @param string $variableName
      * @return string
      */
-    protected function addServiceMethodCalls($id, $definition, $variableName = 'instance')
+    private function addServiceMethodCalls($id, $definition, $variableName = 'instance')
     {
         $calls = '';
         foreach ($definition->getMethodCalls() as $call) {
@@ -404,21 +373,27 @@ EOF;
             $calls .= $this->wrapServiceConditionals($call[1], sprintf("        \$%s->%s(%s);\n", $variableName, $call[0], implode(', ', $arguments)));
         }
 
-        if (!$this->container->isFrozen() && count($this->container->getInterfaceInjectors()) > 0) {
-            $calls = sprintf("\n        \$this->applyInterfaceInjectors(\$%s);\n", $variableName);
+        return $calls;
+    }
+
+    private function addServiceProperties($id, $definition, $variableName = 'instance')
+    {
+        $code = '';
+        foreach ($definition->getProperties() as $name => $value) {
+            $code .= sprintf("        \$%s->%s = %s;\n", $variableName, $name, $this->dumpValue($value));
         }
 
-        return $calls;
+        return $code;
     }
 
     /**
      * Generates the inline definition setup.
      *
-     * @param string $id 
-     * @param Definition $definition 
+     * @param string $id
+     * @param Definition $definition
      * @return string
      */
-    protected function addServiceInlinedDefinitionsSetup($id, $definition)
+    private function addServiceInlinedDefinitionsSetup($id, $definition)
     {
         $this->referenceVariables[$id] = new Variable('instance');
 
@@ -452,12 +427,12 @@ EOF;
     /**
      * Adds configurator definition
      *
-     * @param string $id 
-     * @param Definition $definition 
-     * @param string $variableName 
+     * @param string $id
+     * @param Definition $definition
+     * @param string $variableName
      * @return string
      */
-    protected function addServiceConfigurator($id, $definition, $variableName = 'instance')
+    private function addServiceConfigurator($id, $definition, $variableName = 'instance')
     {
         if (!$callable = $definition->getConfigurator()) {
             return '';
@@ -477,11 +452,11 @@ EOF;
     /**
      * Adds a service
      *
-     * @param string $id 
-     * @param Definition $definition 
+     * @param string $id
+     * @param Definition $definition
      * @return string
      */
-    protected function addService($id, $definition)
+    private function addService($id, $definition)
     {
         $name = Container::camelize($id);
         $this->definitionVariables = new \SplObjectStorage();
@@ -535,7 +510,7 @@ EOF;
         if (ContainerInterface::SCOPE_CONTAINER !== $scope && ContainerInterface::SCOPE_PROTOTYPE !== $scope) {
             $code .= <<<EOF
         if (!isset(\$this->scopedServices['$scope'])) {
-            throw new \RuntimeException('You cannot create a service ("$id") of an inactive scope ("$scope").');
+            throw new InactiveScopeException('$id', '$scope');
         }
 
 
@@ -552,6 +527,7 @@ EOF;
                 $this->addServiceInstance($id, $definition).
                 $this->addServiceInlinedDefinitionsSetup($id, $definition).
                 $this->addServiceMethodCalls($id, $definition).
+                $this->addServiceProperties($id, $definition).
                 $this->addServiceConfigurator($id, $definition).
                 $this->addServiceReturn($id, $definition)
             ;
@@ -566,11 +542,11 @@ EOF;
     /**
      * Adds a service alias.
      *
-     * @param string $alias 
-     * @param string $id 
+     * @param string $alias
+     * @param string $id
      * @return string
      */
-    protected function addServiceAlias($alias, $id)
+    private function addServiceAlias($alias, $id)
     {
         $name = Container::camelize($alias);
         $type = 'Object';
@@ -600,7 +576,7 @@ EOF;
      *
      * @return string
      */
-    protected function addServices()
+    private function addServices()
     {
         $publicServices = $privateServices = $aliasServices = '';
         $definitions = $this->container->getDefinitions();
@@ -629,15 +605,16 @@ EOF;
      * @param string $baseClass The name of the base class
      * @return string
      */
-    protected function startClass($class, $baseClass)
+    private function startClass($class, $baseClass)
     {
-        $bagClass = $this->container->isFrozen() ? '' : 'use Symfony\Component\DependencyInjection\ParameterBag\\ParameterBag;';
+        $bagClass = $this->container->isFrozen() ? 'use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;' : 'use Symfony\Component\DependencyInjection\ParameterBag\\ParameterBag;';
 
         return <<<EOF
 <?php
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\Exception\InactiveScopeException;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Parameter;
 $bagClass
@@ -658,7 +635,7 @@ EOF;
      *
      * @return string
      */
-    protected function addConstructor()
+    private function addConstructor()
     {
         $code = <<<EOF
 
@@ -690,7 +667,7 @@ EOF;
      *
      * @return string
      */
-    protected function addFrozenConstructor()
+    private function addFrozenConstructor()
     {
         $code = <<<EOF
 
@@ -731,7 +708,7 @@ EOF;
      *
      * @return string
      */
-    protected function addDefaultParametersMethod()
+    private function addDefaultParametersMethod()
     {
         if (!$this->container->getParameterBag()->all()) {
             return '';
@@ -772,6 +749,18 @@ EOF;
     {
         throw new \LogicException('Impossible to call set() on a frozen ParameterBag.');
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getParameterBag()
+    {
+        if (null === \$this->parameterBag) {
+            \$this->parameterBag = new FrozenParameterBag(\$this->parameters);
+        }
+
+        return \$this->parameterBag;
+    }
 EOF;
         }
 
@@ -795,22 +784,23 @@ EOF;
     /**
      * Exports parameters.
      *
-     * @param string $parameters 
-     * @param integer $indent 
+     * @param array $parameters
+     * @param string $path
+     * @param integer $indent
      * @return string
      */
-    protected function exportParameters($parameters, $indent = 12)
+    private function exportParameters($parameters, $path = '', $indent = 12)
     {
         $php = array();
         foreach ($parameters as $key => $value) {
             if (is_array($value)) {
-                $value = $this->exportParameters($value, $indent + 4);
+                $value = $this->exportParameters($value, $path.'/'.$key, $indent + 4);
             } elseif ($value instanceof Variable) {
-                throw new \InvalidArgumentException(sprintf('you cannot dump a container with parameters that contain variable references. Variable "%s" found.', $value));
+                throw new \InvalidArgumentException(sprintf('You cannot dump a container with parameters that contain variable references. Variable "%s" found in "%s".', $value, $path.'/'.$key));
             } elseif ($value instanceof Definition) {
-                throw new \InvalidArgumentException(sprintf('You cannot dump a container with parameters that contain service definitions. Definition for "%s" found.', $value->getClass()));
+                throw new \InvalidArgumentException(sprintf('You cannot dump a container with parameters that contain service definitions. Definition for "%s" found in "%s".', $value->getClass(), $path.'/'.$key));
             } elseif ($value instanceof Reference) {
-                throw new \InvalidArgumentException(sprintf('You cannot dump a container with parameters that contain references to other services (reference to service %s found).', $value));
+                throw new \InvalidArgumentException(sprintf('You cannot dump a container with parameters that contain references to other services (reference to service "%s" found in "%s").', $value, $path.'/'.$key));
             } else {
                 $value = var_export($value, true);
             }
@@ -824,9 +814,9 @@ EOF;
     /**
      * Ends the class definition.
      *
-     * @return void
+     * @return string
      */
-    protected function endClass()
+    private function endClass()
     {
         return <<<EOF
 }
@@ -837,11 +827,11 @@ EOF;
     /**
      * Wraps the service conditionals.
      *
-     * @param string $value 
-     * @param string $code 
+     * @param string $value
+     * @param string $code
      * @return string
      */
-    protected function wrapServiceConditionals($value, $code)
+    private function wrapServiceConditionals($value, $code)
     {
         if (!$services = ContainerBuilder::getServiceConditionals($value)) {
             return $code;
@@ -861,12 +851,12 @@ EOF;
     /**
      * Builds service calls from arguments
      *
-     * @param array $arguments 
-     * @param string $calls By reference
+     * @param array  $arguments
+     * @param string $calls    By reference
      * @param string $behavior By reference
      * @return void
      */
-    protected function getServiceCallsFromArguments(array $arguments, array &$calls, array &$behavior)
+    private function getServiceCallsFromArguments(array $arguments, array &$calls, array &$behavior)
     {
         foreach ($arguments as $argument) {
             if (is_array($argument)) {
@@ -891,17 +881,17 @@ EOF;
     /**
      * Returns the inline definition
      *
-     * @param Definition $definition 
-     * @return string
+     * @param Definition $definition
+     * @return array
      */
-    protected function getInlinedDefinitions(Definition $definition)
+    private function getInlinedDefinitions(Definition $definition)
     {
         if (false === $this->inlinedDefinitions->contains($definition)) {
-            $definitions = $this->getDefinitionsFromArguments($definition->getArguments());
-
-            foreach ($definition->getMethodCalls() as $arguments) {
-                $definitions = array_merge($definitions, $this->getDefinitionsFromArguments($arguments));
-            }
+            $definitions = array_merge(
+                $this->getDefinitionsFromArguments($definition->getArguments()),
+                $this->getDefinitionsFromArguments($definition->getMethodCalls()),
+                $this->getDefinitionsFromArguments($definition->getProperties())
+            );
 
             $this->inlinedDefinitions->offsetSet($definition, $definitions);
 
@@ -914,10 +904,10 @@ EOF;
     /**
      * Gets the definition from arguments
      *
-     * @param array $arguments 
+     * @param array $arguments
      * @return array
      */
-    protected function getDefinitionsFromArguments(array $arguments)
+    private function getDefinitionsFromArguments(array $arguments)
     {
         $definitions = array();
         foreach ($arguments as $argument) {
@@ -938,11 +928,11 @@ EOF;
     /**
      * Checks if a service id has a reference
      *
-     * @param string $id 
-     * @param array $arguments 
-     * @return boolean
+     * @param string $id
+     * @param array $arguments
+     * @return Boolean
      */
-    protected function hasReference($id, array $arguments)
+    private function hasReference($id, array $arguments)
     {
         foreach ($arguments as $argument) {
             if (is_array($argument)) {
@@ -962,11 +952,11 @@ EOF;
     /**
      * Dumps values.
      *
-     * @param string $value 
-     * @param boolean $interpolate 
+     * @param array $value
+     * @param Boolean $interpolate
      * @return string
      */
-    protected function dumpValue($value, $interpolate = true)
+    private function dumpValue($value, $interpolate = true)
     {
         if (is_array($value)) {
             $code = array();
@@ -1026,7 +1016,7 @@ EOF;
                 $that = $this;
                 $replaceParameters = function ($match) use ($that)
                 {
-                    return sprintf("'.".$that->dumpParameter(strtolower($match[2])).".'");
+                    return "'.".$that->dumpParameter(strtolower($match[2])).".'";
                 };
 
                 $code = str_replace('%%', '%', preg_replace_callback('/(?<!%)(%)([^%]+)\1/', $replaceParameters, var_export($value, true)));
@@ -1046,7 +1036,7 @@ EOF;
     /**
      * Dumps a parameter
      *
-     * @param string $name 
+     * @param string $name
      * @return string
      */
     public function dumpParameter($name)
@@ -1061,11 +1051,11 @@ EOF;
     /**
      * Gets a service call
      *
-     * @param string $id 
-     * @param Reference $reference 
+     * @param string    $id
+     * @param Reference $reference
      * @return string
      */
-    protected function getServiceCall($id, Reference $reference = null)
+    private function getServiceCall($id, Reference $reference = null)
     {
         if ('service_container' === $id) {
             return '$this';
@@ -1087,7 +1077,7 @@ EOF;
      *
      * @return string
      */
-    protected function getNextVariableName()
+    private function getNextVariableName()
     {
         $firstChars = self::FIRST_CHARS;
         $firstCharsLength = strlen($firstChars);

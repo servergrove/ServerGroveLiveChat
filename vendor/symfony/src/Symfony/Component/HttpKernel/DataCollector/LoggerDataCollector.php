@@ -13,6 +13,7 @@ namespace Symfony\Component\HttpKernel\DataCollector;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 /**
  * LogDataCollector.
@@ -21,12 +22,12 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class LoggerDataCollector extends DataCollector
 {
-    protected $logger;
+    private $logger;
 
     public function __construct($logger = null)
     {
-        if (null !== $logger) {
-            $this->logger = $logger->getDebugLogger();
+        if (null !== $logger && $logger instanceof DebugLoggerInterface) {
+            $this->logger = $logger;
         }
     }
 
@@ -38,7 +39,7 @@ class LoggerDataCollector extends DataCollector
         if (null !== $this->logger) {
             $this->data = array(
                 'error_count' => $this->logger->countErrors(),
-                'logs'        => $this->logger->getLogs(),
+                'logs'        => $this->sanitizeLogs($this->logger->getLogs()),
             );
         }
     }
@@ -48,7 +49,7 @@ class LoggerDataCollector extends DataCollector
      *
      * @return array An array of called events
      *
-     * @see EventDispatcherTraceableInterface
+     * @see TraceableEventDispatcherInterface
      */
     public function countErrors()
     {
@@ -71,5 +72,35 @@ class LoggerDataCollector extends DataCollector
     public function getName()
     {
         return 'logger';
+    }
+
+    private function sanitizeLogs($logs)
+    {
+        foreach ($logs as $i => $log) {
+            $logs[$i]['context'] = $this->sanitizeContext($log['context']);
+        }
+
+        return $logs;
+    }
+
+    private function sanitizeContext($context)
+    {
+        if (is_array($context)) {
+            foreach ($context as $key => $value) {
+                $context[$key] = $this->sanitizeContext($value);
+            }
+
+            return $context;
+        }
+
+        if (is_resource($context)) {
+            return sprintf('Resource(%s)', get_resource_type($context));
+        }
+
+        if (is_object($context)) {
+            return sprintf('Object(%s)', get_class($context));
+        }
+
+        return $context;
     }
 }

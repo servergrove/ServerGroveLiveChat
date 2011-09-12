@@ -41,7 +41,11 @@ class ClassMetadata extends ElementMetadata
     {
         $this->name = $class;
         // class name without namespace
-        $this->defaultGroup = substr($class, strrpos($class, '\\') + 1);
+        if (false !== $nsSep = strrpos($class, '\\')) {
+            $this->defaultGroup = substr($class, $nsSep + 1);
+        } else {
+            $this->defaultGroup = $class;
+        }
     }
 
     /**
@@ -96,7 +100,7 @@ class ClassMetadata extends ElementMetadata
      */
     public function addConstraint(Constraint $constraint)
     {
-        if (!in_array(Constraint::CLASS_CONSTRAINT, (array)$constraint->targets())) {
+        if (!in_array(Constraint::CLASS_CONSTRAINT, (array) $constraint->getTargets())) {
             throw new ConstraintDefinitionException(sprintf(
                 'The constraint %s cannot be put on classes',
                 get_class($constraint)
@@ -199,10 +203,6 @@ class ClassMetadata extends ElementMetadata
     protected function addMemberMetadata(MemberMetadata $metadata)
     {
         $property = $metadata->getPropertyName();
-
-        if (!isset($this->members[$property])) {
-            $this->members[$property] = array();
-        }
 
         $this->members[$property][] = $metadata;
     }

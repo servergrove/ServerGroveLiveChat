@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class CookieClearingLogoutHandler implements LogoutHandlerInterface
 {
-    protected $cookies;
+    private $cookies;
 
     /**
      * Constructor
@@ -36,8 +36,8 @@ class CookieClearingLogoutHandler implements LogoutHandlerInterface
     /**
      * Implementation for the LogoutHandlerInterface. Deletes all requested cookies.
      *
-     * @param Request $request
-     * @param Response $response
+     * @param Request        $request
+     * @param Response       $response
      * @param TokenInterface $token
      * @return void
      */

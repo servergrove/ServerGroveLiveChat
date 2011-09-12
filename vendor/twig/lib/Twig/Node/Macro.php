@@ -13,7 +13,7 @@
  * Represents a macro node.
  *
  * @package    twig
- * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author     Fabien Potencier <fabien@symfony.com>
  */
 class Twig_Node_Macro extends Twig_Node
 {
@@ -55,8 +55,16 @@ class Twig_Node_Macro extends Twig_Node
             ->outdent()
             ->write("));\n\n")
             ->write("ob_start();\n")
+            ->write("try {\n")
+            ->indent()
             ->subcompile($this->getNode('body'))
-            ->raw("\n")
+            ->outdent()
+            ->write("} catch(Exception \$e) {\n")
+            ->indent()
+            ->write("ob_end_clean();\n\n")
+            ->write("throw \$e;\n")
+            ->outdent()
+            ->write("}\n\n")
             ->write("return ob_get_clean();\n")
             ->outdent()
             ->write("}\n\n")

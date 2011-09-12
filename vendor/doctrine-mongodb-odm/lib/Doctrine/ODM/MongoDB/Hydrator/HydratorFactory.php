@@ -29,6 +29,7 @@ use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Doctrine\ODM\MongoDB\Event\PreLoadEventArgs;
 use Doctrine\ODM\MongoDB\PersistentCollection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ODM\MongoDB\Proxy\Proxy;
 
 /**
  * The HydratorFactory class is responsible for instantiating a correct hydrator
@@ -227,7 +228,7 @@ EOF
                     $code .= sprintf(<<<EOF
 
         \$className = \$this->class->fieldMappings['%2\$s']['targetDocument'];
-        \$return = \$this->dm->getRepository(\$className)->%3\$s();
+        \$return = \$this->dm->getRepository(\$className)->%3\$s(\$document);
         \$this->class->reflFields['%2\$s']->setValue(\$document, \$return);
         \$hydratedData['%2\$s'] = \$return;
 
@@ -372,6 +373,9 @@ EOF
         }
 
         $data = $this->getHydratorFor($metadata->name)->hydrate($document, $data);
+        if ($document instanceof Proxy) {
+            $document->__isInitialized__ = true;
+        }
 
         // Invoke the postLoad lifecycle callbacks and listeners
         if (isset($metadata->lifecycleCallbacks[Events::postLoad])) {

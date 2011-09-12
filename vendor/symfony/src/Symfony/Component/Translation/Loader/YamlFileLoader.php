@@ -18,15 +18,19 @@ use Symfony\Component\Yaml\Yaml;
  * YamlFileLoader loads translations from Yaml files.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 class YamlFileLoader extends ArrayLoader implements LoaderInterface
 {
     /**
      * {@inheritdoc}
+     *
+     * @api
      */
     public function load($resource, $locale, $domain = 'messages')
     {
-        $messages = Yaml::load($resource);
+        $messages = Yaml::parse($resource);
 
         // empty file
         if (null === $messages) {

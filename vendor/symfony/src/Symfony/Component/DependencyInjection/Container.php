@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
@@ -52,6 +54,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\FrozenParameterBag;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @api
  */
 class Container implements ContainerInterface
 {
@@ -67,16 +71,18 @@ class Container implements ContainerInterface
      * Constructor.
      *
      * @param ParameterBagInterface $parameterBag A ParameterBagInterface instance
+     *
+     * @api
      */
     public function __construct(ParameterBagInterface $parameterBag = null)
     {
         $this->parameterBag = null === $parameterBag ? new ParameterBag() : $parameterBag;
 
-        $this->services =
-        $this->scopes =
-        $this->scopeChildren =
-        $this->scopedServices =
-        $this->scopeStacks = array();
+        $this->services       = array();
+        $this->scopes         = array();
+        $this->scopeChildren  = array();
+        $this->scopedServices = array();
+        $this->scopeStacks    = array();
 
         $this->set('service_container', $this);
     }
@@ -88,6 +94,8 @@ class Container implements ContainerInterface
      *
      *  * Parameter values are resolved;
      *  * The parameter bag is frozen.
+     *
+     * @api
      */
     public function compile()
     {
@@ -100,6 +108,8 @@ class Container implements ContainerInterface
      * Returns true if the container parameter bag are frozen.
      *
      * @return Boolean true if the container parameter bag are frozen, false otherwise
+     *
+     * @api
      */
     public function isFrozen()
     {
@@ -110,6 +120,8 @@ class Container implements ContainerInterface
      * Gets the service container parameter bag.
      *
      * @return ParameterBagInterface A ParameterBagInterface instance
+     *
+     * @api
      */
     public function getParameterBag()
     {
@@ -124,6 +136,8 @@ class Container implements ContainerInterface
      * @return mixed  The parameter value
      *
      * @throws  \InvalidArgumentException if the parameter is not defined
+     *
+     * @api
      */
     public function getParameter($name)
     {
@@ -136,6 +150,8 @@ class Container implements ContainerInterface
      * @param  string $name The parameter name
      *
      * @return Boolean The presence of parameter in container
+     *
+     * @api
      */
     public function hasParameter($name)
     {
@@ -145,8 +161,10 @@ class Container implements ContainerInterface
     /**
      * Sets a parameter.
      *
-     * @param string $name       The parameter name
-     * @param mixed  $parameters The parameter value
+     * @param string $name  The parameter name
+     * @param mixed  $value The parameter value
+     *
+     * @api
      */
     public function setParameter($name, $value)
     {
@@ -159,6 +177,8 @@ class Container implements ContainerInterface
      * @param string $id      The service identifier
      * @param object $service The service instance
      * @param string $scope   The scope of the service
+     *
+     * @api
      */
     public function set($id, $service, $scope = self::SCOPE_CONTAINER)
     {
@@ -185,6 +205,8 @@ class Container implements ContainerInterface
      * @param  string  $id      The service identifier
      *
      * @return Boolean true if the service is defined, false otherwise
+     *
+     * @api
      */
     public function has($id)
     {
@@ -199,14 +221,16 @@ class Container implements ContainerInterface
      * If a service is both defined through a set() method and
      * with a set*Service() method, the former has always precedence.
      *
-     * @param  string $id              The service identifier
-     * @param  int    $invalidBehavior The behavior when the service does not exist
+     * @param  string  $id              The service identifier
+     * @param  integer $invalidBehavior The behavior when the service does not exist
      *
      * @return object The associated service
      *
      * @throws \InvalidArgumentException if the service is not defined
      *
      * @see Reference
+     *
+     * @api
      */
     public function get($id, $invalidBehavior = self::EXCEPTION_ON_INVALID_REFERENCE)
     {
@@ -217,13 +241,18 @@ class Container implements ContainerInterface
         }
 
         if (isset($this->loading[$id])) {
-            throw new \LogicException(sprintf('Circular reference detected for service "%s" (services currently loading: %s).', $id, implode(', ', array_keys($this->loading))));
+            throw new ServiceCircularReferenceException($id, array_keys($this->loading));
         }
 
         if (method_exists($this, $method = 'get'.strtr($id, array('_' => '', '.' => '_')).'Service')) {
             $this->loading[$id] = true;
 
-            $service = $this->$method();
+            try {
+                $service = $this->$method();
+            } catch (\Exception $e) {
+                unset($this->loading[$id]);
+                throw $e;
+            }
 
             unset($this->loading[$id]);
 
@@ -231,7 +260,7 @@ class Container implements ContainerInterface
         }
 
         if (self::EXCEPTION_ON_INVALID_REFERENCE === $invalidBehavior) {
-            throw new \InvalidArgumentException(sprintf('The service "%s" does not exist.', $id));
+            throw new ServiceNotFoundException($id);
         }
     }
 
@@ -250,7 +279,7 @@ class Container implements ContainerInterface
             }
         }
 
-        return array_merge($ids, array_keys($this->services));
+        return array_unique(array_merge($ids, array_keys($this->services)));
     }
 
     /**
@@ -258,6 +287,8 @@ class Container implements ContainerInterface
      *
      * @param string $name
      * @return void
+     *
+     * @api
      */
     public function enterScope($name)
     {
@@ -302,6 +333,8 @@ class Container implements ContainerInterface
      * @param string $name The name of the scope to leave
      * @return void
      * @throws \InvalidArgumentException if the scope is not active
+     *
+     * @api
      */
     public function leaveScope($name)
     {
@@ -338,6 +371,8 @@ class Container implements ContainerInterface
      *
      * @param ScopeInterface $scope
      * @return void
+     *
+     * @api
      */
     public function addScope(ScopeInterface $scope)
     {
@@ -369,6 +404,8 @@ class Container implements ContainerInterface
      *
      * @param string $name The name of the scope
      * @return Boolean
+     *
+     * @api
      */
     public function hasScope($name)
     {
@@ -382,6 +419,8 @@ class Container implements ContainerInterface
      *
      * @param string $name
      * @return Boolean
+     *
+     * @api
      */
     public function isScopeActive($name)
     {
@@ -396,7 +435,7 @@ class Container implements ContainerInterface
      */
     static public function camelize($id)
     {
-        return preg_replace(array('/(?:^|_)+(.)/e', '/\.(.)/e'), array("strtoupper('\\1')", "'_'.strtoupper('\\1')"), $id);
+        return preg_replace_callback('/(^|_|\.)+(.)/', function ($match) { return ('.' === $match[1] ? '_' : '').strtoupper($match[2]); }, $id);
     }
 
     /**

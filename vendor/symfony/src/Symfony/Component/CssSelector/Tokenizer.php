@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\CssSelector;
 
+use Symfony\Component\CssSelector\Exception\ParseException;
+
 /**
  * Tokenizer lexes a CSS Selector to tokens.
  *
@@ -107,14 +109,14 @@ class Tokenizer
      * and returns an array holding the unquoted string contained by $s and
      * the new position from which tokenizing should take over.
      *
-     * @throws SyntaxError When expected closing is not found
+     * @throws ParseException When expected closing is not found
      *
      * @param  string  $s   The selector string containing the quoted string.
      * @param  integer $pos The starting position for the quoted string.
      *
      * @return array
      */
-    protected function tokenizeEscapedString($s, $pos)
+    private function tokenizeEscapedString($s, $pos)
     {
         $quote = $s[$pos];
 
@@ -123,7 +125,7 @@ class Tokenizer
         while (true) {
             $next = strpos($s, $quote, $pos);
             if (false === $next) {
-                throw new SyntaxError(sprintf('Expected closing %s for string in: %s', $quote, substr($s, $start)));
+                throw new ParseException(sprintf('Expected closing %s for string in: %s', $quote, substr($s, $start)));
             }
 
             $result = substr($s, $start, $next - $start);
@@ -144,13 +146,13 @@ class Tokenizer
     /**
      * Unescapes a string literal and returns the unescaped string.
      *
-     * @throws SyntaxError When invalid escape sequence is found
+     * @throws ParseException When invalid escape sequence is found
      *
      * @param  string $literal The string literal to unescape.
      *
      * @return string
      */
-    protected function unescapeStringLiteral($literal)
+    private function unescapeStringLiteral($literal)
     {
         return preg_replace_callback('#(\\\\(?:[A-Fa-f0-9]{1,6}(?:\r\n|\s)?|[^A-Fa-f0-9]))#', function ($matches) use ($literal)
         {
@@ -160,7 +162,7 @@ class Tokenizer
                     return chr(trim($matches[0]));
                 }
             } else {
-                throw new SyntaxError(sprintf('Invalid escape sequence %s in string %s', $matches[0], $literal));
+                throw new ParseException(sprintf('Invalid escape sequence %s in string %s', $matches[0], $literal));
             }
         }, $literal);
     }
@@ -170,14 +172,14 @@ class Tokenizer
      * contained in it and the new position from which tokenizing should take
      * over.
      *
-     * @throws SyntaxError When Unexpected symbol is found
+     * @throws ParseException When Unexpected symbol is found
      *
      * @param  string  $s   The selector string.
      * @param  integer $pos The position in $s at which the symbol starts.
      *
      * @return array
      */
-    protected function tokenizeSymbol($s, $pos)
+    private function tokenizeSymbol($s, $pos)
     {
         $start = $pos;
 
@@ -189,7 +191,7 @@ class Tokenizer
         $matchStart = $match[0][1];
 
         if ($matchStart == $pos) {
-            throw new SyntaxError(sprintf('Unexpected symbol: %s at %s', $s[$pos], $pos));
+            throw new ParseException(sprintf('Unexpected symbol: %s at %s', $s[$pos], $pos));
         }
 
         $result = substr($s, $start, $matchStart - $start);

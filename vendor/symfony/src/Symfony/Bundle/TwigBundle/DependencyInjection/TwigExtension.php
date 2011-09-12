@@ -12,7 +12,6 @@
 namespace Symfony\Bundle\TwigBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -37,12 +36,13 @@ class TwigExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('twig.xml');
 
-        $processor = new Processor();
         $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
 
-        $config = $processor->process($configuration->getConfigTree(), $configs);
+        $container->setParameter('twig.exception_listener.controller', $config['exception_controller']);
 
         $container->setParameter('twig.form.resources', $config['form']['resources']);
+        $container->getDefinition('twig.loader')->addMethodCall('addPath', array(__DIR__.'/../../../Bridge/Twig/Resources/views/Form'));
 
         if (!empty($config['globals'])) {
             $def = $container->getDefinition('twig');
@@ -55,21 +55,10 @@ class TwigExtension extends Extension
             }
         }
 
-        if (!empty($config['extensions'])) {
-            foreach ($config['extensions'] as $id) {
-                $container->getDefinition($id)->addTag('twig.extension');
-            }
-        }
-
-        if (!empty($config['cache_warmer'])) {
-            $container->getDefinition('templating.cache_warmer.templates_cache')->addTag('kernel.cache_warmer');
-        }
-
         unset(
             $config['form'],
             $config['globals'],
-            $config['extensions'],
-            $config['cache_warmer']
+            $config['extensions']
         );
 
         $container->setParameter('twig.options', $config);

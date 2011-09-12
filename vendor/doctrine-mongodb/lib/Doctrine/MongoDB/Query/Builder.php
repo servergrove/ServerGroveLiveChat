@@ -125,7 +125,7 @@ class Builder
      * Set slave okaye.
      *
      * @param bool $bool
-     * @return Query
+     * @return Builder
      */
     public function slaveOkay($bool = true)
     {
@@ -137,7 +137,7 @@ class Builder
      * Set snapshot.
      *
      * @param bool $bool
-     * @return Query
+     * @return Builder
      */
     public function snapshot($bool = true)
     {
@@ -149,7 +149,7 @@ class Builder
      * Set immortal.
      *
      * @param bool $bool
-     * @return Query
+     * @return Builder
      */
     public function immortal($bool = true)
     {
@@ -161,7 +161,7 @@ class Builder
      * Pass a hint to the Cursor
      *
      * @param string $keyPattern
-     * @return Query
+     * @return Builder
      */
     public function hint($keyPattern)
     {
@@ -173,7 +173,7 @@ class Builder
      * Change the query type to find and optionally set and change the class being queried.
      *
      * @param string $className The Document class being queried.
-     * @return Query
+     * @return Builder
      */
     public function find()
     {
@@ -184,7 +184,7 @@ class Builder
     /**
      * Sets a flag for the query to be executed as a findAndUpdate query query.
      *
-     * @return Query
+     * @return Builder
      */
     public function findAndUpdate()
     {
@@ -207,7 +207,7 @@ class Builder
     /**
      * Sets a flag for the query to be executed as a findAndUpdate query query.
      *
-     * @return Query
+     * @return Builder
      */
     public function findAndRemove()
     {
@@ -218,7 +218,7 @@ class Builder
     /**
      * Change the query type to update and optionally set and change the class being queried.
      *
-     * @return Query
+     * @return Builder
      */
     public function update()
     {
@@ -229,7 +229,7 @@ class Builder
     /**
      * Change the query type to insert and optionally set and change the class being queried.
      *
-     * @return Query
+     * @return Builder
      */
     public function insert()
     {
@@ -240,7 +240,7 @@ class Builder
     /**
      * Change the query type to remove and optionally set and change the class being queried.
      *
-     * @return Query
+     * @return Builder
      */
     public function remove()
     {
@@ -251,11 +251,9 @@ class Builder
     /**
      * Perform an operation similar to SQL's GROUP BY command
      *
-     * @param array $keys
+     * @param $keys
      * @param array $initial
-     * @param string $reduce
-     * @param array $condition
-     * @return Query
+     * @return Builder
      */
     public function group($keys, array $initial)
     {
@@ -272,7 +270,7 @@ class Builder
      * field for the document being queried for.
      *
      * @param string $field
-     * @return Query
+     * @return Builder
      */
     public function distinct($field)
     {
@@ -285,13 +283,28 @@ class Builder
      * The fields to select.
      *
      * @param string $fieldName
-     * @return Query
+     * @return Builder
      */
     public function select($fieldName = null)
     {
         $select = func_get_args();
         foreach ($select as $fieldName) {
-            $this->query['select'][] = $fieldName;
+            $this->query['select'][$fieldName] = 1;
+        }
+        return $this;
+    }
+
+    /**
+     * The fields not to select.
+     *
+     * @param string $fieldName
+     * @return Builder
+     */
+    public function exclude($fieldName = null)
+    {
+        $select = func_get_args();
+        foreach ($select as $fieldName) {
+            $this->query['select'][$fieldName] = 0;
         }
         return $this;
     }
@@ -302,7 +315,7 @@ class Builder
      * @param string $fieldName
      * @param integer $skip
      * @param integer $limit
-     * @return Query
+     * @return Builder
      */
     public function selectSlice($fieldName, $skip, $limit = null)
     {
@@ -319,7 +332,7 @@ class Builder
      *
      * @param string $x
      * @param string $y
-     * @return Query
+     * @return Builder
      */
     public function near($value)
     {
@@ -332,7 +345,7 @@ class Builder
      * Set the current field to operate on.
      *
      * @param string $field
-     * @return Query
+     * @return Builder
      */
     public function field($field)
     {
@@ -342,10 +355,8 @@ class Builder
     }
 
     /**
-     * Add a new where criteria erasing all old criteria.
-     *
-     * @param string $value
-     * @return Query
+     * @param $value
+     * @return Builder
      */
     public function equals($value)
     {
@@ -357,7 +368,7 @@ class Builder
      * Add $where javascript function to reduce result sets.
      *
      * @param string $javascript
-     * @return Query
+     * @return Builder
      */
     public function where($javascript)
     {
@@ -369,7 +380,7 @@ class Builder
      * Add a new where in criteria.
      *
      * @param mixed $values
-     * @return Query
+     * @return Builder
      */
     public function in($values)
     {
@@ -381,7 +392,7 @@ class Builder
      * Add where not in criteria.
      *
      * @param mixed $values
-     * @return Query
+     * @return Builder
      */
     public function notIn($values)
     {
@@ -393,7 +404,7 @@ class Builder
      * Add where not equal criteria.
      *
      * @param string $value
-     * @return Query
+     * @return Builder
      */
     public function notEqual($value)
     {
@@ -405,7 +416,7 @@ class Builder
      * Add where greater than criteria.
      *
      * @param string $value
-     * @return Query
+     * @return Builder
      */
     public function gt($value)
     {
@@ -417,7 +428,7 @@ class Builder
      * Add where greater than or equal to criteria.
      *
      * @param string $value
-     * @return Query
+     * @return Builder
      */
     public function gte($value)
     {
@@ -429,7 +440,7 @@ class Builder
      * Add where less than criteria.
      *
      * @param string $value
-     * @return Query
+     * @return Builder
      */
     public function lt($value)
     {
@@ -441,7 +452,7 @@ class Builder
      * Add where less than or equal to criteria.
      *
      * @param string $value
-     * @return Query
+     * @return Builder
      */
     public function lte($value)
     {
@@ -454,7 +465,7 @@ class Builder
      *
      * @param string $start
      * @param string $end
-     * @return Query
+     * @return Builder
      */
     public function range($start, $end)
     {
@@ -466,7 +477,7 @@ class Builder
      * Add where size criteria.
      *
      * @param string $size
-     * @return Query
+     * @return Builder
      */
     public function size($size)
     {
@@ -478,7 +489,7 @@ class Builder
      * Add where exists criteria.
      *
      * @param string $bool
-     * @return Query
+     * @return Builder
      */
     public function exists($bool)
     {
@@ -490,7 +501,7 @@ class Builder
      * Add where type criteria.
      *
      * @param string $type
-     * @return Query
+     * @return Builder
      */
     public function type($type)
     {
@@ -502,7 +513,7 @@ class Builder
      * Add where all criteria.
      *
      * @param mixed $values
-     * @return Query
+     * @return Builder
      */
     public function all($values)
     {
@@ -514,7 +525,7 @@ class Builder
      * Add where mod criteria.
      *
      * @param string $mod
-     * @return Query
+     * @return Builder
      */
     public function mod($mod)
     {
@@ -529,7 +540,7 @@ class Builder
      * @param string $y1
      * @param string $x2
      * @param string $y2
-     * @return Query
+     * @return Builder
      */
     public function withinBox($x1, $y1, $x2, $y2)
     {
@@ -543,7 +554,7 @@ class Builder
      * @param string $x
      * @param string $y
      * @param string $radius
-     * @return Query
+     * @return Builder
      */
     public function withinCenter($x, $y, $radius)
     {
@@ -551,11 +562,13 @@ class Builder
         return $this;
     }
 
+
     /**
      * Set sort and erase all old sorts.
      *
+     * @param string $fieldName
      * @param string $order
-     * @return Query
+     * @return Builder
      */
     public function sort($fieldName, $order = null)
     {
@@ -577,7 +590,7 @@ class Builder
      * Set the Document limit for the Cursor
      *
      * @param string $limit
-     * @return Query
+     * @return Builder
      */
     public function limit($limit)
     {
@@ -589,7 +602,7 @@ class Builder
      * Set the number of Documents to skip for the Cursor
      *
      * @param string $skip
-     * @return Query
+     * @return Builder
      */
     public function skip($skip)
     {
@@ -600,17 +613,19 @@ class Builder
     /**
      * Specify a map reduce operation for this query.
      *
-     * @param mixed $map
-     * @param mixed $reduce
+     * @param string $map
+     * @param string $reduce
+     * @param array $out
      * @param array $options
-     * @return Query
+     * @return Builder
      */
-    public function mapReduce($map, $reduce, array $options = array())
+    public function mapReduce($map, $reduce, array $out = array('inline' => true), array $options = array())
     {
         $this->query['type'] = Query::TYPE_MAP_REDUCE;
         $this->query['mapReduce'] = array(
             'map' => $map,
             'reduce' => $reduce,
+            'out' => $out,
             'options' => $options
         );
         return $this;
@@ -620,7 +635,7 @@ class Builder
      * Specify a map operation for this query.
      *
      * @param string $map
-     * @return Query
+     * @return Builder
      */
     public function map($map)
     {
@@ -633,7 +648,7 @@ class Builder
      * Specify a reduce operation for this query.
      *
      * @param string $reduce
-     * @return Query
+     * @return Builder
      */
     public function reduce($reduce)
     {
@@ -645,10 +660,24 @@ class Builder
     }
 
     /**
+     * Specify output type for mar/reduce operation.
+     *
+     * @param array $out
+     * @return Builder
+     */
+    public function out(array $out)
+    {
+        $this->query['mapReduce']['out'] = $out;
+        $this->query['type'] = Query::TYPE_MAP_REDUCE;
+
+        return $this;
+    }
+
+    /**
      * Specify the map reduce array of options for this query.
      *
      * @param array $options
-     * @return Query
+     * @return Builder
      */
     public function mapReduceOptions(array $options)
     {
@@ -661,7 +690,7 @@ class Builder
      *
      * @param mixed $value
      * @param boolean $atomic
-     * @return Query
+     * @return Builder
      */
     public function set($value, $atomic = true)
     {
@@ -677,7 +706,7 @@ class Builder
      * otherwise sets field to the number value.
      *
      * @param integer $value
-     * @return Query
+     * @return Builder
      */
     public function inc($value)
     {
@@ -688,7 +717,7 @@ class Builder
     /**
      * Deletes a given field.
      *
-     * @return Query
+     * @return Builder
      */
     public function unsetField()
     {
@@ -702,7 +731,7 @@ class Builder
      * but is not an array, an error condition is raised.
      *
      * @param mixed $value
-     * @return Query
+     * @return Builder
      */
     public function push($value)
     {
@@ -717,7 +746,7 @@ class Builder
      * raised.
      *
      * @param array $valueArray
-     * @return Query
+     * @return Builder
      */
     public function pushAll(array $valueArray)
     {
@@ -729,7 +758,7 @@ class Builder
      * Adds value to the array only if its not in the array already.
      *
      * @param mixed $value
-     * @return Query
+     * @return Builder
      */
     public function addToSet($value)
     {
@@ -741,7 +770,7 @@ class Builder
      * Adds values to the array only they are not in the array already.
      *
      * @param array $values
-     * @return Query
+     * @return Builder
      */
     public function addManyToSet(array $values)
     {
@@ -752,7 +781,7 @@ class Builder
     /**
      * Removes first element in an array
      *
-     * @return Query
+     * @return Builder
      */
     public function popFirst()
     {
@@ -763,7 +792,7 @@ class Builder
     /**
      * Removes last element in an array
      *
-     * @return Query
+     * @return Builder
      */
     public function popLast()
     {
@@ -776,7 +805,7 @@ class Builder
      * If field is present but is not an array, an error condition is raised.
      *
      * @param mixed $value
-     * @return Query
+     * @return Builder
      */
     public function pull($value)
     {
@@ -790,7 +819,7 @@ class Builder
      * condition is raised.
      *
      * @param array $valueArray
-     * @return Query
+     * @return Builder
      */
     public function pullAll(array $valueArray)
     {
@@ -809,7 +838,7 @@ class Builder
      *         ->addOr($qb->expr()->field('first_name')->equals('Chris'));
      *
      * @param array|QueryBuilder $expression
-     * @return Query
+     * @return Builder
      */
     public function addOr($expression)
     {
@@ -828,7 +857,7 @@ class Builder
      *         ->elemMatch($qb->expr()->field('phonenumber')->equals('6155139185'));
      *
      * @param array|QueryBuilder $expression
-     * @return Query
+     * @return Builder
      */
     public function elemMatch($expression)
     {
@@ -845,7 +874,7 @@ class Builder
      *     $qb->field('id')->not($qb->expr()->in(1));
      *
      * @param array|QueryBuilder $expression
-     * @return Query
+     * @return Builder
      */
     public function not($expression)
     {
@@ -856,7 +885,7 @@ class Builder
     /**
      * Create a new Query\Expr instance that can be used as an expression with the QueryBuilder
      *
-     * @return Query\Expr $expr
+     * @return Expr $expr
      */
     public function expr()
     {
@@ -889,7 +918,7 @@ class Builder
      * Gets the Query executable.
      *
      * @param array $options
-     * @return QueryInterface $query
+     * @return Query $query
      */
     public function getQuery(array $options = array())
     {

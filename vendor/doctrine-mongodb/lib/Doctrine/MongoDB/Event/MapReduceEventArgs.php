@@ -34,13 +34,15 @@ class MapReduceEventArgs extends EventArgs
     private $invoker;
     private $map;
     private $reduce;
-    private $query = array();
+    private $query;
+    private $out;
 
-    public function __construct($invoker, &$map, array &$reduce, array &$query)
+    public function __construct($invoker, &$map, &$reduce, array &$out, array &$query)
     {
         $this->invoker = $invoker;
         $this->map = $map;
         $this->reduce = $reduce;
+        $this->out = $out;
         $this->query = $query;
     }
 
@@ -57,5 +59,10 @@ class MapReduceEventArgs extends EventArgs
     public function getQuery()
     {
         return $this->query;
+    }
+
+    public function getOut()
+    {
+        return $this->out;
     }
 }

@@ -1,0 +1,11 @@
+<script type="text/javascript">
+    //<![CDATA[
+    {% include "ServerGroveLiveChatBundle:Admin:sessionsApi.js.twig" %}
+    jQuery('#currentVisits').ready(function() {
+        SessionToolkit.Global.refresh();
+    });
+    jQuery(document).ready(function() {
+        SessionToolkit.Global.loadTimeout();
+    });
+    //]]>
+</script>

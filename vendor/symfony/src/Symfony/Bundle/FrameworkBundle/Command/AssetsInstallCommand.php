@@ -18,11 +18,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 
 /**
- * AssetsInstallCommand.
+ * Command that places bundle web assets into a given directory.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class AssetsInstallCommand extends Command
+class AssetsInstallCommand extends ContainerAwareCommand
 {
     /**
      * @see Command
@@ -31,9 +31,24 @@ class AssetsInstallCommand extends Command
     {
         $this
             ->setDefinition(array(
-                new InputArgument('target', InputArgument::REQUIRED, 'The target directory'),
+                new InputArgument('target', InputArgument::REQUIRED, 'The target directory (usually "web")'),
             ))
             ->addOption('symlink', null, InputOption::VALUE_NONE, 'Symlinks the assets instead of copying it')
+            ->setDescription('Install bundles web assets under a public web directory')
+            ->setHelp(<<<EOT
+The <info>assets:install</info> command installs bundle assets into a given
+directory (e.g. the web directory).
+
+<info>php app/console assets:install web [--symlink]</info>
+
+A "bundles" directory will be created inside the target directory, and the
+"Resources/public" directory of each bundle will be copied into it.
+
+To create a symlink to each bundle instead of copying its assets, use the
+<info>--symlink</info> option.
+
+EOT
+            )
             ->setName('assets:install')
         ;
     }
@@ -49,23 +64,27 @@ class AssetsInstallCommand extends Command
             throw new \InvalidArgumentException(sprintf('The target directory "%s" does not exist.', $input->getArgument('target')));
         }
 
-        $filesystem = $this->container->get('filesystem');
+        if (!function_exists('symlink') && $input->getOption('symlink')) {
+            throw new \InvalidArgumentException('The symlink() function is not available on your system. You need to install the assets without the --symlink option.');
+        }
+
+        $filesystem = $this->getContainer()->get('filesystem');
 
         // Create the bundles directory otherwise symlink will fail.
-        $filesystem->mkdirs($input->getArgument('target').'/bundles/', 0777);
+        $filesystem->mkdir($input->getArgument('target').'/bundles/', 0777);
 
-        foreach ($this->container->get('kernel')->getBundles() as $bundle) {
+        foreach ($this->getContainer()->get('kernel')->getBundles() as $bundle) {
             if (is_dir($originDir = $bundle->getPath().'/Resources/public')) {
-                $output->writeln(sprintf('Installing assets for <comment>%s</comment>', $bundle->getNamespace()));
-
                 $targetDir = $input->getArgument('target').'/bundles/'.preg_replace('/bundle$/', '', strtolower($bundle->getName()));
+
+                $output->writeln(sprintf('Installing assets for <comment>%s</comment> into <comment>%s</comment>', $bundle->getNamespace(), $targetDir));
 
                 $filesystem->remove($targetDir);
 
                 if ($input->getOption('symlink')) {
                     $filesystem->symlink($originDir, $targetDir);
                 } else {
-                    $filesystem->mkdirs($targetDir, 0777);
+                    $filesystem->mkdir($targetDir, 0777);
                     $filesystem->mirror($originDir, $targetDir);
                 }
             }

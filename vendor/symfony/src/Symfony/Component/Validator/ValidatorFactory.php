@@ -11,6 +11,7 @@ namespace Symfony\Component\Validator;
  * file that was distributed with this source code.
  */
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Validator\Exception\MappingException;
 use Symfony\Component\Validator\Mapping\ClassMetadataFactory;
 use Symfony\Component\Validator\Mapping\ClassMetadataFactoryInterface;
@@ -51,8 +52,8 @@ use Symfony\Component\Validator\Mapping\Loader\LoaderChain;
  *
  * <code>
  * $defaultContext = new ValidatorContext();
- * $defaultContext->classMetadataFactory($metadataFactory);
- * $defaultContext->constraintValidatorFactory($validatorFactory);
+ * $defaultContext->setClassMetadataFactory($metadataFactory);
+ * $defaultContext->setConstraintValidatorFactory($validatorFactory);
  * $factory = new ValidatorFactory($defaultContext);
  *
  * $form = $factory->getValidator();
@@ -65,7 +66,7 @@ use Symfony\Component\Validator\Mapping\Loader\LoaderChain;
  *
  * <code>
  * $form = $factory
- *     ->classMetadataFactory($customFactory);
+ *     ->setClassMetadataFactory($customFactory);
  *     ->getValidator();
  * </code>
  *
@@ -87,20 +88,16 @@ class ValidatorFactory implements ValidatorContextInterface
      * @param  array $mappingFiles          A list of XML or YAML file names
      *                                      where mapping information can be
      *                                      found. Can be empty.
-     * @param  boolean $annotations         Whether to use annotations for
+     * @param  Boolean $annotations         Whether to use annotations for
      *                                      retrieving mapping information
-     * @param  array $annotationNamespaces  The annotation namespaces used
-     *                                      for finding the annotation classes.
-     *                                      The namespace "validation" is used
-     *                                      by default
      * @param  string $staticMethod         The name of the static method to
      *                                      use, if static method loading should
      *                                      be enabled
-     * @throws \InvalidArgumentException    If any of the files in $mappingFiles
+     * @throws MappingException             If any of the files in $mappingFiles
      *                                      has neither the extension ".xml" nor
      *                                      ".yml" nor ".yaml"
      */
-    public static function buildDefault(array $mappingFiles = array(), $annotations = true, $annotationNamespaces = null, $staticMethod = null)
+    static public function buildDefault(array $mappingFiles = array(), $annotations = true, $staticMethod = null)
     {
         $xmlMappingFiles = array();
         $yamlMappingFiles = array();
@@ -128,7 +125,7 @@ class ValidatorFactory implements ValidatorContextInterface
         }
 
         if ($annotations) {
-            $loaders[] = new AnnotationLoader($annotationNamespaces);
+            $loaders[] = new AnnotationLoader(new AnnotationReader());
         }
 
         if ($staticMethod) {
@@ -143,8 +140,8 @@ class ValidatorFactory implements ValidatorContextInterface
             throw new MappingException('No mapping loader was found for the given parameters');
         }
 
-        $context->classMetadataFactory(new ClassMetadataFactory($loader));
-        $context->constraintValidatorFactory(new ConstraintValidatorFactory());
+        $context->setClassMetadataFactory(new ClassMetadataFactory($loader));
+        $context->setConstraintValidatorFactory(new ConstraintValidatorFactory());
 
         return new static($context);
     }
@@ -166,11 +163,11 @@ class ValidatorFactory implements ValidatorContextInterface
      * @param  ClassMetadataFactoryInterface $metadataFactory  The new factory instance
      * @return ValidatorContextInterface                       The preconfigured form context
      */
-    public function classMetadataFactory(ClassMetadataFactoryInterface $metadataFactory)
+    public function setClassMetadataFactory(ClassMetadataFactoryInterface $metadataFactory)
     {
         $context = clone $this->defaultContext;
 
-        return $context->classMetadataFactory($metadataFactory);
+        return $context->setClassMetadataFactory($metadataFactory);
     }
 
     /**
@@ -180,11 +177,11 @@ class ValidatorFactory implements ValidatorContextInterface
      * @param  ClassMetadataFactoryInterface $validatorFactory  The new factory instance
      * @return ValidatorContextInterface                        The preconfigured form context
      */
-    public function constraintValidatorFactory(ConstraintValidatorFactoryInterface $validatorFactory)
+    public function setConstraintValidatorFactory(ConstraintValidatorFactoryInterface $validatorFactory)
     {
         $context = clone $this->defaultContext;
 
-        return $context->constraintValidatorFactory($validatorFactory);
+        return $context->setConstraintValidatorFactory($validatorFactory);
     }
 
     /**

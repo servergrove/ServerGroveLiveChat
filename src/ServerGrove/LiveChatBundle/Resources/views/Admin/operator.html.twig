@@ -1,0 +1,50 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
+
+{% block content %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+
+{% if operator.getId() %}
+<h1>Edit operator "{{operator.getName()}}"</h1>
+{% else %}
+<h1>Add new operator</h1>
+{% endif %}
+
+{% set route = operator.getId() ? 'sglc_admin_operator_edit' : 'sglc_admin_operator' %}
+{% set vars = operator.getId() ? {'id': operator.getId()} : {} %}
+
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text:first').focus();
+        jQuery('form').submit(function() {
+            if (jQuery('#passwordEnabler').length > 0 && jQuery(':password[disabled]').length == 0 && jQuery(':password:first').val().trim().length == 0) {
+                alert('Password cannot be empty');
+                return false;
+            }
+            
+            return true;
+        });
+    });
+</script>
+
+<form action="{{ path(route, vars) }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <div>
+            {{ form_errors(form) }}
+        </div>
+        {{ form_row(form.name) }}
+        <p></p>
+        {{ form_row(form.email) }}
+        <p></p>
+        {% set attr = edit ? {'autocomplete': 'off', 'disabled': 'disabled'} : {'autocomplete': 'off'} %}
+        {{ form_row(form.passwd, {'attr': attr}) }}
+        {# if edit %}
+            <input type="checkbox" id="passwordEnabler" onclick="jQuery(this).siblings(':password').attr({'disabled': !this.checked}).prev(':password:first').focus();" /> Change
+        {% endif #}
+        <p>{{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}</p>
+        {{ form_row(form.departments) }}
+        <p>{{ form_rest(form) }}</p>
+        <input type="submit" value="Submit" onclick="return " />
+    </div>
+</form>
+{% endblock %}

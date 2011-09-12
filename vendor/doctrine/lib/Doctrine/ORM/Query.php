@@ -53,6 +53,15 @@ final class Query extends AbstractQuery
      * @var string
      */
     const HINT_REFRESH = 'doctrine.refresh';
+    
+    
+    /**
+     * Internal hint: is set to the proxy entity that is currently triggered for loading
+     * 
+     * @var string
+     */
+    const HINT_REFRESH_ENTITY = 'doctrine.refresh.entity';
+    
     /**
      * The forcePartialLoad query hint forces a particular query to return
      * partial objects.
@@ -249,7 +258,12 @@ final class Query extends AbstractQuery
                     $idValues = $class->getIdentifierValues($value);
                 }
                 $sqlPositions = $paramMappings[$key];
-                $sqlParams += array_combine((array)$sqlPositions, $idValues);
+                $cSqlPos = count($sqlPositions);
+                $cIdValues = count($idValues);
+                $idValues = array_values($idValues);
+                for ($i = 0; $i < $cSqlPos; $i++) {
+                    $sqlParams[$sqlPositions[$i]] = $idValues[ ($i % $cIdValues) ];
+                }
             } else {
                 foreach ($paramMappings[$key] as $position) {
                     $sqlParams[$position] = $value;

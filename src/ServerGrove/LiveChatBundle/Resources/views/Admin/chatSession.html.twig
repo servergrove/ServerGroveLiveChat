@@ -1,0 +1,27 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+<h1>Chat session "{{session.getId()}}"</h1>
+<div>
+    <div style="overflow: auto;height: 400px;" id="messages">
+        <div id="user-messages">
+            {% for message in session.getMessages() %}
+            <table width="100%" cellspacing="0" cellpadding="3" border="0">
+                <tbody>
+                    <tr valign="top">
+                        <td width="70px">
+                            <div class="name {{message.isOperator() ? 'operator' : 'client'}}">{{message.getSenderName()}}: </div>
+                        </td>
+                        <td>{{message.getContent()}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            {%endfor%}
+        </div>
+        <div style="font-size: 0.8em; font-style: italic;" id="action">&nbsp;</div>
+    </div>
+</div>
+<script type="text/javascript">
+    jQuery('#user-messages table:even tbody tr').css({'background-color': '#F8F8F8'});
+</script>
+{%endblock%}

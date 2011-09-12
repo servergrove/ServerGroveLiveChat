@@ -23,31 +23,25 @@ class RegisterKernelListenersPass implements CompilerPassInterface
             return;
         }
 
-        $listeners = array();
-        foreach ($container->findTaggedServiceIds('kernel.listener') as $id => $events) {
+        $definition = $container->getDefinition('event_dispatcher');
+
+        foreach ($container->findTaggedServiceIds('kernel.event_listener') as $id => $events) {
             foreach ($events as $event) {
                 $priority = isset($event['priority']) ? $event['priority'] : 0;
+
                 if (!isset($event['event'])) {
-                    throw new \InvalidArgumentException(sprintf('Service "%s" must define the "event" attribute on "kernel.listener" tags.', $id));
+                    throw new \InvalidArgumentException(sprintf('Service "%s" must define the "event" attribute on "kernel.event_listener" tags.', $id));
                 }
+
                 if (!isset($event['method'])) {
-                    throw new \InvalidArgumentException(sprintf('Service "%s" must define the "method" attribute on "kernel.listener" tags.', $id));
+                    $event['method'] = 'on'.preg_replace(array(
+                        '/(?<=\b)[a-z]/ie',
+                        '/[^a-z0-9]/i'
+                    ), array('strtoupper("\\0")', ''), $event['event']);
                 }
 
-                if (!isset($listeners[$event['event']][$priority])) {
-                    if (!isset($listeners[$event['event']])) {
-                        $listeners[$event['event']] = array();
-                    }
-                    $listeners[$event['event']][$priority] = array();
-                }
-
-                $listeners[$event['event']][$priority][] = array($id, $event['method']);
+                $definition->addMethodCall('addListenerService', array($event['event'], array($id, $event['method']), $priority));
             }
         }
-
-        $container
-            ->getDefinition('event_dispatcher')
-            ->addMethodCall('registerKernelListeners', array($listeners))
-        ;
     }
 }

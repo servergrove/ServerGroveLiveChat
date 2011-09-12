@@ -36,23 +36,18 @@ interface ProfilerStorageInterface
      *
      * @param string $token A token
      *
-     * @return string The data associated with token
+     * @return Profile The profile associated with token
      */
     function read($token);
 
     /**
      * Write data associated with the given token.
      *
-     * @param string  $token  A token
-     * @param string  $parent The parent token
-     * @param string  $data   The data associated with token
-     * @param string  $ip     An IP
-     * @param string  $url    An URL
-     * @param integer $time   The time of the data
+     * @param Profile $profile A Profile instance
      *
      * @return Boolean Write operation successful
      */
-    function write($token, $parent, $data, $ip, $url, $time);
+    function write(Profile $profile);
 
     /**
      * Purges all data from the database.

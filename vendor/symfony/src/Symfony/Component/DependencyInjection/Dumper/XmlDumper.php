@@ -15,20 +15,21 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\InterfaceInjector;
 
 /**
  * XmlDumper dumps a service container as an XML string.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Martin Hasoň <martin.hason@gmail.com>
+ *
+ * @api
  */
 class XmlDumper extends Dumper
 {
     /**
      * @var \DOMDocument
      */
-    protected $document;
+    private $document;
 
     /**
      * Dumps the service container as an XML string.
@@ -36,6 +37,8 @@ class XmlDumper extends Dumper
      * @param  array  $options An array of options
      *
      * @return string An xml string representing of the service container
+     *
+     * @api
      */
     public function dump(array $options = array())
     {
@@ -48,7 +51,6 @@ class XmlDumper extends Dumper
 
         $this->addParameters($container);
         $this->addServices($container);
-        $this->addInterfaceInjectors($container);
 
         $this->document->appendChild($container);
         $xml = $this->document->saveXML();
@@ -60,10 +62,10 @@ class XmlDumper extends Dumper
     /**
      * Adds parameters.
      *
-     * @param DOMElement $parent 
+     * @param DOMElement $parent
      * @return void
      */
-    protected function addParameters(\DOMElement $parent)
+    private function addParameters(\DOMElement $parent)
     {
         $data = $this->container->getParameterBag()->all();
         if (!$data) {
@@ -82,11 +84,11 @@ class XmlDumper extends Dumper
     /**
      * Adds method calls.
      *
-     * @param array $methodcalls 
-     * @param DOMElement $parent 
+     * @param array $methodcalls
+     * @param DOMElement $parent
      * @return void
      */
-    protected function addMethodCalls(array $methodcalls, \DOMElement $parent)
+    private function addMethodCalls(array $methodcalls, \DOMElement $parent)
     {
         foreach ($methodcalls as $methodcall) {
             $call = $this->document->createElement('call');
@@ -99,48 +101,14 @@ class XmlDumper extends Dumper
     }
 
     /**
-     * Adds interface injector.
-     *
-     * @param InterfaceInjector $injector 
-     * @param DOMElement $parent 
-     * @return void
-     */
-    protected function addInterfaceInjector(InterfaceInjector $injector, \DOMElement $parent)
-    {
-        $interface = $this->document->createElement('interface');
-        $interface->setAttribute('class', $injector->getClass());
-        $this->addMethodCalls($injector->getMethodCalls(), $interface);
-        $parent->appendChild($interface);
-    }
-
-    /**
-     * Adds interface injectors.
-     *
-     * @param DOMElement $parent 
-     * @return void
-     */
-    protected function addInterfaceInjectors(\DOMElement $parent)
-    {
-        if (!$this->container->getInterfaceInjectors()) {
-            return;
-        }
-
-        $interfaces = $this->document->createElement('interfaces');
-        foreach ($this->container->getInterfaceInjectors() as $injector) {
-            $this->addInterfaceInjector($injector, $interfaces);
-        }
-        $parent->appendChild($interfaces);
-    }
-
-    /**
      * Adds a service.
      *
-     * @param Definition $definition 
-     * @param string $id 
-     * @param DOMElement $parent 
+     * @param Definition $definition
+     * @param string $id
+     * @param DOMElement $parent
      * @return void
      */
-    protected function addService($definition, $id, \DOMElement $parent)
+    private function addService($definition, $id, \DOMElement $parent)
     {
         $service = $this->document->createElement('service');
         if (null !== $id) {
@@ -157,6 +125,9 @@ class XmlDumper extends Dumper
         }
         if (ContainerInterface::SCOPE_CONTAINER !== $scope = $definition->getScope()) {
             $service->setAttribute('scope', $scope);
+        }
+        if (!$definition->isPublic()) {
+            $service->setAttribute('public', 'false');
         }
 
         foreach ($definition->getTags() as $name => $tags) {
@@ -179,6 +150,10 @@ class XmlDumper extends Dumper
             $this->convertParameters($parameters, 'argument', $service);
         }
 
+        if ($parameters = $definition->getProperties()) {
+            $this->convertParameters($parameters, 'property', $service, 'name');
+        }
+
         $this->addMethodCalls($definition->getMethodCalls(), $service);
 
         if ($callable = $definition->getConfigurator()) {
@@ -198,12 +173,12 @@ class XmlDumper extends Dumper
     /**
      * Adds a service alias.
      *
-     * @param string $alias 
-     * @param string $id 
-     * @param DOMElement $parent 
+     * @param string $alias
+     * @param string $id
+     * @param DOMElement $parent
      * @return void
      */
-    protected function addServiceAlias($alias, $id, \DOMElement $parent)
+    private function addServiceAlias($alias, $id, \DOMElement $parent)
     {
         $service = $this->document->createElement('service');
         $service->setAttribute('id', $alias);
@@ -217,10 +192,10 @@ class XmlDumper extends Dumper
     /**
      * Adds services.
      *
-     * @param DOMElement $parent 
+     * @param DOMElement $parent
      * @return void
      */
-    protected function addServices(\DOMElement $parent)
+    private function addServices(\DOMElement $parent)
     {
         $definitions = $this->container->getDefinitions();
         if (!$definitions) {
@@ -241,23 +216,24 @@ class XmlDumper extends Dumper
     /**
      * Converts parameters.
      *
-     * @param string $parameters 
-     * @param string $type 
-     * @param DOMElement $parent 
+     * @param array      $parameters
+     * @param string     $type
+     * @param DOMElement $parent
+     * @param string     $keyAttribute
      * @return void
      */
-    protected function convertParameters($parameters, $type, \DOMElement $parent)
+    private function convertParameters($parameters, $type, \DOMElement $parent, $keyAttribute = 'key')
     {
         $withKeys = array_keys($parameters) !== range(0, count($parameters) - 1);
         foreach ($parameters as $key => $value) {
             $element = $this->document->createElement($type);
             if ($withKeys) {
-                $element->setAttribute('key', $key);
+                $element->setAttribute($keyAttribute, $key);
             }
 
             if (is_array($value)) {
                 $element->setAttribute('type', 'collection');
-                $this->convertParameters($value, $type, $element);
+                $this->convertParameters($value, $type, $element, 'key');
             } else if (is_object($value) && $value instanceof Reference) {
                 $element->setAttribute('type', 'service');
                 $element->setAttribute('id', (string) $value);
@@ -284,10 +260,10 @@ class XmlDumper extends Dumper
     /**
      * Escapes arguments
      *
-     * @param array $arguments 
+     * @param array $arguments
      * @return array
      */
-    protected function escape($arguments)
+    private function escape($arguments)
     {
         $args = array();
         foreach ($arguments as $k => $v) {

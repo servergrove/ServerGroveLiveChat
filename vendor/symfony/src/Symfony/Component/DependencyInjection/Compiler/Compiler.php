@@ -18,14 +18,15 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
  * This class is used to remove circular dependencies between individual passes.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @api
  */
 class Compiler
 {
-    protected $passConfig;
-    protected $currentPass;
-    protected $currentStartTime;
-    protected $log;
-    protected $serviceReferenceGraph;
+    private $passConfig;
+    private $log;
+    private $loggingFormatter;
+    private $serviceReferenceGraph;
 
     /**
      * Constructor.
@@ -34,6 +35,7 @@ class Compiler
     {
         $this->passConfig = new PassConfig();
         $this->serviceReferenceGraph = new ServiceReferenceGraph();
+        $this->loggingFormatter = new LoggingFormatter();
         $this->log = array();
     }
 
@@ -41,6 +43,8 @@ class Compiler
      * Returns the PassConfig.
      *
      * @return PassConfig The PassConfig instance
+     *
+     * @api
      */
     public function getPassConfig()
     {
@@ -51,6 +55,8 @@ class Compiler
      * Returns the ServiceReferenceGraph.
      *
      * @return ServiceReferenceGraph The ServiceReferenceGraph instance
+     *
+     * @api
      */
     public function getServiceReferenceGraph()
     {
@@ -58,10 +64,22 @@ class Compiler
     }
 
     /**
+     * Returns the logging formatter which can be used by compilation passes.
+     *
+     * @return LoggingFormatter
+     */
+    public function getLoggingFormatter()
+    {
+        return $this->loggingFormatter;
+    }
+
+    /**
      * Adds a pass to the PassConfig.
      *
      * @param CompilerPassInterface $pass A compiler pass
-     * @param string $type The type of the pass
+     * @param string                $type The type of the pass
+     *
+     * @api
      */
     public function addPass(CompilerPassInterface $pass, $type = PassConfig::TYPE_BEFORE_OPTIMIZATION)
     {
@@ -71,7 +89,7 @@ class Compiler
     /**
      * Adds a log message.
      *
-     * @param string $string The log message 
+     * @param string $string The log message
      */
     public function addLogMessage($string)
     {
@@ -91,36 +109,14 @@ class Compiler
     /**
      * Run the Compiler and process all Passes.
      *
-     * @param ContainerBuilder $container 
+     * @param ContainerBuilder $container
+     *
+     * @api
      */
     public function compile(ContainerBuilder $container)
     {
         foreach ($this->passConfig->getPasses() as $pass) {
-            $this->startPass($pass);
             $pass->process($container);
-            $this->endPass($pass);
         }
-    }
-
-    /**
-     * Starts an individual pass.
-     *
-     * @param CompilerPassInterface $pass The pass to start
-     */
-    protected function startPass(CompilerPassInterface $pass)
-    {
-        $this->currentPass = $pass;
-        $this->currentStartTime = microtime(true);
-    }
-
-    /**
-     * Ends an individual pass.
-     *
-     * @param CompilerPassInterface $pass The compiler pass
-     */
-    protected function endPass(CompilerPassInterface $pass)
-    {
-        $this->currentPass = null;
-        $this->addLogMessage(sprintf('%s finished in %.3fs', get_class($pass), microtime(true) - $this->currentStartTime));
     }
 }

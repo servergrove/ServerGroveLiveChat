@@ -20,8 +20,8 @@ use Symfony\Component\Console\Command\Command;
  */
 class HelperSet
 {
-    protected $helpers;
-    protected $command;
+    private $helpers;
+    private $command;
 
     /**
      * @param Helper[] $helpers An array of helper.
@@ -37,8 +37,8 @@ class HelperSet
     /**
      * Sets a helper.
      *
-     * @param HelperInterface $value The helper instance
-     * @param string                    $alias An alias
+     * @param HelperInterface $helper The helper instance
+     * @param string          $alias  An alias
      */
     public function set(HelperInterface $helper, $alias = null)
     {

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <parameters>
+        <parameter key="livechat.controller.listener.class">ServerGrove\LiveChatBundle\EventListener\ControllerListener</parameter>
+        <parameter key="livechat.cache.manager.class">ServerGrove\LiveChatBundle\Cache\Manager</parameter>
+        <parameter key="livechat.cache.engine.apc.class">ServerGrove\LiveChatBundle\Cache\Engine\Apc</parameter>
+        <parameter key="livechat.cache.engine.mongo.class">ServerGrove\LiveChatBundle\Cache\Engine\Mongo</parameter>
+
+        <parameter key="livechat.cookies.class">Symfony\Component\HttpFoundation\ParameterBag</parameter>
+    </parameters>
+    
+    <services>
+        <!-- User Repository Service -->
+        <service id="livechat.cache.manager" class="%livechat.cache.manager.class%">
+            <argument type="service" id="livechat.cache.default_engine" />
+        </service>
+
+        <service id="livechat.cache.default_engine" alias="livechat.cache.engine.mongo" public="false"></service>
+        <service id="livechat.cache.engine.apc" class="%livechat.cache.engine.apc.class%"></service>
+        <service id="livechat.cache.engine.mongo" class="%livechat.cache.engine.mongo.class%">
+            <argument type="service" id="doctrine.odm.mongodb.default_document_manager" />
+        </service>
+
+        <service id="livechat.controller.listener" class="%livechat.controller.listener.class%">
+            <argument type="service" id="service_container" />
+            <tag name="kernel.event_listener" event="kernel.response" method="onKernelResponse" />
+        </service>
+
+        <service id="livechat.cookies" class="%livechat.cookies.class%"></service>
+
+    </services>
+    
+</container>

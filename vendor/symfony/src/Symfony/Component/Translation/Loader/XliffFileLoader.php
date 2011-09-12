@@ -18,11 +18,15 @@ use Symfony\Component\Config\Resource\FileResource;
  * XliffFileLoader loads translations from XLIFF files.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 class XliffFileLoader implements LoaderInterface
 {
     /**
      * {@inheritdoc}
+     *
+     * @api
      */
     public function load($resource, $locale, $domain = 'messages')
     {
@@ -44,15 +48,24 @@ class XliffFileLoader implements LoaderInterface
      * @param  string $file
      * @return SimpleXMLElement
      */
-    protected function parseFile($file)
+    private function parseFile($file)
     {
         $dom = new \DOMDocument();
         $current = libxml_use_internal_errors(true);
         if (!@$dom->load($file, LIBXML_COMPACT)) {
-            throw new \Exception(implode("\n", $this->getXmlErrors()));
+            throw new \RuntimeException(implode("\n", $this->getXmlErrors()));
         }
 
-        $parts = explode('/', str_replace('\\', '/', __DIR__).'/schema/dic/xliff-core/xml.xsd');
+        $location = str_replace('\\', '/', __DIR__).'/schema/dic/xliff-core/xml.xsd';
+        $parts = explode('/', $location);
+        if (preg_match('#^phar://#i', $location)) {
+            $tmpfile = tempnam(sys_get_temp_dir(), 'sf2');
+            if ($tmpfile) {
+                file_put_contents($tmpfile, file_get_contents($location));
+                $tmpfiles[] = $tmpfile;
+                $parts = explode('/', str_replace('\\', '/', $tmpfile));
+            }
+        }
         $drive = '\\' === DIRECTORY_SEPARATOR ? array_shift($parts).'/' : '';
         $location = 'file:///'.$drive.implode('/', array_map('rawurlencode', $parts));
 
@@ -60,7 +73,7 @@ class XliffFileLoader implements LoaderInterface
         $source = str_replace('http://www.w3.org/2001/xml.xsd', $location, $source);
 
         if (!@$dom->schemaValidateSource($source)) {
-            throw new \Exception(implode("\n", $this->getXmlErrors()));
+            throw new \RuntimeException(implode("\n", $this->getXmlErrors()));
         }
         $dom->validateOnParse = true;
         $dom->normalizeDocument();
@@ -74,7 +87,7 @@ class XliffFileLoader implements LoaderInterface
      *
      * @return array  An array of errors
      */
-    protected function getXmlErrors()
+    private function getXmlErrors()
     {
         $errors = array();
         foreach (libxml_get_errors() as $error) {

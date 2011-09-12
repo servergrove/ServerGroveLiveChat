@@ -16,23 +16,34 @@ namespace Symfony\Component\Security\Core\Authentication\Token;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class UsernamePasswordToken extends Token
+class UsernamePasswordToken extends AbstractToken
 {
+    private $credentials;
+    private $providerKey;
+
     /**
      * Constructor.
      *
-     * @param string $user The username (like a nickname, email address, etc.)
+     * @param string $user        The username (like a nickname, email address, etc.)
      * @param string $credentials This usually is the password of the user
+     * @param string $providerKey The provider key
+     * @param array  $roles       An array of roles
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct($user, $credentials, $providerKey, array $roles = array())
     {
         parent::__construct($roles);
 
+        if (empty($providerKey)) {
+            throw new \InvalidArgumentException('$providerKey must not be empty.');
+        }
+
         $this->setUser($user);
         $this->credentials = $credentials;
         $this->providerKey = $providerKey;
 
-        parent::setAuthenticated((Boolean) count($roles));
+        parent::setAuthenticated(count($roles) > 0);
     }
 
     /**
@@ -47,6 +58,16 @@ class UsernamePasswordToken extends Token
         parent::setAuthenticated(false);
     }
 
+    public function getCredentials()
+    {
+        return $this->credentials;
+    }
+
+    public function getProviderKey()
+    {
+        return $this->providerKey;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -55,5 +76,16 @@ class UsernamePasswordToken extends Token
         parent::eraseCredentials();
 
         $this->credentials = null;
+    }
+
+    public function serialize()
+    {
+        return serialize(array($this->credentials, $this->providerKey, parent::serialize()));
+    }
+
+    public function unserialize($str)
+    {
+        list($this->credentials, $this->providerKey, $parentStr) = unserialize($str);
+        parent::unserialize($parentStr);
     }
 }

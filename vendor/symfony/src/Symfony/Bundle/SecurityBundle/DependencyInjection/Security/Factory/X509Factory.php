@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
-use Symfony\Component\Config\Definition\Builder\NodeBuilder;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 
@@ -30,14 +30,16 @@ class X509Factory implements SecurityFactoryInterface
         $provider = 'security.authentication.provider.pre_authenticated.'.$id;
         $container
             ->setDefinition($provider, new DefinitionDecorator('security.authentication.provider.pre_authenticated'))
-            ->setArgument(0, new Reference($userProvider))
+            ->replaceArgument(0, new Reference($userProvider))
             ->addArgument($id)
         ;
 
         // listener
         $listenerId = 'security.authentication.listener.x509.'.$id;
         $listener = $container->setDefinition($listenerId, new DefinitionDecorator('security.authentication.listener.x509'));
-        $listener->setArgument(2, $id);
+        $listener->replaceArgument(2, $id);
+        $listener->replaceArgument(3, $config['user']);
+        $listener->replaceArgument(4, $config['credentials']);
 
         return array($provider, $listenerId, $defaultEntryPoint);
     }
@@ -52,10 +54,14 @@ class X509Factory implements SecurityFactoryInterface
         return 'x509';
     }
 
-    public function addConfiguration(NodeBuilder $builder)
+    public function addConfiguration(NodeDefinition $node)
     {
-        $builder
-            ->scalarNode('provider')->end()
+        $node
+            ->children()
+                ->scalarNode('provider')->end()
+                ->scalarNode('user')->defaultValue('SSL_CLIENT_S_DN_Email')->end()
+                ->scalarNode('credentials')->defaultValue('SSL_CLIENT_S_DN')->end()
+            ->end()
         ;
     }
 }

@@ -154,11 +154,11 @@ class CollectionPersister
         list($propertyPath, $parent) = $this->getPathAndParent($coll);
         if ($mapping['strategy'] === 'set') {
             $setData = array();
-            foreach ($coll as $document) {
+            foreach ($coll as $key => $document) {
                 if (isset($mapping['reference'])) {
-                    $setData[] = $this->pb->prepareReferencedDocumentValue($mapping, $document);
+                    $setData[$key] = $this->pb->prepareReferencedDocumentValue($mapping, $document);
                 } else {
-                    $setData[] = $this->pb->prepareEmbeddedDocumentValue($mapping, $document);
+                    $setData[$key] = $this->pb->prepareEmbeddedDocumentValue($mapping, $document);
                 }
             }
             $query = array($this->cmd.'set' => array($propertyPath => $setData));
@@ -168,7 +168,7 @@ class CollectionPersister
             $insertDiff = $coll->getInsertDiff();
             if ($insertDiff) {
                 $query = array($this->cmd.$strategy => array());
-                foreach ($insertDiff as $key => $document) {
+                foreach ($insertDiff as $document) {
                     if (isset($mapping['reference'])) {
                         $query[$this->cmd.$strategy][$propertyPath][] = $this->pb->prepareReferencedDocumentValue($mapping, $document);
                     } else {
@@ -211,8 +211,12 @@ class CollectionPersister
         $fields = array();
         $parent = $coll->getOwner();
         while (null !== ($association = $this->uow->getParentAssociation($parent))) {
-            list($m, $parent, $path) = $association;
-            $fields[] = $path;
+            list($m, $owner, $field) = $association;
+            if (isset($m['reference'])) {
+                break;
+            }
+            $parent = $owner;
+            $fields[] = $field;
         }
         $propertyPath = implode('.', array_reverse($fields));
         $path = $mapping['name'];

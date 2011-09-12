@@ -17,6 +17,8 @@ use Symfony\Component\Templating\TemplateReferenceInterface;
  * LoaderInterface is the interface all loaders must implement.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 interface LoaderInterface
 {
@@ -26,14 +28,18 @@ interface LoaderInterface
      * @param TemplateReferenceInterface $template A template
      *
      * @return Storage|Boolean false if the template cannot be loaded, a Storage instance otherwise
+     *
+     * @api
      */
     function load(TemplateReferenceInterface $template);
 
     /**
      * Returns true if the template is still fresh.
      *
-     * @param TemplateReferenceInterface    $template A template
-     * @param integer                       $time     The last modification time of the cached template (timestamp)
+     * @param TemplateReferenceInterface $template A template
+     * @param integer                    $time     The last modification time of the cached template (timestamp)
+     *
+     * @api
      */
     function isFresh(TemplateReferenceInterface $template, $time);
 }

@@ -12,81 +12,83 @@
 namespace Symfony\Component\EventDispatcher;
 
 /**
- * EventDispatcherInterface describes an event dispatcher class.
+ * The EventDispatcherInterface is the central point of Symfony's event listener system.
+ * Listeners are registered on the manager and events are dispatched through the
+ * manager.
  *
- * @see http://developer.apple.com/documentation/Cocoa/Conceptual/Notifications/index.html Apple's Cocoa framework
+ * @author Bernhard Schussek <bschussek@gmail.com>
  *
- * @author Fabien Potencier <fabien@symfony.com>
+ * @api
  */
 interface EventDispatcherInterface
 {
     /**
-     * Connects a listener to a given event name.
+     * Dispatches an event to all registered listeners.
      *
-     * Listeners with a higher priority are executed first.
+     * @param string $eventName The name of the event to dispatch. The name of
+     *                          the event is the name of the method that is
+     *                          invoked on listeners.
+     * @param Event $event The event to pass to the event handlers/listeners.
+     *                     If not supplied, an empty Event instance is created.
      *
-     * @param string  $name      An event name
-     * @param mixed   $listener  A PHP callable
-     * @param integer $priority  The priority (between -10 and 10 -- defaults to 0)
+     * @api
      */
-    function connect($name, $listener, $priority = 0);
+    function dispatch($eventName, Event $event = null);
 
     /**
-     * Disconnects one, or all listeners for the given event name.
+     * Adds an event listener that listens on the specified events.
      *
-     * @param string     $name     An event name
-     * @param mixed|null $listener The listener to remove, or null to remove all
+     * @param string   $eventName The event to listen on
+     * @param callable $listener  The listener
+     * @param integer  $priority  The higher this value, the earlier an event
+     *                            listener will be triggered in the chain (defaults to 0)
      *
-     * @return void
+     * @api
      */
-    function disconnect($name, $listener = null);
+    function addListener($eventName, $listener, $priority = 0);
 
     /**
-     * Notifies all listeners of a given event.
+     * Adds an event subscriber. The subscriber is asked for all the events he is
+     * interested in and added as a listener for these events.
      *
-     * @param EventInterface $event An EventInterface instance
+     * @param EventSubscriberInterface $subscriber The subscriber.
+     *
+     * @api
      */
-    function notify(EventInterface $event);
+    function addSubscriber(EventSubscriberInterface $subscriber);
 
     /**
-     * Notifies all listeners of a given event until one processes the event.
+     * Removes an event listener from the specified events.
      *
-     * A listener tells the dispatcher that it has processed the event
-     * by calling the setProcessed() method on it.
-     *
-     * It can then return a value that will be forwarded to the caller.
-     *
-     * @param  EventInterface $event An EventInterface instance
-     *
-     * @return mixed The returned value of the listener that processed the event
+     * @param string|array $eventName The event(s) to remove a listener from.
+     * @param object $listener The listener object to remove.
      */
-    function notifyUntil(EventInterface $event);
+    function removeListener($eventName, $listener);
 
     /**
-     * Filters a value by calling all listeners of a given event.
+     * Removes an event subscriber.
      *
-     * @param  EventInterface $event An EventInterface instance
-     * @param  mixed          $value The value to be filtered
-     *
-     * @return mixed The filtered value
+     * @param EventSubscriberInterface $subscriber The subscriber.
      */
-    function filter(EventInterface $event, $value);
+    function removeSubscriber(EventSubscriberInterface $subscriber);
 
     /**
-     * Returns true if the given event name has some listeners.
+     * Gets the listeners of a specific event or all listeners.
      *
-     * @param  string $name The event name
+     * @param string $eventName The name of the event.
      *
-     * @return Boolean true if some listeners are connected, false otherwise
+     * @return array The event listeners for the specified event, or all event
+     *               listeners by event name.
      */
-    function hasListeners($name);
+    function getListeners($eventName = null);
 
     /**
-     * Returns all listeners associated with a given event name.
+     * Checks whether an event has any registered listeners.
      *
-     * @param  string $name The event name
+     * @param string $eventName The name of the event.
      *
-     * @return array  An array of listeners
+     * @return Boolean TRUE if the specified event has any listeners, FALSE
+     *                 otherwise.
      */
-    function getListeners($name);
+    function hasListeners($eventName = null);
 }

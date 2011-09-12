@@ -24,18 +24,15 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 class ControllerNameParser
 {
     protected $kernel;
-    protected $logger;
 
     /**
      * Constructor.
      *
      * @param KernelInterface $kernel A KernelInterface instance
-     * @param LoggerInterface $logger A LoggerInterface instance
      */
-    public function __construct(KernelInterface $kernel, LoggerInterface $logger = null)
+    public function __construct(KernelInterface $kernel)
     {
         $this->kernel = $kernel;
-        $this->logger = $logger;
     }
 
     /**
@@ -57,9 +54,7 @@ class ControllerNameParser
         foreach ($this->kernel->getBundle($bundle, false) as $b) {
             $try = $b->getNamespace().'\\Controller\\'.$controller.'Controller';
             if (!class_exists($try)) {
-                if (null !== $this->logger) {
-                    $logs[] = sprintf('Failed finding controller "%s:%s" from namespace "%s" (%s)', $bundle, $controller, $b->getNamespace(), $try);
-                }
+                $logs[] = sprintf('Unable to find controller "%s:%s" - class "%s" does not exist.', $bundle, $controller, $try);
             } else {
                 $class = $try;
 
@@ -68,15 +63,26 @@ class ControllerNameParser
         }
 
         if (null === $class) {
-            if (null !== $this->logger) {
-                foreach ($logs as $log) {
-                    $this->logger->info($log);
-                }
-            }
-
-            throw new \InvalidArgumentException(sprintf('Unable to find controller "%s:%s".', $bundle, $controller));
+            $this->handleControllerNotFoundException($bundle, $controller, $logs);
         }
 
         return $class.'::'.$action.'Action';
+    }
+
+    private function handleControllerNotFoundException($bundle, $controller, array $logs)
+    {
+        // just one log, return it as the exception
+        if (1 == count($logs)) {
+            throw new \InvalidArgumentException($logs[0]);
+        }
+
+        // many logs, use a message that mentions each searched bundle
+        $names = array();
+        foreach ($this->kernel->getBundle($bundle, false) as $b) {
+            $names[] = $b->getName();
+        }
+        $msg = sprintf('Unable to find controller "%s:%s" in bundles %s.', $bundle, $controller, implode(', ', $names));
+
+        throw new \InvalidArgumentException($msg);
     }
 }

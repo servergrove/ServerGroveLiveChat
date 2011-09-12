@@ -1,11 +1,18 @@
 <?php
 
+/*
+ * This file is part of the Symfony framework.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
-use Symfony\Component\Config\Definition\Builder\NodeBuilder;
-
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
-
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -35,9 +42,6 @@ class RememberMeFactory implements SecurityFactoryInterface
 
         // remember me services
         if (isset($config['token_provider'])) {
-            $config['token-provider'] = $config['token_provider'];
-        }
-        if (isset($config['token-provider'])) {
             $templateId = 'security.authentication.rememberme.services.persistent';
             $rememberMeServicesId = $templateId.'.'.$id;
         } else {
@@ -53,18 +57,17 @@ class RememberMeFactory implements SecurityFactoryInterface
         }
 
         $rememberMeServices = $container->setDefinition($rememberMeServicesId, new DefinitionDecorator($templateId));
-        $rememberMeServices->setArgument(1, $config['key']);
-        $rememberMeServices->setArgument(2, $id);
+        $rememberMeServices->replaceArgument(1, $config['key']);
+        $rememberMeServices->replaceArgument(2, $id);
 
-        if (isset($config['token-provider'])) {
-            // FIXME: make the naming assumption more flexible
+        if (isset($config['token_provider'])) {
             $rememberMeServices->addMethodCall('setTokenProvider', array(
-                new Reference('security.rememberme.token.provider.'.$config['token-provider'])
+                new Reference($config['token_provider'])
             ));
         }
 
         // remember-me options
-        $rememberMeServices->setArgument(3, array_intersect_key($config, $this->options));
+        $rememberMeServices->replaceArgument(3, array_intersect_key($config, $this->options));
 
         // attach to remember-me aware listeners
         $userProviders = array();
@@ -85,15 +88,21 @@ class RememberMeFactory implements SecurityFactoryInterface
                 ;
             }
         }
+        if ($config['user_providers']) {
+            $userProviders = array();
+            foreach ($config['user_providers'] as $providerName) {
+                $userProviders[] = new Reference('security.user.provider.concrete.'.$providerName);
+            }
+        }
         if (count($userProviders) === 0) {
             throw new \RuntimeException('You must configure at least one remember-me aware listener (such as form-login) for each firewall that has remember-me enabled.');
         }
-        $rememberMeServices->setArgument(0, $userProviders);
+        $rememberMeServices->replaceArgument(0, $userProviders);
 
         // remember-me listener
         $listenerId = 'security.authentication.listener.rememberme.'.$id;
         $listener = $container->setDefinition($listenerId, new DefinitionDecorator('security.authentication.listener.rememberme'));
-        $listener->setArgument(1, new Reference($rememberMeServicesId));
+        $listener->replaceArgument(1, new Reference($rememberMeServicesId));
 
         return array($authProviderId, $listenerId, $defaultEntryPoint);
     }
@@ -108,18 +117,27 @@ class RememberMeFactory implements SecurityFactoryInterface
         return 'remember-me';
     }
 
-    public function addConfiguration(NodeBuilder $node)
+    public function addConfiguration(NodeDefinition $node)
     {
-        $node
+        $node->fixXmlConfig('user_provider');
+        $builder = $node->children();
+
+        $builder
             ->scalarNode('key')->isRequired()->cannotBeEmpty()->end()
             ->scalarNode('token_provider')->end()
+            ->arrayNode('user_providers')
+                ->beforeNormalization()
+                    ->ifString()->then(function($v) { return array($v); })
+                ->end()
+                ->prototype('scalar')->end()
+            ->end()
         ;
 
         foreach ($this->options as $name => $value) {
             if (is_bool($value)) {
-                $node->booleanNode($name)->defaultValue($value);
+                $builder->booleanNode($name)->defaultValue($value);
             } else {
-                $node->scalarNode($name)->defaultValue($value);
+                $builder->scalarNode($name)->defaultValue($value);
             }
         }
     }

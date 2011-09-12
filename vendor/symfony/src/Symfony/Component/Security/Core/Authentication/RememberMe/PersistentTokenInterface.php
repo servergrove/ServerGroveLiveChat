@@ -14,29 +14,35 @@ namespace Symfony\Component\Security\Core\Authentication\RememberMe;
 /**
  * Interface to be implemented by persistent token classes (such as
  * Doctrine entities representing a remember-me token)
- * 
+ *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
 interface PersistentTokenInterface
 {
     /**
+     * Returns the class of the user
+     * @return string
+     */
+    function getClass();
+
+    /**
      * Returns the username
      * @return string
      */
     function getUsername();
-    
+
     /**
      * Returns the series
      * @return string
      */
     function getSeries();
-    
+
     /**
      * Returns the token value
      * @return string
      */
     function getTokenValue();
-    
+
     /**
      * Returns the last time the cookie was used
      * @return \DateTime

@@ -13,11 +13,9 @@ namespace Symfony\Bundle\WebProfilerBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Bundle\WebProfilerBundle\EventListener\WebDebugToolbarListener;
 
 /**
  * WebProfilerExtension.
@@ -33,39 +31,30 @@ use Symfony\Component\Config\FileLocator;
  */
 class WebProfilerExtension extends Extension
 {
-    public function load(array $configs, ContainerBuilder $container)
-    {
-        foreach ($configs as $config) {
-            $this->doConfigLoad($config, $container);
-        }
-    }
-
     /**
      * Loads the web profiler configuration.
      *
-     * @param array            $config    An array of configuration settings
+     * @param array            $configs   An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance
      */
-    protected function doConfigLoad(array $config, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('toolbar.xml');
 
-        if (isset($config['toolbar'])) {
-            if ($config['toolbar']) {
-                if (!$container->hasDefinition('debug.toolbar')) {
-                    $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-                    $loader->load('toolbar.xml');
-                }
-            } elseif ($container->hasDefinition('debug.toolbar')) {
-                $container->getDefinition('debug.toolbar')->clearTags();
-            }
-        }
+        $container->setParameter('web_profiler.debug_toolbar.intercept_redirects', $config['intercept_redirects']);
 
-        foreach (array('intercept-redirects', 'intercept_redirects') as $key) {
-            if (isset($config[$key])) {
-                $container->setParameter('debug.toolbar.intercept_redirects', (Boolean) $config[$key]);
-            }
+        if (!$config['toolbar']) {
+            $mode = WebDebugToolbarListener::DISABLED;
+        } elseif ($config['verbose']) {
+            $mode = WebDebugToolbarListener::ENABLED;
+        } else {
+            $mode = WebDebugToolbarListener::ENABLED_MINIMAL;
         }
+        $container->setParameter('web_profiler.debug_toolbar.mode', $mode);
     }
 
     /**

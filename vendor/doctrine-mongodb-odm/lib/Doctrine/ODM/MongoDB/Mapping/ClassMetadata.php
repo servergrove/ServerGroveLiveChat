@@ -114,7 +114,8 @@ class ClassMetadata extends ClassMetadataInfo
             'rootDocumentName',
             'generatorType',
             'generatorOptions',
-            'idGenerator'
+            'idGenerator',
+            'indexes'
         );
 
         // The rest of the metadata is only serialized if necessary.
@@ -150,6 +151,10 @@ class ClassMetadata extends ClassMetadataInfo
 
         if ($this->lifecycleCallbacks) {
             $serialized[] = 'lifecycleCallbacks';
+        }
+
+        if ($this->file) {
+            $serialized[] = 'file';
         }
 
         return $serialized;

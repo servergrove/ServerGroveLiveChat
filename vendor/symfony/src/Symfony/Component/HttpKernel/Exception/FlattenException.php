@@ -20,17 +20,21 @@ namespace Symfony\Component\HttpKernel\Exception;
  */
 class FlattenException
 {
-    protected $message;
-    protected $code;
-    protected $previous;
-    protected $trace;
-    protected $class;
+    private $message;
+    private $code;
+    private $previous;
+    private $trace;
+    private $class;
+    private $statusCode;
+    private $headers;
 
-    static public function create(\Exception $exception)
+    static public function create(\Exception $exception, $statusCode = 500, array $headers = array())
     {
         $e = new static();
         $e->setMessage($exception->getMessage());
         $e->setCode($exception->getCode());
+        $e->setStatusCode($statusCode);
+        $e->setHeaders($headers);
         $e->setTrace($exception->getTrace(), $exception->getFile(), $exception->getLine());
         $e->setClass(get_class($exception));
         if ($exception->getPrevious()) {
@@ -43,15 +47,35 @@ class FlattenException
     public function toArray()
     {
         $exceptions = array();
-        foreach (array_merge(array($this), $this->getPreviouses()) as $exception) {
+        foreach (array_merge(array($this), $this->getAllPrevious()) as $exception) {
             $exceptions[] = array(
-                'message'  => $exception->getMessage(),
-                'class'    => $exception->getClass(),
-                'trace'    => $exception->getTrace(),
+                'message' => $exception->getMessage(),
+                'class'   => $exception->getClass(),
+                'trace'   => $exception->getTrace(),
             );
         }
 
         return $exceptions;
+    }
+
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
+
+    public function setStatusCode($code)
+    {
+        $this->statusCode = $code;
+    }
+
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
+    public function setHeaders(array $headers)
+    {
+        $this->headers = $headers;
     }
 
     public function getClass()
@@ -94,7 +118,7 @@ class FlattenException
         $this->previous = $previous;
     }
 
-    public function getPreviouses()
+    public function getAllPrevious()
     {
         $exceptions = array();
         $e = $this;
@@ -145,20 +169,24 @@ class FlattenException
         }
     }
 
-    protected function flattenArgs($args)
+    private function flattenArgs($args, $level = 0)
     {
         $result = array();
         foreach ($args as $key => $value) {
             if (is_object($value)) {
                 $result[$key] = array('object', get_class($value));
             } elseif (is_array($value)) {
-                $result[$key] = array('array', $this->flattenArgs($value));
+                if ($level > 10) {
+                    $result[$key] = array('array', '*DEEP NESTED ARRAY*');
+                } else {
+                    $result[$key] = array('array', $this->flattenArgs($value, ++$level));
+                }
             } elseif (null === $value) {
                 $result[$key] = array('null', null);
             } elseif (is_bool($value)) {
                 $result[$key] = array('boolean', $value);
             } elseif (is_resource($value)) {
-                $result[$key] = array('resource', '');
+                $result[$key] = array('resource', get_resource_type($value));
             } else {
                 $result[$key] = array('string', (string) $value);
             }

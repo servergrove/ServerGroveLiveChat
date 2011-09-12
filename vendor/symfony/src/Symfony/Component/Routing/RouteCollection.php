@@ -17,19 +17,30 @@ use Symfony\Component\Config\Resource\ResourceInterface;
  * A RouteCollection represents a set of Route instances.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
-class RouteCollection
+class RouteCollection implements \IteratorAggregate
 {
-    protected $routes;
-    protected $resources;
+    private $routes;
+    private $resources;
+    private $prefix;
 
     /**
      * Constructor.
+     *
+     * @api
      */
     public function __construct()
     {
         $this->routes = array();
         $this->resources = array();
+        $this->prefix = '';
+    }
+
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->routes);
     }
 
     /**
@@ -39,6 +50,8 @@ class RouteCollection
      * @param Route  $route A Route instance
      *
      * @throws \InvalidArgumentException When route name contains non valid characters
+     *
+     * @api
      */
     public function add($name, Route $route)
     {
@@ -56,7 +69,16 @@ class RouteCollection
      */
     public function all()
     {
-        return $this->routes;
+        $routes = array();
+        foreach ($this->routes as $name => $route) {
+            if ($route instanceof RouteCollection) {
+                $routes = array_merge($routes, $route->all());
+            } else {
+                $routes[$name] = $route;
+            }
+        }
+
+        return $routes;
     }
 
     /**
@@ -68,7 +90,20 @@ class RouteCollection
      */
     public function get($name)
     {
-        return isset($this->routes[$name]) ? $this->routes[$name] : null;
+        // get the latest defined route
+        foreach (array_reverse($this->routes) as $routes) {
+            if (!$routes instanceof RouteCollection) {
+                continue;
+            }
+
+            if (null !== $route = $routes->get($name)) {
+                return $route;
+            }
+        }
+
+        if (isset($this->routes[$name])) {
+            return $this->routes[$name];
+        }
     }
 
     /**
@@ -76,32 +111,51 @@ class RouteCollection
      *
      * @param RouteCollection $collection A RouteCollection instance
      * @param string          $prefix     An optional prefix to add before each pattern of the route collection
+     *
+     * @api
      */
     public function addCollection(RouteCollection $collection, $prefix = '')
     {
         $collection->addPrefix($prefix);
 
-        foreach ($collection->getResources() as $resource) {
-            $this->addResource($resource);
-        }
-
-        $this->routes = array_merge($this->routes, $collection->all());
+        $this->routes[] = $collection;
     }
 
     /**
      * Adds a prefix to all routes in the current set.
      *
      * @param string          $prefix     An optional prefix to add before each pattern of the route collection
+     *
+     * @api
      */
     public function addPrefix($prefix)
     {
+        // a prefix must not end with a slash
+        $prefix = rtrim($prefix, '/');
+
         if (!$prefix) {
             return;
         }
 
-        foreach ($this->all() as $route) {
-            $route->setPattern($prefix.$route->getPattern());
+        // a prefix must start with a slash
+        if ('/' !== $prefix[0]) {
+            $prefix = '/'.$prefix;
         }
+
+        $this->prefix = $prefix.$this->prefix;
+
+        foreach ($this->routes as $name => $route) {
+            if ($route instanceof RouteCollection) {
+                $route->addPrefix($prefix);
+            } else {
+                $route->setPattern($prefix.$route->getPattern());
+            }
+        }
+    }
+
+    public function getPrefix()
+    {
+        return $this->prefix;
     }
 
     /**
@@ -111,7 +165,14 @@ class RouteCollection
      */
     public function getResources()
     {
-        return array_unique($this->resources);
+        $resources = $this->resources;
+        foreach ($this as $routes) {
+            if ($routes instanceof RouteCollection) {
+                $resources = array_merge($resources, $routes->getResources());
+            }
+        }
+
+        return array_unique($resources);
     }
 
     /**

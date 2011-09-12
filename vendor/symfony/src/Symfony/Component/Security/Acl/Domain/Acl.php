@@ -10,6 +10,7 @@
 
 namespace Symfony\Component\Security\Acl\Domain;
 
+use Doctrine\Common\NotifyPropertyChanged;
 use Doctrine\Common\PropertyChangedListener;
 use Symfony\Component\Security\Acl\Model\AclInterface;
 use Symfony\Component\Security\Acl\Model\AuditableAclInterface;
@@ -33,28 +34,28 @@ use Symfony\Component\Security\Acl\Model\SecurityIdentityInterface;
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-class Acl implements AuditableAclInterface
+class Acl implements AuditableAclInterface, NotifyPropertyChanged
 {
-    protected $parentAcl;
-    protected $permissionGrantingStrategy;
-    protected $objectIdentity;
-    protected $classAces;
-    protected $classFieldAces;
-    protected $objectAces;
-    protected $objectFieldAces;
-    protected $id;
-    protected $loadedSids;
-    protected $entriesInheriting;
-    protected $listeners;
+    private $parentAcl;
+    private $permissionGrantingStrategy;
+    private $objectIdentity;
+    private $classAces;
+    private $classFieldAces;
+    private $objectAces;
+    private $objectFieldAces;
+    private $id;
+    private $loadedSids;
+    private $entriesInheriting;
+    private $listeners;
 
     /**
      * Constructor
      *
-     * @param integer $id
-     * @param ObjectIdentityInterface $objectIdentity
+     * @param integer                             $id
+     * @param ObjectIdentityInterface             $objectIdentity
      * @param PermissionGrantingStrategyInterface $permissionGrantingStrategy
-     * @param array $loadedSids
-     * @param Boolean $entriesInheriting
+     * @param array                               $loadedSids
+     * @param Boolean                             $entriesInheriting
      * @return void
      */
     public function __construct($id, ObjectIdentityInterface $objectIdentity, PermissionGrantingStrategyInterface $permissionGrantingStrategy, array $loadedSids = array(), $entriesInheriting)
@@ -406,7 +407,7 @@ class Acl implements AuditableAclInterface
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function deleteAce($property, $index)
+    private function deleteAce($property, $index)
     {
         $aces =& $this->$property;
         if (!isset($aces[$index])) {
@@ -432,7 +433,7 @@ class Acl implements AuditableAclInterface
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function deleteFieldAce($property, $index, $field)
+    private function deleteFieldAce($property, $index, $field)
     {
         $aces =& $this->$property;
         if (!isset($aces[$field][$index])) {
@@ -452,17 +453,17 @@ class Acl implements AuditableAclInterface
     /**
      * Inserts an ACE
      *
-     * @param string $property
-     * @param integer $index
-     * @param integer $mask
+     * @param string                    $property
+     * @param integer                   $index
+     * @param integer                   $mask
      * @param SecurityIdentityInterface $sid
-     * @param Boolean $granting
-     * @param string $strategy
+     * @param Boolean                   $granting
+     * @param string                    $strategy
      * @throws \OutOfBoundsException
      * @throws \InvalidArgumentException
      * @return void
      */
-    protected function insertAce($property, $index, $mask, SecurityIdentityInterface $sid, $granting, $strategy = null)
+    private function insertAce($property, $index, $mask, SecurityIdentityInterface $sid, $granting, $strategy = null)
     {
         if ($index < 0 || $index > count($this->$property)) {
             throw new \OutOfBoundsException(sprintf('The index must be in the interval [0, %d].', count($this->$property)));
@@ -501,18 +502,18 @@ class Acl implements AuditableAclInterface
     /**
      * Inserts a field-based ACE
      *
-     * @param string $property
-     * @param integer $index
-     * @param string $field
-     * @param integer $mask
+     * @param string                    $property
+     * @param integer                   $index
+     * @param string                    $field
+     * @param integer                   $mask
      * @param SecurityIdentityInterface $sid
-     * @param Boolean $granting
-     * @param string $strategy
+     * @param Boolean                   $granting
+     * @param string                    $strategy
      * @throws \InvalidArgumentException
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function insertFieldAce($property, $index, $field, $mask, SecurityIdentityInterface $sid, $granting, $strategy = null)
+    private function insertFieldAce($property, $index, $field, $mask, SecurityIdentityInterface $sid, $granting, $strategy = null)
     {
         if (0 === strlen($field)) {
             throw new \InvalidArgumentException('$field cannot be empty.');
@@ -557,37 +558,6 @@ class Acl implements AuditableAclInterface
     }
 
     /**
-     * Called when a property of the ACL changes
-     *
-     * @param string $name
-     * @param mixed $oldValue
-     * @param mixed $newValue
-     * @return void
-     */
-    protected function onPropertyChanged($name, $oldValue, $newValue)
-    {
-        foreach ($this->listeners as $listener) {
-            $listener->propertyChanged($this, $name, $oldValue, $newValue);
-        }
-    }
-
-    /**
-     * Called when a property of an ACE associated with this ACL changes
-     *
-     * @param EntryInterface $entry
-     * @param string $name
-     * @param mixed $oldValue
-     * @param mixed $newValue
-     * @return void
-     */
-    protected function onEntryPropertyChanged(EntryInterface $entry, $name, $oldValue, $newValue)
-    {
-        foreach ($this->listeners as $listener) {
-            $listener->propertyChanged($entry, $name, $oldValue, $newValue);
-        }
-    }
-
-    /**
      * Updates an ACE
      *
      * @param string $property
@@ -597,7 +567,7 @@ class Acl implements AuditableAclInterface
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function updateAce($property, $index, $mask, $strategy = null)
+    private function updateAce($property, $index, $mask, $strategy = null)
     {
         $aces =& $this->$property;
         if (!isset($aces[$index])) {
@@ -625,7 +595,7 @@ class Acl implements AuditableAclInterface
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function updateAuditing(array &$aces, $index, $auditSuccess, $auditFailure)
+    private function updateAuditing(array &$aces, $index, $auditSuccess, $auditFailure)
     {
         if (!isset($aces[$index])) {
             throw new \OutOfBoundsException(sprintf('The index "%d" does not exist.', $index));
@@ -654,7 +624,7 @@ class Acl implements AuditableAclInterface
      * @throws \OutOfBoundsException
      * @return void
      */
-    protected function updateFieldAce($property, $index, $field, $mask, $strategy = null)
+    private function updateFieldAce($property, $index, $field, $mask, $strategy = null)
     {
         if (0 === strlen($field)) {
             throw new \InvalidArgumentException('$field cannot be empty.');
@@ -673,6 +643,37 @@ class Acl implements AuditableAclInterface
         if (null !== $strategy && $strategy !== $oldStrategy = $ace->getStrategy()) {
             $this->onEntryPropertyChanged($ace, 'strategy', $oldStrategy, $strategy);
             $ace->setStrategy($strategy);
+        }
+    }
+
+    /**
+     * Called when a property of the ACL changes
+     *
+     * @param string $name
+     * @param mixed $oldValue
+     * @param mixed $newValue
+     * @return void
+     */
+    private function onPropertyChanged($name, $oldValue, $newValue)
+    {
+        foreach ($this->listeners as $listener) {
+            $listener->propertyChanged($this, $name, $oldValue, $newValue);
+        }
+    }
+
+    /**
+     * Called when a property of an ACE associated with this ACL changes
+     *
+     * @param EntryInterface $entry
+     * @param string         $name
+     * @param mixed          $oldValue
+     * @param mixed          $newValue
+     * @return void
+     */
+    private function onEntryPropertyChanged(EntryInterface $entry, $name, $oldValue, $newValue)
+    {
+        foreach ($this->listeners as $listener) {
+            $listener->propertyChanged($entry, $name, $oldValue, $newValue);
         }
     }
 }

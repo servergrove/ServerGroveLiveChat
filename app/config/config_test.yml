@@ -2,13 +2,16 @@ imports:
     - { resource: config_dev.yml }
 
 framework:
-    error_handler: false
     test: ~
+    session:
+        storage_id: session.storage.filesystem
 
 web_profiler:
     toolbar: false
     intercept_redirects: false
 
-zend:
-    logger:
-        priority: debug
+swiftmailer:
+    disable_delivery: true
+
+doctrine_mongodb:
+  default_database: livechat_%kernel.environment%

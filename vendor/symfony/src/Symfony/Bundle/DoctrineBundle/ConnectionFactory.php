@@ -11,7 +11,6 @@
 
 namespace Symfony\Bundle\DoctrineBundle;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\DriverManager;
@@ -26,7 +25,8 @@ class ConnectionFactory
     private $initialized = false;
 
     /**
-     * @param ContainerInterface $container
+     * Construct.
+     *
      * @param array $typesConfig
      */
     public function __construct(array $typesConfig)
@@ -36,18 +36,30 @@ class ConnectionFactory
 
     /**
      * Create a connection by name.
-     * 
-     * @param  string $connectionName
+     *
+     * @param array         $params
+     * @param Configuration $config
+     * @param EventManager  $eventManager
+     *
      * @return Doctrine\DBAL\Connection
      */
-    public function createConnection(array $params, Configuration $config = null, EventManager $eventManager = null)
+    public function createConnection(array $params, Configuration $config = null, EventManager $eventManager = null, array $mappingTypes = array())
     {
         if (!$this->initialized) {
             $this->initializeTypes();
             $this->initialized = true;
         }
 
-        return DriverManager::getConnection($params, $config, $eventManager);
+        $connection = DriverManager::getConnection($params, $config, $eventManager);
+
+        if (!empty($mappingTypes)) {
+            $platform = $connection->getDatabasePlatform();
+            foreach ($mappingTypes as $dbType => $doctrineType) {
+                $platform->registerDoctrineTypeMapping($dbType, $doctrineType);
+            }
+        }
+
+        return $connection;
     }
 
     private function initializeTypes()

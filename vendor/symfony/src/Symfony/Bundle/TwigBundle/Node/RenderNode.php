@@ -26,13 +26,13 @@ class RenderNode extends \Twig_Node
     /**
      * Compiles the node to PHP.
      *
-     * @param \Twig_Compiler A Twig_Compiler instance
+     * @param \Twig_Compiler $compiler A Twig_Compiler instance
      */
     public function compile(\Twig_Compiler $compiler)
     {
         $compiler
             ->addDebugInfo($this)
-            ->write("echo \$this->env->getExtension('templating')->renderAction(")
+            ->write("echo \$this->env->getExtension('actions')->renderAction(")
             ->subcompile($this->getNode('expr'))
             ->raw(', ')
             ->subcompile($this->getNode('attributes'))

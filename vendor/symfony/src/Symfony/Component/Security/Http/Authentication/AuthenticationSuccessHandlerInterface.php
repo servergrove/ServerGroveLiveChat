@@ -1,8 +1,16 @@
 <?php
 
+/*
+ * This file is part of the Symfony framework.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Symfony\Component\Security\Http\Authentication;
 
-use Symfony\Component\EventDispatcher\EventInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -22,12 +30,10 @@ interface AuthenticationSuccessHandlerInterface
      * is called by authentication listeners inheriting from
      * AbstractAuthenticationListener.
      *
-     * @param EventInterface $event the "core.security" event, this event always
-     *                              has the kernel as target
      * @param Request        $request
      * @param TokenInterface $token
      *
      * @return Response the response to return
      */
-    function onAuthenticationSuccess(EventInterface $event, Request $request, TokenInterface $token);
+    function onAuthenticationSuccess(Request $request, TokenInterface $token);
 }

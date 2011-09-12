@@ -1,0 +1,15 @@
+sglc_admin:
+  resource: "@ServerGroveLiveChatBundle/Controller/AdminController.php"
+  type:     annotation
+
+sglc_chat:
+  resource: "@ServerGroveLiveChatBundle/Controller/ChatController.php"
+  type:     annotation
+
+sglc_tracker:
+  resource: "@ServerGroveLiveChatBundle/Controller/TrackController.php"
+  type:     annotation
+
+sglc_default:
+  resource: "@ServerGroveLiveChatBundle/Controller/DefaultController.php"
+  type:     annotation

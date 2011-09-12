@@ -23,7 +23,7 @@ use Symfony\Component\Config\Loader\Loader;
  */
 class ClosureLoader extends Loader
 {
-    protected $container;
+    private $container;
 
     /**
      * Constructor.
@@ -38,8 +38,8 @@ class ClosureLoader extends Loader
     /**
      * Loads a Closure.
      *
-     * @param \Closure $resource The resource
-     * @param string   $type     The resource type
+     * @param \Closure $closure The resource
+     * @param string   $type    The resource type
      */
     public function load($closure, $type = null)
     {

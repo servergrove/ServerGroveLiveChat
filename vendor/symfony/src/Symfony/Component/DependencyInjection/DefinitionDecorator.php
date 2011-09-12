@@ -1,21 +1,34 @@
 <?php
 
+/*
+ * This file is part of the Symfony framework.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Symfony\Component\DependencyInjection;
 
 /**
  * This definition decorates another definition.
  *
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
+ *
+ * @api
  */
 class DefinitionDecorator extends Definition
 {
-    protected $parent;
-    protected $changes;
+    private $parent;
+    private $changes;
 
     /**
      * Constructor.
      *
      * @param Definition $parent The Definition instance to decorate.
+     *
+     * @api
      */
     public function __construct($parent)
     {
@@ -29,6 +42,8 @@ class DefinitionDecorator extends Definition
      * Returns the Definition being decorated.
      *
      * @return Definition
+     *
+     * @api
      */
     public function getParent()
     {
@@ -39,14 +54,18 @@ class DefinitionDecorator extends Definition
      * Returns all changes tracked for the Definition object.
      *
      * @return array An array of changes for this Definition
+     *
+     * @api
      */
     public function getChanges()
     {
         return $this->changes;
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setClass($class)
     {
@@ -54,9 +73,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setClass($class);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setFactoryClass($class)
     {
@@ -64,9 +85,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setFactoryClass($class);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setFactoryMethod($method)
     {
@@ -74,9 +97,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setFactoryMethod($method);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setFactoryService($service)
     {
@@ -84,9 +109,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setFactoryService($service);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setConfigurator($callable)
     {
@@ -94,9 +121,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setConfigurator($callable);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setFile($file)
     {
@@ -104,9 +133,11 @@ class DefinitionDecorator extends Definition
 
         return parent::setFile($file);
     }
-    
+
     /**
      * {@inheritDoc}
+     *
+     * @api
      */
     public function setPublic($boolean)
     {
@@ -127,9 +158,11 @@ class DefinitionDecorator extends Definition
      * @param mixed $value
      *
      * @return DefinitionDecorator the current instance
-     * @throws \InvalidArgumentException when $index isnt an integer
+     * @throws \InvalidArgumentException when $index isn't an integer
+     *
+     * @api
      */
-    public function setArgument($index, $value)
+    public function replaceArgument($index, $value)
     {
         if (!is_int($index)) {
             throw new \InvalidArgumentException('$index must be an integer.');

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>{% block title %}ServerGrove Livechat{% endblock %}</title>
+        <link type="text/css" href="{{asset('css/main-lc.css')}}" rel="stylesheet" media="all" />
+        <script type="text/javascript" src="{{asset('js/jquery.js')}}"></script>
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+    </head>
+    <body>
+        {% block body %}
+        <div id="chatWin_header">
+            <img src="{{asset('images/sg_logo.jpg')}}" width="182" height="37" alt="Online Support ServerGrove" class="logo" />
+            {% block head_buttons %}{% endblock %}
+        </div>
+        <div class="vspacer"></div>
+        {% block content %}{% endblock %}
+        {% endblock %}
+    </body>
+</html>

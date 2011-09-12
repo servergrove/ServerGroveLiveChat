@@ -20,8 +20,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class RepeatedPass implements CompilerPassInterface
 {
-    protected $repeat;
-    protected $passes;
+    private $repeat;
+    private $passes;
 
     /**
      * Constructor.
@@ -44,18 +44,14 @@ class RepeatedPass implements CompilerPassInterface
     /**
      * Process the repeatable passes that run more than once.
      *
-     * @param ContainerBuilder $container 
+     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
         $compiler = $container->getCompiler();
         $this->repeat = false;
         foreach ($this->passes as $pass) {
-            $time = microtime(true);
             $pass->process($container);
-            $compiler->addLogMessage(sprintf(
-                '%s finished in %.3fs', get_class($pass), microtime(true) - $time
-            ));
         }
 
         if ($this->repeat) {

@@ -300,8 +300,8 @@ class DocumentPersister
         $id = $this->uow->getDocumentIdentifier($document);
         $query = array('_id' => $this->class->getDatabaseIdentifierValue($id));
 
-        if ($this->class->isVersioned) {
-            $query['locked'] = array($this->cmd . 'exists' => false);
+        if ($this->class->isLockable) {
+            $query[$this->class->lockField] = array($this->cmd . 'exists' => false);
             $options['safe'] = true;
         }
 
@@ -363,10 +363,23 @@ class DocumentPersister
      * @param array $criteria
      * @return array
      */
-    public function loadAll(array $criteria = array())
+    public function loadAll(array $criteria = array(), array $orderBy = null, $limit = null, $offset = null)
     {
         $criteria = $this->prepareQuery($criteria);
         $cursor = $this->collection->find($criteria);
+
+        if (null !== $orderBy) {
+            $cursor->sort($orderBy);
+        }
+
+        if (null !== $limit) {
+            $cursor->limit($limit);
+        }
+
+        if (null !== $offset) {
+            $cursor->skip($offset);
+        }
+
         return $this->wrapCursor($cursor);
     }
 
@@ -451,7 +464,7 @@ class DocumentPersister
 
         if ($document !== null) {
             $hints[Query::HINT_REFRESH] = true;
-            $id = $result['_id'];
+            $id = $this->class->getPHPIdentifierValue($result['_id']);
             $this->uow->registerManaged($document, $id, $result);
         }
 
@@ -473,7 +486,7 @@ class DocumentPersister
 
             case ClassMetadata::REFERENCE_MANY:
                 $mapping = $collection->getMapping();
-                if ($mapping['repositoryMethod']) {
+                if (isset($mapping['repositoryMethod']) && $mapping['repositoryMethod']) {
                     $this->loadReferenceManyWithRepositoryMethod($collection);
                 } else {
                     if ($mapping['isOwningSide']) {
@@ -528,16 +541,16 @@ class DocumentPersister
             $mongoCollection = $this->dm->getDocumentCollection($className);
             $criteria = array_merge(
                 array('_id' => array($cmd . 'in' => $ids)),
-                $mapping['criteria']
+                isset($mapping['criteria']) ? $mapping['criteria'] : array()
             );
             $cursor = $mongoCollection->find($criteria);
-            if ($mapping['sort']) {
+            if (isset($mapping['sort'])) {
                 $cursor->sort($mapping['sort']);
             }
-            if ($mapping['limit']) {
+            if (isset($mapping['limit'])) {
                 $cursor->limit($mapping['limit']);
             }
-            if ($mapping['skip']) {
+            if (isset($mapping['skip'])) {
                 $cursor->skip($mapping['skip']);
             }
             foreach ($cursor as $documentData) {
@@ -555,19 +568,19 @@ class DocumentPersister
         $owner = $collection->getOwner();
         $ownerClass = $this->dm->getClassMetadata(get_class($owner));
         $criteria = array_merge(
-            array($mapping['mappedBy'].'.'.$this->cmd.'id' => $ownerClass->getIdentifierObject($owner)),
-            $mapping['criteria']
+            array($mapping['mappedBy'].'.id' => $ownerClass->getIdentifierObject($owner)),
+            isset($mapping['criteria']) ? $mapping['criteria'] : array()
         );
         $qb = $this->dm->createQueryBuilder($mapping['targetDocument'])
             ->setQueryArray($criteria);
 
-        if ($mapping['sort']) {
+        if (isset($mapping['sort'])) {
             $qb->sort($mapping['sort']);
         }
-        if ($mapping['limit']) {
+        if (isset($mapping['limit'])) {
             $qb->limit($mapping['limit']);
         }
-        if ($mapping['skip']) {
+        if (isset($mapping['skip'])) {
             $qb->skip($mapping['skip']);
         }
         $query = $qb->getQuery();
@@ -580,7 +593,7 @@ class DocumentPersister
     private function loadReferenceManyWithRepositoryMethod(PersistentCollection $collection)
     {
         $mapping = $collection->getMapping();
-        $cursor = $this->dm->getRepository($mapping['targetDocument'])->$mapping['repositoryMethod']();
+        $cursor = $this->dm->getRepository($mapping['targetDocument'])->$mapping['repositoryMethod']($collection->getOwner());
         if ($mapping['sort']) {
             $cursor->sort($mapping['sort']);
         }

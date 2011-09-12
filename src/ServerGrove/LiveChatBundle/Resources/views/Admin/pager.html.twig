@@ -1,0 +1,13 @@
+{% if pages > 1 %}
+<ul class="pager">
+    {% spaceless %}
+    <li><a href="{{path(route, {'page': 1})}}">First</a></li>
+    {% set _from = pages > 10 and page > 5 ? page < pages - 10 ? page - 5 : pages - 10 : 1 %}
+    {% set limit = pages > 10 ? _from + 10 : pages %}
+    {% for i in _from..limit %}
+    <li><a href="{{path(route, {'page': i})}}">{{i}}</a></li>
+    {% endfor %}
+    <li><a href="{{path(route, {'page': pages})}}">Last</a></li>
+    {% endspaceless %}
+</ul>
+{% endif %}

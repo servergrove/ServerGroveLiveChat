@@ -12,22 +12,21 @@
 namespace Symfony\Bundle\FrameworkBundle;
 
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddConstraintValidatorsPass;
-use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddFieldFactoryGuessersPass;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddValidatorInitializersPass;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\FormPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\TemplatingPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\RegisterKernelListenersPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\RoutingResolverPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ProfilerPass;
-use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddClassesToCachePass;
-use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddClassesToAutoloadMapPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\TranslatorPass;
 use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\AddCacheWarmerPass;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\ContainerBuilderDebugDumpPass;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\Compiler\CompilerDebugDumpPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Scope;
-use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\ClassLoader\ClassCollectionLoader;
-use Symfony\Component\ClassLoader\MapFileClassLoader;
 
 /**
  * Bundle.
@@ -36,31 +35,10 @@ use Symfony\Component\ClassLoader\MapFileClassLoader;
  */
 class FrameworkBundle extends Bundle
 {
-    /**
-     * Boots the Bundle.
-     */
     public function boot()
     {
-        // load core classes
-        ClassCollectionLoader::load(
-            $this->container->getParameter('kernel.compiled_classes'),
-            $this->container->getParameter('kernel.cache_dir'),
-            'classes',
-            $this->container->getParameter('kernel.debug'),
-            true
-        );
-
-        if ($this->container->has('error_handler')) {
-            $this->container->get('error_handler');
-        }
-
-        if ($this->container->hasParameter('document_root')) {
-            File::setDocumentRoot($this->container->getParameter('document_root'));
-        }
-
-        if (file_exists($this->container->getParameter('kernel.cache_dir').'/autoload.php')) {
-            $classloader = new MapFileClassLoader($this->container->getParameter('kernel.cache_dir').'/autoload.php');
-            $classloader->register(true);
+        if ($this->container->getParameter('kernel.trust_proxy_headers')) {
+            Request::trustProxyData();
         }
     }
 
@@ -72,13 +50,17 @@ class FrameworkBundle extends Bundle
 
         $container->addCompilerPass(new RoutingResolverPass());
         $container->addCompilerPass(new ProfilerPass());
-        $container->addCompilerPass(new RegisterKernelListenersPass());
+        $container->addCompilerPass(new RegisterKernelListenersPass(), PassConfig::TYPE_AFTER_REMOVING);
         $container->addCompilerPass(new TemplatingPass());
         $container->addCompilerPass(new AddConstraintValidatorsPass());
-        $container->addCompilerPass(new AddFieldFactoryGuessersPass());
-        $container->addCompilerPass(new AddClassesToCachePass());
-        $container->addCompilerPass(new AddClassesToAutoloadMapPass());
+        $container->addCompilerPass(new AddValidatorInitializersPass());
+        $container->addCompilerPass(new FormPass());
         $container->addCompilerPass(new TranslatorPass());
         $container->addCompilerPass(new AddCacheWarmerPass());
+
+        if ($container->getParameter('kernel.debug')) {
+            $container->addCompilerPass(new ContainerBuilderDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
+            $container->addCompilerPass(new CompilerDebugDumpPass(), PassConfig::TYPE_AFTER_REMOVING);
+        }
     }
 }

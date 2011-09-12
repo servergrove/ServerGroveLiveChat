@@ -309,7 +309,7 @@ class UnitOfWork implements PropertyChangedListener
      * Get the document persister instance for the given document name
      *
      * @param string $documentName
-     * @return DocumentPersister
+     * @return Persisters\DocumentPersister
      */
     public function getDocumentPersister($documentName)
     {
@@ -325,7 +325,7 @@ class UnitOfWork implements PropertyChangedListener
      * Gets a collection persister for a collection-valued association.
      *
      * @param array $mapping
-     * @return CollectionPersister
+     * @return Persisters\CollectionPersister
      */
     public function getCollectionPersister(array $mapping)
     {
@@ -340,7 +340,7 @@ class UnitOfWork implements PropertyChangedListener
      * Set the document persister instance to use for the given document name
      *
      * @param string $documentName
-     * @param DocumentPersister $persister
+     * @param Persisters\DocumentPersister $persister
      */
     public function setDocumentPersister($documentName, Persisters\DocumentPersister $persister)
     {
@@ -601,6 +601,8 @@ class UnitOfWork implements PropertyChangedListener
                     $values = $value;
                     if (isset($mapping['type']) && $mapping['type'] === 'one') {
                         $values = array($values);
+                    } elseif ($values instanceof PersistentCollection) {
+                        $values = $values->unwrap();
                     }
                     foreach ($values as $obj) {
                         $oid2 = spl_object_hash($obj);
@@ -909,7 +911,7 @@ class UnitOfWork implements PropertyChangedListener
                         $this->recomputeSingleDocumentChangeSet($class, $document);
                     }
 
-                    if ($hasPreUpdateListeners) {
+                    if ($hasPreUpdateListeners && isset($this->documentChangeSets[$oid])) {
                         $this->evm->dispatchEvent(Events::preUpdate, new Event\PreUpdateEventArgs(
                             $document, $this->dm, $this->documentChangeSets[$oid])
                         );
@@ -917,7 +919,7 @@ class UnitOfWork implements PropertyChangedListener
                     $this->cascadePreUpdate($class, $document);
                 }
 
-                if ( ! $class->isEmbeddedDocument) {
+                if ( ! $class->isEmbeddedDocument && isset($this->documentChangeSets[$oid])) {
                     $persister->update($document, $options);
                 }
                 unset($this->documentUpdates[$oid]);
@@ -2276,11 +2278,12 @@ class UnitOfWork implements PropertyChangedListener
             }
         } else {
             $document = $class->newInstance();
+            $this->registerManaged($document, $id, $data);
             $oid = spl_object_hash($document);
             $this->documentStates[$oid] = self::STATE_MANAGED;
             $this->identityMap[$class->rootDocumentName][$id] = $document;
             $data = $this->hydratorFactory->hydrate($document, $data);
-            $this->registerManaged($document, $id, $data);
+            $this->originalDocumentData[$oid] = $data;
         }
         return $document;
     }
@@ -2325,7 +2328,6 @@ class UnitOfWork implements PropertyChangedListener
      */
     public function loadCollection(PersistentCollection $collection)
     {
-        $mapping = $collection->getMapping();
         $this->getDocumentPersister(get_class($collection->getOwner()))->loadCollection($collection);
     }
 

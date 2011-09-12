@@ -1,2 +1,7 @@
+# Internal routing configuration to handle ESI
+#_internal:
+#   resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
+#   prefix:   /_internal
+
 sglivechat:
-  resource: @SGLiveChatBundle/Resources/config/routing.yml
+  resource: "@ServerGroveLiveChatBundle/Resources/config/routing.yml"

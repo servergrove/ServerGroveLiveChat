@@ -15,25 +15,39 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ * Validates whether a value match or not given regexp pattern
+ *
+ * @author Bernhard Schussek <bernhard.schussek@symfony.com>
+ * @author Joseph Bielawski <stloyd@gmail.com>
+ *
+ * @api
+ */
 class RegexValidator extends ConstraintValidator
 {
+    /**
+     * Checks if the passed value is valid.
+     *
+     * @param mixed      $value      The value that should be validated
+     * @param Constraint $constraint The constraint for the validation
+     *
+     * @return Boolean Whether or not the value is valid
+     *
+     * @api
+     */
     public function isValid($value, Constraint $constraint)
     {
         if (null === $value || '' === $value) {
             return true;
         }
 
-        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString()'))) {
+        if (!is_scalar($value) && !(is_object($value) && method_exists($value, '__toString'))) {
             throw new UnexpectedTypeException($value, 'string');
         }
 
-        $value = (string)$value;
+        $value = (string) $value;
 
-        if (
-            ($constraint->match && !preg_match($constraint->pattern, $value))
-            ||
-            (!$constraint->match && preg_match($constraint->pattern, $value))
-        ) {
+        if ($constraint->match xor preg_match($constraint->pattern, $value)) {
             $this->setMessage($constraint->message, array('{{ value }}' => $value));
 
             return false;

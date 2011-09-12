@@ -11,7 +11,7 @@
 
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory;
 
-use Symfony\Component\Config\Definition\Builder\NodeBuilder;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -29,7 +29,7 @@ class FormLoginFactory extends AbstractFactory
         $this->addOption('username_parameter', '_username');
         $this->addOption('password_parameter', '_password');
         $this->addOption('csrf_parameter', '_csrf_token');
-        $this->addOption('csrf_page_id', 'form_login');
+        $this->addOption('intention', 'authenticate');
         $this->addOption('post_only', true);
     }
 
@@ -43,12 +43,14 @@ class FormLoginFactory extends AbstractFactory
         return 'form-login';
     }
 
-    public function addConfiguration(NodeBuilder $builder)
+    public function addConfiguration(NodeDefinition $node)
     {
-        parent::addConfiguration($builder);
+        parent::addConfiguration($node);
 
-        $builder
-            ->scalarNode('csrf_provider')->cannotBeEmpty()->end()
+        $node
+            ->children()
+                ->scalarNode('csrf_provider')->cannotBeEmpty()->end()
+            ->end()
         ;
     }
 
@@ -62,8 +64,8 @@ class FormLoginFactory extends AbstractFactory
         $provider = 'security.authentication.provider.dao.'.$id;
         $container
             ->setDefinition($provider, new DefinitionDecorator('security.authentication.provider.dao'))
-            ->setArgument(0, new Reference($userProviderId))
-            ->setArgument(2, $id)
+            ->replaceArgument(0, new Reference($userProviderId))
+            ->replaceArgument(2, $id)
         ;
 
         return $provider;
@@ -88,6 +90,7 @@ class FormLoginFactory extends AbstractFactory
         $entryPointId = 'security.authentication.form_entry_point.'.$id;
         $container
             ->setDefinition($entryPointId, new DefinitionDecorator('security.authentication.form_entry_point'))
+            ->addArgument(new Reference('security.http_utils'))
             ->addArgument($config['login_path'])
             ->addArgument($config['use_forward'])
         ;

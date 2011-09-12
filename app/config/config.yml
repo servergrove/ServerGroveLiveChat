@@ -1,18 +1,19 @@
 imports:
     - { resource: parameters.ini }
+    - { resource: security.yml }
 
 framework:
-    charset:       UTF-8
-    error_handler: null
-    csrf_protection:
-        enabled: true
-        secret: %csrf_secret%
-    router:        { resource: "%kernel.root_dir%/config/routing.yml" }
-    validation:    { enabled: true, annotations: true }
-    templating:    { engines: ['twig'] } #assets_version: SomeVersionScheme
+    #esi:             ~
+    #translator:      { fallback: %locale% }
+    secret:          %secret%
+    charset:         UTF-8
+    router:          { resource: "%kernel.root_dir%/config/routing.yml" }
+    form:            true
+    csrf_protection: true
+    validation:      { enable_annotations: true }
+    templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
     session:
         default_locale: %locale%
-        lifetime:       0
         auto_start:     true
 
 # Twig Configuration
@@ -24,43 +25,49 @@ twig:
 assetic:
     debug:          %kernel.debug%
     use_controller: false
+    filters:
+        cssrewrite: ~
+        # closure:
+        #     jar: %kernel.root_dir%/java/compiler.jar
+        # yui_css:
+        #     jar: %kernel.root_dir%/java/yuicompressor-2.4.2.jar
 
 # Doctrine Configuration
-#doctrine:
-#    dbal:
-#        driver:   %database_driver%
-#        host:     %database_host%
-#        dbname:   %database_name%
-#        user:     %database_user%
-#        password: %database_password%
-#        logging:  %kernel.debug%
-
-doctrine_mongo_db:
-  server: mongodb://localhost:27017
-  default_database: livechat
+# doctrine:
+#     dbal:
+#         driver:   %database_driver%
+#         host:     %database_host%
+#         port:     %database_port%
+#         dbname:   %database_name%
+#         user:     %database_user%
+#         password: %database_password%
+#         charset:  UTF8
+ 
+doctrine_mongodb:
   connections:
     default:
-        options:
-            connect: true
-  options:
-    connect: true
-  metadata_cache_driver: array # array, apc, xcache, memcache
+      server: mongodb://localhost:27017
+      options:
+        connect: true
+  default_database: livechat
   auto_generate_hydrator_classes: true
   auto_generate_proxy_classes: true
-  mappings:
-    SGLiveChatBundle: ~
-
-#    orm:
-#        auto_generate_proxy_classes: %kernel.debug%
-#        mappings:
-#            AcmeDemoBundle: ~
+  document_managers:
+    default:
+      mappings:
+        ServerGroveLiveChatBundle: ~
+      metadata_cache_driver: array # array, apc, xcache, memcache
 
 # Swiftmailer Configuration
-swiftmailer: ~
-#    transport:  %mailer_transport%
-#    host:       %mailer_host%
-#    username:   %mailer_user%
-#    password:   %mailer_password%
+swiftmailer:
+    transport: %mailer_transport%
+    host:      %mailer_host%
+    username:  %mailer_user%
+    password:  %mailer_password%
 
-sg_live_chat:
+jms_security_extra:
+    secure_controllers:  true
+    secure_all_services: false
+
+server_grove_live_chat:
   cache_engine: mongo

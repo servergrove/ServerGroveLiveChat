@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Matcher\Dumper\ApacheMatcherDumper;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class RouterApacheDumperCommand extends Command
+class RouterApacheDumperCommand extends ContainerAwareCommand
 {
     /**
      * @see Command
@@ -32,7 +32,8 @@ class RouterApacheDumperCommand extends Command
     {
         $this
             ->setDefinition(array(
-                new InputArgument('script_name', InputArgument::OPTIONAL, 'The script name of the application\'s front controller.')
+                new InputArgument('script_name', InputArgument::OPTIONAL, 'The script name of the application\'s front controller.'),
+                new InputOption('base-uri', null, InputOption::VALUE_REQUIRED, 'The base URI'),
             ))
             ->setName('router:dump-apache')
             ->setDescription('Dumps all routes as Apache rewrite rules')
@@ -52,15 +53,18 @@ EOF
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $router = $this->container->get('router.real');
+        $router = $this->getContainer()->get('router');
 
         $dumpOptions = array();
         if ($input->getArgument('script_name')) {
             $dumpOptions['script_name'] = $input->getArgument('script_name');
         }
+        if ($input->getOption('base-uri')) {
+            $dumpOptions['base_uri'] = $input->getOption('base-uri');
+        }
 
         $dumper = new ApacheMatcherDumper($router->getRouteCollection());
 
-        $output->writeln($dumper->dump($dumpOptions), Output::OUTPUT_RAW);
+        $output->writeln($dumper->dump($dumpOptions), OutputInterface::OUTPUT_RAW);
     }
 }

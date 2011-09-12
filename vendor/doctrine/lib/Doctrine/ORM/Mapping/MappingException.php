@@ -73,6 +73,11 @@ class MappingException extends \Doctrine\ORM\ORMException
         return new self("No mapping found for field '$fieldName' on class '$className'.");
     }
 
+    public static function queryNotFound($className, $queryName)
+    {
+        return new self("No query found named '$queryName' on class '$className'.");
+    }
+
     public static function oneToManyRequiresMappedBy($fieldName)
     {
         return new self("OneToMany mapping on field '$fieldName' requires the 'mappedBy' attribute.");
@@ -158,6 +163,10 @@ class MappingException extends \Doctrine\ORM\ORMException
 
     public static function duplicateAssociationMapping($entity, $fieldName) {
         return new self('Property "'.$fieldName.'" in "'.$entity.'" was already declared, but it must be declared only once');
+    }
+
+    public static function duplicateQueryMapping($entity, $queryName) {
+        return new self('Query named "'.$queryName.'" in "'.$entity.'" was already declared, but it must be declared only once');
     }
 
     public static function singleIdNotAllowedOnCompositePrimaryKey($entity) {
@@ -274,5 +283,14 @@ class MappingException extends \Doctrine\ORM\ORMException
     public static function noInheritanceOnMappedSuperClass($className)
     {
         return new self("Its not supported to define inheritance information on a mapped superclass '" . $className . "'.");
+    }
+    
+    public static function mappedClassNotPartOfDiscriminatorMap($className, $rootClassName)
+    {
+        return new self(
+            "Entity '" . $className . "' has to be part of the descriminator map of '" . $rootClassName . "' " .
+            "to be properly mapped in the inheritance hierachy. Alternatively you can make '".$className."' an abstract class " .
+            "to avoid this exception from occuring."
+        );
     }
 }

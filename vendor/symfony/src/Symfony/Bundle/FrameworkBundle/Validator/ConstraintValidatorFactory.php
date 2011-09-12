@@ -34,7 +34,7 @@ use Symfony\Component\Validator\ConstraintValidatorFactoryInterface;
  *         return 'some_alias';
  *     }
  *
- * @author Kris Wallsmith <kris.wallsmith@symfony.com>
+ * @author Kris Wallsmith <kris@symfony.com>
  */
 class ConstraintValidatorFactory implements ConstraintValidatorFactoryInterface
 {
@@ -44,7 +44,8 @@ class ConstraintValidatorFactory implements ConstraintValidatorFactoryInterface
     /**
      * Constructor.
      *
-     * @param ContainerInterface $container The service container
+     * @param ContainerInterface $container  The service container
+     * @param array              $validators An array of validators
      */
     public function __construct(ContainerInterface $container, array $validators = array())
     {

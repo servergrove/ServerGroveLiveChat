@@ -12,7 +12,14 @@
 namespace Symfony\Bundle\FrameworkBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Form\FormTypeInterface;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormBuilder;
+use Symfony\Bundle\DoctrineBundle\Registry;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Controller is a simple implementation of a Controller.
@@ -26,13 +33,13 @@ class Controller extends ContainerAware
     /**
      * Generates a URL from the given parameters.
      *
-     * @param  string  $name       The name of the route
-     * @param  array   $parameters An array of parameters
-     * @param  Boolean $absolute   Whether to generate an absolute URL
+     * @param string  $name       The name of the route
+     * @param mixed   $parameters An array of parameters
+     * @param Boolean $absolute   Whether to generate an absolute URL
      *
      * @return string The generated URL
      */
-    public function generateUrl($route, array $parameters = array(), $absolute = false)
+    public function generateUrl($route, $parameters = array(), $absolute = false)
     {
         return $this->container->get('router')->generate($route, $parameters, $absolute);
     }
@@ -49,6 +56,19 @@ class Controller extends ContainerAware
     public function forward($controller, array $path = array(), array $query = array())
     {
         return $this->container->get('http_kernel')->forward($controller, $path, $query);
+    }
+
+    /**
+     * Returns a RedirectResponse to the given URL.
+     *
+     * @param string  $url The URL to redirect to
+     * @param integer $status The status code to use for the Response
+     *
+     * @return RedirectResponse
+     */
+    public function redirect($url, $status = 302)
+    {
+        return new RedirectResponse($url, $status);
     }
 
     /**
@@ -79,6 +99,73 @@ class Controller extends ContainerAware
     }
 
     /**
+     * Returns a NotFoundHttpException.
+     *
+     * This will result in a 404 response code. Usage example:
+     *
+     *     throw $this->createNotFoundException('Page not found!');
+     *
+     * @return NotFoundHttpException
+     */
+    public function createNotFoundException($message = 'Not Found', \Exception $previous = null)
+    {
+        return new NotFoundHttpException($message, $previous);
+    }
+
+    /**
+     * Creates and returns a Form instance from the type of the form.
+     *
+     * @param string|FormTypeInterface $type    The built type of the form
+     * @param mixed $data                       The initial data for the form
+     * @param array $options                    Options for the form
+     *
+     * @return Form
+     */
+    public function createForm($type, $data = null, array $options = array())
+    {
+        return $this->container->get('form.factory')->create($type, $data, $options);
+    }
+
+    /**
+     * Creates and returns a form builder instance
+     *
+     * @param mixed $data               The initial data for the form
+     * @param array $options            Options for the form
+     *
+     * @return FormBuilder
+     */
+    public function createFormBuilder($data = null, array $options = array())
+    {
+        return $this->container->get('form.factory')->createBuilder('form', $data, $options);
+    }
+
+    /**
+     * Shortcut to return the request service.
+     *
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return $this->container->get('request');
+    }
+
+    /**
+     * Shortcut to return the Doctrine Registry service.
+     *
+     * @return Registry
+     *
+     * @throws \LogicException If DoctrineBundle is not available
+     */
+    public function getDoctrine()
+    {
+        if (!$this->container->has('doctrine')) {
+            throw new \LogicException('The DoctrineBundle is not installed in your application.');
+        }
+
+        return $this->container->get('doctrine');
+    }
+
+    /**
      * Returns true if the service id is defined.
      *
      * @param  string  $id The service id
@@ -95,7 +182,7 @@ class Controller extends ContainerAware
      *
      * @param  string $id The service id
      *
-     * @return object  The service
+     * @return object The service
      */
     public function get($id)
     {

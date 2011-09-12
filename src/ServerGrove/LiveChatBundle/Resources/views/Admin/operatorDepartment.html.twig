@@ -1,0 +1,28 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
+
+{% block content %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+{% if department.getId() %}
+<h1>Edit department "{{department.getName()}}"</h1>
+{% else %}
+<h1>Add new department</h1>
+{% endif %}
+{% set route = department.getId() ? 'sglc_admin_operator_department_edit' : 'sglc_admin_operator_department' %}
+{% set vars = department.getId() ? {'id': department.getId()} : {} %}
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text:first').focus();
+    });
+</script>
+<form action="{{ path(route, vars) }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <div>{{ form_errors(form) }}</div>
+        {{ form_row(form.name) }}
+        <p>{{ form_widget(form.isActive) }}{{ form_label(form.isActive) }}</p>
+        <p>{{ form_rest(form) }}</p>
+        <input type="submit" value="Submit" />
+    </div>
+</form>
+
+{% endblock %}

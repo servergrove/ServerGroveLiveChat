@@ -205,6 +205,13 @@ class ClassMetadataInfo implements ClassMetadata
     public $subClasses = array();
 
     /**
+     * READ-ONLY: The named queries allowed to be called directly from Repository.
+     * 
+     * @var array
+     */
+    public $namedQueries = array();
+
+    /**
      * READ-ONLY: The field names of all fields that are part of the identifier/primary key
      * of the mapped entity class.
      *
@@ -328,7 +335,6 @@ class ClassMetadataInfo implements ClassMetadata
      * uniqueConstraints => array
      *
      * @var array
-     * @todo Rename to just $table
      */
     public $table;
 
@@ -476,6 +482,17 @@ class ClassMetadataInfo implements ClassMetadata
      * @var ReflectionClass
      */
     public $reflClass;
+
+    /**
+     * Is this entity marked as "read-only"?
+     *
+     * That means it is never considered for change-tracking in the UnitOfWork. It is a very helpful performance
+     * optimization for entities that are immutable, either in your domain or through the relation database
+     * (coming from a view, or a history table for example).
+     *
+     * @var bool
+     */
+    public $isReadOnly = false;
 
     /**
      * Initializes a new ClassMetadata instance that will hold the object-relational mapping
@@ -656,6 +673,32 @@ class ClassMetadataInfo implements ClassMetadata
     }
 
     /**
+     * Gets the named query.
+     *
+     * @see ClassMetadataInfo::$namedQueries
+     * @throws MappingException
+     * @param string $queryName The query name
+     * @return string
+     */
+    public function getNamedQuery($queryName)
+    {
+        if ( ! isset($this->namedQueries[$queryName])) {
+            throw MappingException::queryNotFound($this->name, $queryName);
+        }
+        return $this->namedQueries[$queryName];
+    }
+
+    /**
+     * Gets all named queries of the class.
+     *
+     * @return array
+     */
+    public function getNamedQueries()
+    {
+        return $this->namedQueries;
+    }
+
+    /**
      * Validates & completes the given field mapping.
      *
      * @param array $mapping  The field mapping to validated & complete.
@@ -789,7 +832,7 @@ class ClassMetadataInfo implements ClassMetadata
         }
 
         // Cascades
-        $cascades = isset($mapping['cascade']) ? $mapping['cascade'] : array();
+        $cascades = isset($mapping['cascade']) ? array_map('strtolower', $mapping['cascade']) : array();
         if (in_array('all', $cascades)) {
             $cascades = array(
                'remove',
@@ -1228,7 +1271,8 @@ class ClassMetadataInfo implements ClassMetadata
      */
     public function getTemporaryIdTableName()
     {
-        return $this->table['name'] . '_id_tmp';
+        // replace dots with underscores because PostgreSQL creates temporary tables in a special schema
+        return str_replace('.', '_', $this->table['name'] . '_id_tmp');
     }
 
     /**
@@ -1368,8 +1412,7 @@ class ClassMetadataInfo implements ClassMetadata
      * Adds an association mapping without completing/validating it.
      * This is mainly used to add inherited association mappings to derived classes.
      *
-     * @param AssociationMapping $mapping
-     * @param string $owningClassName The name of the class that defined this mapping.
+     * @param array $mapping
      */
     public function addInheritedAssociationMapping(array $mapping/*, $owningClassName = null*/)
     {
@@ -1385,13 +1428,28 @@ class ClassMetadataInfo implements ClassMetadata
      * This is mainly used to add inherited field mappings to derived classes.
      *
      * @param array $mapping
-     * @todo Rename: addInheritedFieldMapping
      */
     public function addInheritedFieldMapping(array $fieldMapping)
     {
         $this->fieldMappings[$fieldMapping['fieldName']] = $fieldMapping;
         $this->columnNames[$fieldMapping['fieldName']] = $fieldMapping['columnName'];
         $this->fieldNames[$fieldMapping['columnName']] = $fieldMapping['fieldName'];
+    }
+
+    /**
+     * INTERNAL:
+     * Adds a named query to this class.
+     *
+     * @throws MappingException
+     * @param array $queryMapping
+     */
+    public function addNamedQuery(array $queryMapping)
+    {
+        if (isset($this->namedQueries[$queryMapping['name']])) {
+            throw MappingException::duplicateQueryMapping($this->name, $queryMapping['name']);
+        }
+        $query = str_replace('__CLASS__', $this->name, $queryMapping['query']);
+        $this->namedQueries[$queryMapping['name']] = $query;
     }
 
     /**
@@ -1570,6 +1628,7 @@ class ClassMetadataInfo implements ClassMetadata
             if (strpos($className, '\\') === false && strlen($this->namespace)) {
                 $className = $this->namespace . '\\' . $className;
             }
+            $className = ltrim($className, '\\');
             $this->discriminatorMap[$value] = $className;
             if ($this->name == $className) {
                 $this->discriminatorValue = $value;
@@ -1582,6 +1641,17 @@ class ClassMetadataInfo implements ClassMetadata
                 }
             }
         }
+    }
+
+    /**
+     * Checks whether the class has a named query with the given query name.
+     *
+     * @param string $fieldName
+     * @return boolean
+     */
+    public function hasNamedQuery($queryName)
+    {
+        return isset($this->namedQueries[$queryName]);
     }
 
     /**
@@ -1759,5 +1829,105 @@ class ClassMetadataInfo implements ClassMetadata
     public function setVersionField($versionField)
     {
         $this->versionField = $versionField;
+    }
+
+    /**
+     * Mark this class as read only, no change tracking is applied to it.
+     *
+     * @return void
+     */
+    public function markReadOnly()
+    {
+        $this->isReadOnly = true;
+    }
+    
+    /**
+     * A numerically indexed list of field names of this persistent class.
+     * 
+     * This array includes identifier fields if present on this class.
+     * 
+     * @return array
+     */
+    public function getFieldNames()
+    {
+        return array_keys($this->fieldMappings);
+    }
+    
+    /**
+     * A numerically indexed list of association names of this persistent class.
+     * 
+     * This array includes identifier associations if present on this class.
+     * 
+     * @return array
+     */
+    public function getAssociationNames()
+    {
+        return array_keys($this->associationMappings);
+    }
+    
+    /**
+     * Returns the target class name of the given association.
+     * 
+     * @param string $assocName
+     * @return string
+     */
+    public function getAssociationTargetClass($assocName)
+    {
+        if (!isset($this->associationMappings[$assocName])) {
+            throw new \InvalidArgumentException("Association name expected, '" . $assocName ."' is not an association.");
+        }
+        return $this->associationMappings[$assocName]['targetEntity'];
+    }
+    
+    /**
+     * Get fully-qualified class name of this persistent class.
+     * 
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Gets the (possibly quoted) column name of a mapped field for safe use
+     * in an SQL statement.
+     * 
+     * @param string $field
+     * @param AbstractPlatform $platform
+     * @return string
+     */
+    public function getQuotedColumnName($field, $platform)
+    {
+        return isset($this->fieldMappings[$field]['quoted']) ?
+                $platform->quoteIdentifier($this->fieldMappings[$field]['columnName']) :
+                $this->fieldMappings[$field]['columnName'];
+    }
+    
+    /**
+     * Gets the (possibly quoted) primary table name of this class for safe use
+     * in an SQL statement.
+     * 
+     * @param AbstractPlatform $platform
+     * @return string
+     */
+    public function getQuotedTableName($platform)
+    {
+        return isset($this->table['quoted']) ?
+                $platform->quoteIdentifier($this->table['name']) :
+                $this->table['name'];
+    }
+
+    /**
+     * Gets the (possibly quoted) name of the join table.
+     *
+     * @param AbstractPlatform $platform
+     * @return string
+     */
+    public function getQuotedJoinTableName(array $assoc, $platform)
+    {
+        return isset($assoc['joinTable']['quoted'])
+            ? $platform->quoteIdentifier($assoc['joinTable']['name'])
+            : $assoc['joinTable']['name'];
     }
 }

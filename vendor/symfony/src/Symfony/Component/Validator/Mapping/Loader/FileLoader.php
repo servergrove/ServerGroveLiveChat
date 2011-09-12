@@ -24,6 +24,14 @@ abstract class FileLoader implements LoaderInterface
      */
     protected $namespaces;
 
+    /**
+     * Constructor.
+     *
+     * @param string $file The mapping file to load
+     *
+     * @throws MappingException if the mapping file does not exist
+     * @throws MappingException if the mapping file is not readable
+     */
     public function __construct($file)
     {
         if (!file_exists($file)) {
@@ -50,7 +58,7 @@ abstract class FileLoader implements LoaderInterface
     protected function newConstraint($name, $options)
     {
         if (strpos($name, '\\') !== false && class_exists($name)) {
-            $className = (string)$name;
+            $className = (string) $name;
         } else if (strpos($name, ':') !== false) {
             list($prefix, $className) = explode(':', $name);
 

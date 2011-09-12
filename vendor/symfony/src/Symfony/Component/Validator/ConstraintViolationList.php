@@ -13,8 +13,10 @@ namespace Symfony\Component\Validator;
 
 /**
  * An array-acting object that holds many ConstrainViolation instances.
+ *
+ * @api
  */
-class ConstraintViolationList implements \IteratorAggregate, \Countable
+class ConstraintViolationList implements \IteratorAggregate, \Countable, \ArrayAccess
 {
     protected $violations = array();
 
@@ -42,6 +44,8 @@ EOF;
      * Add a ConstraintViolation to this list.
      *
      * @param ConstraintViolation $violation
+     *
+     * @api
      */
     public function add(ConstraintViolation $violation)
     {
@@ -52,6 +56,8 @@ EOF;
      * Merge an existing ConstraintViolationList into this list.
      *
      * @param ConstraintViolationList $violations
+     *
+     * @api
      */
     public function addAll(ConstraintViolationList $violations)
     {
@@ -62,6 +68,8 @@ EOF;
 
     /**
      * @see IteratorAggregate
+     *
+     * @api
      */
     public function getIterator()
     {
@@ -70,9 +78,56 @@ EOF;
 
     /**
      * @see Countable
+     *
+     * @api
      */
     public function count()
     {
         return count($this->violations);
     }
+
+    /**
+     * @see ArrayAccess
+     *
+     * @api
+     */
+    public function offsetExists($offset)
+    {
+        return isset($this->violations[$offset]);
+    }
+
+    /**
+     * @see ArrayAccess
+     *
+     * @api
+     */
+    public function offsetGet($offset)
+    {
+        return isset($this->violations[$offset]) ? $this->violations[$offset] : null;
+    }
+
+    /**
+     * @see ArrayAccess
+     *
+     * @api
+     */
+    public function offsetSet($offset, $value)
+    {
+        if (null === $offset) {
+            $this->violations[] = $value;
+        } else {
+            $this->violations[$offset] = $value;
+        }
+    }
+
+    /**
+     * @see ArrayAccess
+     *
+     * @api
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->violations[$offset]);
+    }
+
 }

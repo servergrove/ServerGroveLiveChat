@@ -18,7 +18,7 @@ namespace Symfony\Component\ClassLoader;
  */
 class ClassCollectionLoader
 {
-    static protected $loaded;
+    static private $loaded;
 
     /**
      * Loads a list of classes and caches them in one big file.
@@ -28,10 +28,11 @@ class ClassCollectionLoader
      * @param string  $name       The cache name prefix
      * @param Boolean $autoReload Whether to flush the cache when the cache is stale or not
      * @param Boolean $adaptive   Whether to remove already declared classes or not
+     * @param string  $extension  File extension of the resulting file
      *
      * @throws \InvalidArgumentException When class can't be loaded
      */
-    static public function load($classes, $cacheDir, $name, $autoReload, $adaptive = false)
+    static public function load($classes, $cacheDir, $name, $autoReload, $adaptive = false, $extension = '.php')
     {
         // each $name can only be loaded once per PHP process
         if (isset(self::$loaded[$name])) {
@@ -39,8 +40,6 @@ class ClassCollectionLoader
         }
 
         self::$loaded[$name] = true;
-
-        $classes = array_unique($classes);
 
         if ($adaptive) {
             // don't include already declared classes
@@ -50,12 +49,12 @@ class ClassCollectionLoader
             $name = $name.'-'.substr(md5(implode('|', $classes)), 0, 5);
         }
 
-        $cache = $cacheDir.'/'.$name.'.php';
+        $cache = $cacheDir.'/'.$name.$extension;
 
         // auto-reload
         $reload = false;
         if ($autoReload) {
-            $metadata = $cacheDir.'/'.$name.'.meta';
+            $metadata = $cacheDir.'/'.$name.$extension.'.meta';
             if (!file_exists($metadata) || !file_exists($cache)) {
                 $reload = true;
             } else {
@@ -96,7 +95,7 @@ class ClassCollectionLoader
 
             // add namespace declaration for global code
             if (!$r->inNamespace()) {
-                $c = "\nnamespace\n{\n$c\n}\n";
+                $c = "\nnamespace\n{\n".self::stripComments($c)."\n}\n";
             } else {
                 $c = self::fixNamespaceDeclarations('<?php '.$c);
                 $c = preg_replace('/^\s*<\?php/', '', $c);
@@ -109,7 +108,7 @@ class ClassCollectionLoader
         if (!is_dir(dirname($cache))) {
             mkdir(dirname($cache), 0777, true);
         }
-        self::writeCacheFile($cache, self::stripComments('<?php '.$content));
+        self::writeCacheFile($cache, '<?php '.$content);
 
         if ($autoReload) {
             // save the resources
@@ -134,9 +133,13 @@ class ClassCollectionLoader
         $inNamespace = false;
         $tokens = token_get_all($source);
 
-        while ($token = array_shift($tokens)) {
+        for ($i = 0, $max = count($tokens); $i < $max; $i++) {
+            $token = $tokens[$i];
             if (is_string($token)) {
                 $output .= $token;
+            } elseif (in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+                // strip comments
+                continue;
             } elseif (T_NAMESPACE === $token[0]) {
                 if ($inNamespace) {
                     $output .= "}\n";
@@ -144,12 +147,12 @@ class ClassCollectionLoader
                 $output .= $token[1];
 
                 // namespace name and whitespaces
-                while (($t = array_shift($tokens)) && is_array($t) && in_array($t[0], array(T_WHITESPACE, T_NS_SEPARATOR, T_STRING))) {
+                while (($t = $tokens[++$i]) && is_array($t) && in_array($t[0], array(T_WHITESPACE, T_NS_SEPARATOR, T_STRING))) {
                     $output .= $t[1];
                 }
                 if (is_string($t) && '{' === $t) {
                     $inNamespace = false;
-                    array_unshift($tokens, $t);
+                    --$i;
                 } else {
                     $output .= "\n{";
                     $inNamespace = true;
@@ -174,8 +177,7 @@ class ClassCollectionLoader
      *
      * @throws \RuntimeException when a cache file cannot be written
      */
-     
-    static protected function writeCacheFile($file, $content)
+    static private function writeCacheFile($file, $content)
     {
         $tmpFile = tempnam(dirname($file), basename($file));
         if (false !== @file_put_contents($tmpFile, $content) && @rename($tmpFile, $file)) {
@@ -197,7 +199,7 @@ class ClassCollectionLoader
      *
      * @return string The PHP string with the comments removed
      */
-    static protected function stripComments($source)
+    static private function stripComments($source)
     {
         if (!function_exists('token_get_all')) {
             return $source;

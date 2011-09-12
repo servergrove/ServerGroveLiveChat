@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony framework.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Symfony\Bundle\SecurityBundle\Security;
 
 use Symfony\Component\Security\Http\Firewall\ExceptionListener;
@@ -12,8 +21,8 @@ use Symfony\Component\Security\Http\Firewall\ExceptionListener;
  */
 class FirewallContext
 {
-    protected $listeners;
-    protected $exceptionListener;
+    private $listeners;
+    private $exceptionListener;
 
     public function __construct(array $listeners, ExceptionListener $exceptionListener = null)
     {

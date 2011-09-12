@@ -1,0 +1,27 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
+
+
+{% block content %}
+<form action="{{ path('_security_check') }}" method="post">
+    <div style="padding-left: 30px;padding-right: 30px;">
+        <h3>Please enter your e-mail and password to access the admin panel</h3>
+        <div style="color: red;">
+            {% if errorMsg %}
+            {{errorMsg}}
+            {% endif %}
+            {{ form_errors(form) }}
+        </div>
+        {{ form_row(form.email) }}
+        <p></p>
+        {{ form_row(form.passwd) }}
+        <p>{{ form_rest(form) }}</p>
+        <input type="submit" value="Login" />
+    </div>
+</form>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(':text').focus();
+    });
+</script>
+{% endblock %}

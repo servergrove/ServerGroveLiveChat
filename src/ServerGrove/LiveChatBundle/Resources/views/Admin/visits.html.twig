@@ -1,0 +1,82 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+<h1>Visits list</h1>
+<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="150px">
+        <col width="120px">
+        <col width="160px">
+        <col width="150px">
+        <col>
+        <col>
+        <col width="50px">
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Created At
+            </th>
+            <th>
+                Visit Key
+            </th>
+            <th>
+                Visitor
+            </th>
+            <th>
+                Remote Addr
+            </th>
+            <th>
+                Local Time
+            </th>
+            <th>
+                Hits
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="7" style="text-align: right;">
+            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_visits'} %}
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if visits %}
+        {% for visit in visits %}
+        <tr>
+            <td>
+                {{visit.getId()}}
+            </td>
+            <td style="text-align: center;">
+                {{visit.getCreatedAt().format('Y-m-d H:i:s')}}
+            </td>
+            <td>
+                {{visit.getKey()}}
+            </td>
+            <td>
+                {% spaceless %}
+                <a target="_blank" href="{{ path('sglc_admin_visitor', {'id': visit.getVisitor().getId()})}}">
+                    {{visit.getVisitor().getId()}}
+                </a>
+                {% endspaceless %}
+            </td>
+            <td>
+                {{visit.getRemoteAddr()}}
+            </td>
+            <td>
+                {{visit.getLocalTime()}}
+            </td>
+            <td style="text-align: center;">
+                {{visit.getHits().count()}}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

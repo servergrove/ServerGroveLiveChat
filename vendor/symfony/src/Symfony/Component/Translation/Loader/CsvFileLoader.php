@@ -17,21 +17,34 @@ use Symfony\Component\Config\Resource\FileResource;
  * CsvFileLoader loads translations from CSV files.
  *
  * @author Saša Stamenković <umpirsky@gmail.com>
+ *
+ * @api
  */
 class CsvFileLoader extends ArrayLoader implements LoaderInterface
 {
+    private $delimiter = ';';
+    private $enclosure = '"';
+    private $escape    = '\\';
+
     /**
      * {@inheritdoc}
+     *
+     * @api
      */
     public function load($resource, $locale, $domain = 'messages')
     {
         $messages = array();
-        $file = @fopen($resource, 'rb');
-        if (!$file) {
+
+        try {
+            $file = new \SplFileObject($resource, 'rb');
+        } catch(\RuntimeException $e) {
             throw new \InvalidArgumentException(sprintf('Error opening file "%s".', $resource));
         }
 
-        while (($data = fgetcsv($file, 0, ';')) !== false) {
+        $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY);
+        $file->setCsvControl($this->delimiter, $this->enclosure, $this->escape);
+
+        foreach($file as $data) {
             if (substr($data[0], 0, 1) === '#') {
                 continue;
             }
@@ -51,5 +64,19 @@ class CsvFileLoader extends ArrayLoader implements LoaderInterface
         $catalogue->addResource(new FileResource($resource));
 
         return $catalogue;
+    }
+
+    /**
+     * Sets the delimiter, enclosure, and escape character for CSV.
+     *
+     * @param string $delimiter delimiter character
+     * @param string $enclosure enclosure character
+     * @param string $escape    escape character
+     */
+    public function setCsvControl($delimiter = ';', $enclosure = '"', $escape = '\\')
+    {
+        $this->delimiter = $delimiter;
+        $this->enclosure = $enclosure;
+        $this->escape    = $escape;
     }
 }

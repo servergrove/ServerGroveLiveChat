@@ -1,0 +1,89 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+{% block content %}
+{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+<h1>Visitors list</h1>
+<h2>{{msg}}</h2>
+<table cellpadding="3" cellspacing="3" border="0" width="100%">
+    <colgroup>
+        <col width="150px">
+        <col width="120px">
+        <col>
+        <col>
+        <col>
+        <col width="160px">
+        <col width="120px">
+        <col width="75px">
+    </colgroup>
+    <thead>
+        <tr class="header">
+            <th>
+                Id
+            </th>
+            <th>
+                Created At
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                e-mail
+            </th>
+            <th>
+                Agent
+            </th>
+            <th>
+                Visitor key
+            </th>
+            <th>
+                Remote Addr
+            </th>
+            <th>
+                Languages
+            </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <td colspan="10" style="text-align: right;">
+            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_visitors'} %}
+            </td>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% if visitors %}
+        {% for visitor in visitors %}
+        <tr>
+            <td>
+                {% spaceless %}
+                <a target="_blank" href="{{ path('sglc_admin_visitor', {'id': visitor.getId()})}}">
+                    {{visitor.getId()}}
+                </a>
+                {% endspaceless %}
+            </td>
+            <td style="text-align: center;">
+                {{visitor.getCreatedAt().format('Y-m-d H:i:s')}}
+            </td>
+            <td>
+                {{visitor.getName()}}
+            </td>
+            <td>
+                <a href="mailto:{{visitor.getEmail()}}">{{visitor.getEmail()}}</a>
+            </td>
+            <td>
+                {{visitor.getAgent()}}
+            </td>
+            <td>
+                {{visitor.getKey()}}
+            </td>
+            <td>
+                {{visitor.getRemoteAddr()}}
+            </td>
+            <td>
+                {{visitor.getLanguages()}}
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

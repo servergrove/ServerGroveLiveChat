@@ -20,14 +20,18 @@ use Symfony\Component\Config\Loader\FileLoader;
  * The file must return a RouteCollection instance.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 class PhpFileLoader extends FileLoader
 {
     /**
      * Loads a PHP file.
      *
-     * @param mixed  $resource A PHP file path
-     * @param string $type     The resource type
+     * @param mixed  $file A PHP file path
+     * @param string $type The resource type
+     *
+     * @api
      */
     public function load($file, $type = null)
     {
@@ -35,9 +39,9 @@ class PhpFileLoader extends FileLoader
         $loader = $this;
 
         $path = $this->locator->locate($file);
+        $this->setCurrentDir(dirname($path));
 
         $collection = include $path;
-        $this->currentDir = dirname($path);
         $collection->addResource(new FileResource($path));
 
         return $collection;
@@ -50,6 +54,8 @@ class PhpFileLoader extends FileLoader
      * @param string $type     The resource type
      *
      * @return Boolean True if this class supports the given resource, false otherwise
+     *
+     * @api
      */
     public function supports($resource, $type = null)
     {

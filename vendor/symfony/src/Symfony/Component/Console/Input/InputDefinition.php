@@ -22,20 +22,24 @@ namespace Symfony\Component\Console\Input;
  *     ));
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 class InputDefinition
 {
-    protected $arguments;
-    protected $requiredCount;
-    protected $hasAnArrayArgument = false;
-    protected $hasOptional;
-    protected $options;
-    protected $shortcuts;
+    private $arguments;
+    private $requiredCount;
+    private $hasAnArrayArgument = false;
+    private $hasOptional;
+    private $options;
+    private $shortcuts;
 
     /**
      * Constructor.
      *
      * @param array $definition An array of InputArgument and InputOption instance
+     *
+     * @api
      */
     public function __construct(array $definition = array())
     {
@@ -46,6 +50,8 @@ class InputDefinition
      * Sets the definition of the input.
      *
      * @param array $definition The definition array
+     *
+     * @api
      */
     public function setDefinition(array $definition)
     {
@@ -67,6 +73,8 @@ class InputDefinition
      * Sets the InputArgument objects.
      *
      * @param array $arguments An array of InputArgument objects
+     *
+     * @api
      */
     public function setArguments($arguments = array())
     {
@@ -81,6 +89,8 @@ class InputDefinition
      * Add an array of InputArgument objects.
      *
      * @param InputArgument[] $arguments An array of InputArgument objects
+     *
+     * @api
      */
     public function addArguments($arguments = array())
     {
@@ -97,6 +107,8 @@ class InputDefinition
      * @param InputArgument $argument An InputArgument object
      *
      * @throws \LogicException When incorrect argument is given
+     *
+     * @api
      */
     public function addArgument(InputArgument $argument)
     {
@@ -133,6 +145,8 @@ class InputDefinition
      * @return InputArgument An InputArgument object
      *
      * @throws \InvalidArgumentException When argument given doesn't exist
+     *
+     * @api
      */
     public function getArgument($name)
     {
@@ -151,6 +165,8 @@ class InputDefinition
      * @param string|integer $name The InputArgument name or position
      *
      * @return Boolean true if the InputArgument object exists, false otherwise
+     *
+     * @api
      */
     public function hasArgument($name)
     {
@@ -163,6 +179,8 @@ class InputDefinition
      * Gets the array of InputArgument objects.
      *
      * @return array An array of InputArgument objects
+     *
+     * @api
      */
     public function getArguments()
     {
@@ -208,6 +226,8 @@ class InputDefinition
      * Sets the InputOption objects.
      *
      * @param array $options An array of InputOption objects
+     *
+     * @api
      */
     public function setOptions($options = array())
     {
@@ -220,6 +240,8 @@ class InputDefinition
      * Add an array of InputOption objects.
      *
      * @param InputOption[] $options An array of InputOption objects
+     *
+     * @api
      */
     public function addOptions($options = array())
     {
@@ -234,6 +256,8 @@ class InputDefinition
      * @param InputOption $option An InputOption object
      *
      * @throws \LogicException When option given already exist
+     *
+     * @api
      */
     public function addOption(InputOption $option)
     {
@@ -255,6 +279,8 @@ class InputDefinition
      * @param string $name The InputOption name
      *
      * @return InputOption A InputOption object
+     *
+     * @api
      */
     public function getOption($name)
     {
@@ -271,6 +297,8 @@ class InputDefinition
      * @param string $name The InputOption name
      *
      * @return Boolean true if the InputOption object exists, false otherwise
+     *
+     * @api
      */
     public function hasOption($name)
     {
@@ -281,6 +309,8 @@ class InputDefinition
      * Gets the array of InputOption objects.
      *
      * @return array An array of InputOption objects
+     *
+     * @api
      */
     public function getOptions()
     {
@@ -335,7 +365,7 @@ class InputDefinition
      *
      * @throws \InvalidArgumentException When option given does not exist
      */
-    protected function shortcutToName($shortcut)
+    private function shortcutToName($shortcut)
     {
         if (!isset($this->shortcuts[$shortcut])) {
             throw new \InvalidArgumentException(sprintf('The "-%s" option does not exist.', $shortcut));
@@ -378,10 +408,15 @@ class InputDefinition
         // find the largest option or argument name
         $max = 0;
         foreach ($this->getOptions() as $option) {
-            $max = strlen($option->getName()) + 2 > $max ? strlen($option->getName()) + 2 : $max;
+            $nameLength = strlen($option->getName()) + 2;
+            if ($option->getShortcut()) {
+                $nameLength += strlen($option->getShortcut()) + 3;
+            }
+
+            $max = max($max, $nameLength);
         }
         foreach ($this->getArguments() as $argument) {
-            $max = strlen($argument->getName()) > $max ? strlen($argument->getName()) : $max;
+            $max = max($max, strlen($argument->getName()));
         }
         ++$max;
 
@@ -396,7 +431,9 @@ class InputDefinition
                     $default = '';
                 }
 
-                $text[] = sprintf(" <info>%-${max}s</info> %s%s", $argument->getName(), $argument->getDescription(), $default);
+                $description = str_replace("\n", "\n".str_pad('', $max + 2, ' '), $argument->getDescription());
+
+                $text[] = sprintf(" <info>%-${max}s</info> %s%s", $argument->getName(), $description, $default);
             }
 
             $text[] = '';
@@ -413,7 +450,16 @@ class InputDefinition
                 }
 
                 $multiple = $option->isArray() ? '<comment> (multiple values allowed)</comment>' : '';
-                $text[] = sprintf(' %-'.$max.'s %s%s%s%s', '<info>--'.$option->getName().'</info>', $option->getShortcut() ? sprintf('(-%s) ', $option->getShortcut()) : '', $option->getDescription(), $default, $multiple);
+                $description = str_replace("\n", "\n".str_pad('', $max + 2, ' '), $option->getDescription());
+
+                $optionMax = $max - strlen($option->getName()) - 2;
+                $text[] = sprintf(" <info>%s</info> %-${optionMax}s%s%s%s",
+                    '--'.$option->getName(),
+                    $option->getShortcut() ? sprintf('(-%s) ', $option->getShortcut()) : '',
+                    $description,
+                    $default,
+                    $multiple
+                );
             }
 
             $text[] = '';

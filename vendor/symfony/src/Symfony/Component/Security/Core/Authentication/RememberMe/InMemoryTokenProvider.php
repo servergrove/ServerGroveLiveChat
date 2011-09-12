@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony framework.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Symfony\Component\Security\Core\Authentication\RememberMe;
 
 use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
@@ -11,7 +20,7 @@ use Symfony\Component\Security\Core\Exception\TokenNotFoundException;
  */
 class InMemoryTokenProvider implements TokenProviderInterface
 {
-    protected $tokens = array();
+    private $tokens = array();
 
     public function loadTokenBySeries($series)
     {
