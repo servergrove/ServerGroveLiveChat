@@ -28,7 +28,7 @@ class ChatController extends PublicController
 {
 
     /**
-     * @Route("/sglivechat/{id}/accept", name="sglc_chat_accept")
+     * @Route("/sessions/{id}/accept", name="sglc_chat_accept")
      * @Template
      * @param $id
      * @return array|\Symfony\Component\HttpFoundation\RedirectResponse
@@ -73,7 +73,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/invite/accept", name="sglc_chat_invite_accept")
+     * @Route("/sessions/{id}/invite/accept", name="sglc_chat_invite_accept")
      * @param $id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -104,7 +104,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/done", name="sglc_chat_done")
+     * @Route("/sessions/{id}/done", name="sglc_chat_done")
      * @Template
      * @return array|\Symfony\Bundle\FrameworkBundle\Controller\Response|\Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -159,7 +159,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/faq", name="sglc_chat_faq")
+     * @Route("/faq", name="sglc_chat_faq")
      * @Template
      * @return array
      */
@@ -169,7 +169,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat", name="sglc_chat_homepage")
+     * @Route("/", name="sglc_chat_homepage")
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @return \Symfony\Bundle\FrameworkBundle\Controller\Response|\Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -221,7 +221,10 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{sessId}/invite", name="sglc_chat_invite")
+     * @Route("/sessions/{sessId}/invite", name="sglc_chat_invite")
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @param string $sessId
+     * @return \Symfony\Bundle\FrameworkBundle\Controller\RedirectResponse
      */
     public function inviteAction($sessId)
     {
@@ -251,8 +254,10 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/load", name="sglc_chat_load")
+     * @Route("/sessions/{id}/load", name="sglc_chat_load")
      * @Template
+     * @param string $id
+     * @return array|\Symfony\Bundle\FrameworkBundle\Controller\RedirectResponse
      */
     public function loadAction($id)
     {
@@ -290,7 +295,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/messages.{_format}", name="sglc_chat_messages", requirements={"_method"="get"}, defaults={"_format"="html"})
+     * @Route("/sessions/{id}/messages.{_format}", name="sglc_chat_messages", requirements={"_method"="get"}, defaults={"_format"="html"})
      * @Template
      * @param $_format
      * @return array
@@ -361,7 +366,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/invite/reject", name="sglc_chat_invite_reject")
+     * @Route("/sessions/{id}/invite/reject", name="sglc_chat_invite_reject")
      */
     public function rejectInviteAction($id)
     {
@@ -380,7 +385,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/send", name="sglc_chat_send", requirements={"_method"="post"})
+     * @Route("/sessions/{id}/messages/send", name="sglc_chat_send", requirements={"_method"="post"})
      */
     public function sendAction($id)
     {
@@ -404,7 +409,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/status", name="sglc_chat_status", requirements={"_method"="get"})
+     * @Route("/sessions/status", name="sglc_chat_status", requirements={"_method"="get"})
      */
     public function statusAction()
     {
@@ -452,7 +457,7 @@ class ChatController extends PublicController
     }
 
     /**
-     * @Route("/sglivechat/{id}/user/action/{action}", name="sglc_chat_user_action")
+     * @Route("/sessions/{id}/user/action/{action}", name="sglc_chat_user_action")
      */
     public function userActionAction($id, $action)
     {

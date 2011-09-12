@@ -35,8 +35,8 @@ class AdminController extends BaseController
     const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
     /**
-     * @Route("/admin/sglivechat/canned-message", name="sglc_admin_canned_message")
-     * @Route("/admin/sglivechat/canned-message/{id}", name="sglc_admin_canned_message_edit")
+     * @Route("/canned-message", name="sglc_admin_canned_message")
+     * @Route("/canned-message/{id}", name="sglc_admin_canned_message_edit")
      * @Template
      */
     public function cannedMessageAction($id = null)
@@ -82,7 +82,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/canned-messages/{page}", name="sglc_admin_canned_messages", defaults={"page"="1"})
+     * @Route("/canned-messages/{page}", name="sglc_admin_canned_messages", defaults={"page"="1"})
      * @Template
      */
     public function cannedMessagesAction($page)
@@ -91,7 +91,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/chat-session/{id}", name="sglc_admin_chat_session")
+     * @Route("/console/chat-session/{id}", name="sglc_admin_chat_session")
      * @Template
      */
     public function chatSessionAction($id)
@@ -110,7 +110,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/chat-sessions/{page}", name="sglc_admin_chat_sessions", defaults={"page"="1"})
+     * @Route("/console/chat-sessions/{page}", name="sglc_admin_chat_sessions", defaults={"page"="1"})
      * @Template
      */
     public function chatSessionsAction($page)
@@ -119,7 +119,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/close/{id}", name="sglc_admin_console_close")
+     * @Route("/console/close/{id}", name="sglc_admin_console_close")
      */
     public function closeChatAction($id)
     {
@@ -133,7 +133,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/current-visits.{_format}", name="sglc_admin_console_current_visits", defaults={"_format"="html"})
+     * @Route("/console/current-visits.{_format}", name="sglc_admin_console_current_visits", defaults={"_format"="html"})
      * @Template
      */
     public function currentVisitsAction($_format)
@@ -156,7 +156,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat", name="sglc_admin_index")
+     * @Route("/", name="sglc_admin_index")
      *
      * @return RedirectResponse
      */
@@ -170,8 +170,8 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/login", name="_security_login", requirements={"_method"="get"})
-     * @Route("/admin/sglivechat/login/check", name="_security_check", requirements={"_method"="post"})
+     * @Route("/login", name="_security_login", requirements={"_method"="get"})
+     * @Route("/login/check", name="_security_check", requirements={"_method"="post"})
      * @Template
      */
     public function loginAction()
@@ -221,7 +221,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/logout", name="sglc_admin_logout")
+     * @Route("/logout", name="sglc_admin_logout")
      */
     public function logoutAction()
     {
@@ -243,8 +243,8 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/operator/department", name="sglc_admin_operator_department")
-     * @Route("/admin/sglivechat/operator/department/{id}", name="sglc_admin_operator_department_edit")
+     * @Route("/operator/department", name="sglc_admin_operator_department")
+     * @Route("/operator/department/{id}", name="sglc_admin_operator_department_edit")
      * @Template
      */
     public function operatorDepartmentAction($id = null)
@@ -288,7 +288,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/operator/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
+     * @Route("/operator/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
      * @Template
      */
     public function operatorDepartmentsAction($page)
@@ -297,8 +297,8 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/operator", name="sglc_admin_operator")
-     * @Route("/admin/sglivechat/operator/{id}", name="sglc_admin_operator_edit")
+     * @Route("/operator", name="sglc_admin_operator")
+     * @Route("/operator/{id}", name="sglc_admin_operator_edit")
      * @Template
      */
     public function operatorAction($id = null)
@@ -348,7 +348,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/operators/{page}", name="sglc_admin_operators", defaults={"page"="1"})
+     * @Route("/operators/{page}", name="sglc_admin_operators", defaults={"page"="1"})
      * @Template
      */
     public function operatorsAction($page)
@@ -357,7 +357,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/requested-chats.{_format}", name="sglc_admin_console_requested_chats", defaults={"_format"="html"})
+     * @Route("/console/requested-chats.{_format}", name="sglc_admin_console_requested_chats", defaults={"_format"="html"})
      * @Template
      */
     public function requestedChatsAction($_format)
@@ -385,7 +385,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/sessions", name="sglc_admin_console_sessions")
+     * @Route("/console/sessions", name="sglc_admin_console_sessions")
      * @Template
      */
     public function requestsAction()
@@ -409,7 +409,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/console/sessions-service.json", name="sglc_admin_console_sessions_service")
+     * @Route("/console/sessions-service.json", name="sglc_admin_console_sessions_service")
      */
     public function sessionsServiceAction()
     {
@@ -430,7 +430,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/visitor/{id}", name="sglc_admin_visitor")
+     * @Route("/visitor/{id}", name="sglc_admin_visitor")
      * @Template
      */
     public function visitorAction($id)
@@ -452,7 +452,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/visitors/{page}", name="sglc_admin_visitors", defaults={"page"="1"})
+     * @Route("/visitors/{page}", name="sglc_admin_visitors", defaults={"page"="1"})
      * @Template
      */
     public function visitorsAction($page)
@@ -461,7 +461,7 @@ class AdminController extends BaseController
     }
 
     /**
-     * @Route("/admin/sglivechat/visits/{page}", name="sglc_admin_visits", defaults={"page"="1"})
+     * @Route("/visits/{page}", name="sglc_admin_visits", defaults={"page"="1"})
      * @Template
      */
     public function visitsAction($page)

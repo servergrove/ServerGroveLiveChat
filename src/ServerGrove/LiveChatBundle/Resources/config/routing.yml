@@ -1,6 +1,7 @@
 sglc_admin:
   resource: "@ServerGroveLiveChatBundle/Controller/AdminController.php"
   type:     annotation
+  prefix:   /admin
 
 sglc_chat:
   resource: "@ServerGroveLiveChatBundle/Controller/ChatController.php"
@@ -9,6 +10,7 @@ sglc_chat:
 sglc_tracker:
   resource: "@ServerGroveLiveChatBundle/Controller/TrackController.php"
   type:     annotation
+  prefix:   /tracker
 
 sglc_default:
   resource: "@ServerGroveLiveChatBundle/Controller/DefaultController.php"
