@@ -1,11 +1,14 @@
 {% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
 
 {% block stylesheets %}
-<link type="text/css" href="{{asset('css/admin.css')}}" rel="stylesheet" media="all" />
-<link type="text/css" href="{{asset('css/admin-lc.css')}}" rel="stylesheet" media="all" />
+{{ parent() }}
+{% stylesheets "@ServerGroveLiveChatBundle/Resources/public/css/admin.css"
+               "@ServerGroveLiveChatBundle/Resources/public/css/admin-lc.css"
+               output="css/sglc-admin.css"
+%}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ asset_url }}" />
+{% endstylesheets %}
 {% endblock %}
-
-{% block javascripts %}<script type="text/javascript" src="{{asset('js/jquery.js')}}"></script> {% endblock %}
 
 {% block body %}
     {% block content %}{% endblock %}

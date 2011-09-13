@@ -3,10 +3,16 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>{% block title %}ServerGrove Livechat{% endblock %}</title>
-        <link type="text/css" href="{{asset('css/main-lc.css')}}" rel="stylesheet" media="all" />
-        <script type="text/javascript" src="{{asset('js/jquery.js')}}"></script>
-        {% block stylesheets %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+        {% block stylesheets %}
+        {% stylesheets '@ServerGroveLiveChatBundle/Resources/public/css/main-lc.css' output='css/sglc.css' %}
+        <link rel="stylesheet" type="text/css" media="screen" href="{{ asset_url }}" />
+        {% endstylesheets %}
+        {% endblock %}
+        {% block javascripts %}
+        {% javascripts '@ServerGroveLiveChatBundle/Resources/public/js/*' output='js/sglc.js' %}
+        <script type="text/javascript" src="{{ asset_url }}"></script>
+        {% endjavascripts %}
+        {% endblock %}
         <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
