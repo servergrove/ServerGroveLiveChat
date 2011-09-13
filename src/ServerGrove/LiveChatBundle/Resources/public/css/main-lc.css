@@ -26,7 +26,7 @@ br {
 
 #chatWin_header
 {
-    background: url('../images/header_bgr.jpg') repeat-x top;
+    background: url('../../../../../../web/images/header_bgr.jpg') repeat-x top;
     height: 37px;
 }
 
