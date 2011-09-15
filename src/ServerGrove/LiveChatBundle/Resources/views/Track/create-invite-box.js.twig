@@ -3,14 +3,11 @@ if ( jQuery('#chatDiv').length > 0 ) {
 } else {
     SGChatTracker.Chat.createInvite();
 }
-	
-var img = new Image();
-img.src = "{{asset('images/sg_logo.jpg')}}";
 
 var div = document.createElement('div');
 
 jQuery('#chatDiv').html('').append(
-    jQuery(new Image()).attr({src: "{{asset('images/sg_logo.jpg')}}"})
+    jQuery(new Image()).attr({src: "{{asset('/bundles/servergrovelivechat/images/sg_logo.jpg')}}"})
 ).append(
     jQuery(document.createElement('div')).attr({
         style: 'clear: both; padding: 10px;'
