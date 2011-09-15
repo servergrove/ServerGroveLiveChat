@@ -101,7 +101,7 @@ class TrackController extends PublicController
 
             $response->headers->set('Content-type', 'text/javascript');
 
-            return $this->renderTemplate('ServerGroveLiveChatBundle:Track:create-invite-box.js.twig', array('chat' => $chat));
+            return $this->render('ServerGroveLiveChatBundle:Track:create-invite-box.js.twig', array('chat' => $chat), $response);
         } else {
             if ($this->getSessionStorage()->get('chat_invite')) {
                 $this->getSessionStorage()->set('chat_invite', null);
