@@ -5,7 +5,7 @@ namespace ServerGrove\LiveChatBundle\Document;
 /**
  * Description of DocumentRepository
  *
- * @author ismael
+ * @author Ismael Ambrosi<ismael@servergrove.com>
  */
 abstract class DocumentRepository extends \Doctrine\ODM\MongoDB\DocumentRepository
 {

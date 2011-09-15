@@ -3,7 +3,7 @@
 namespace ServerGrove\LiveChatBundle\Document;
 
 /**
- * @author ismael
+ * @author Ismael Ambrosi<ismael@servergrove.com>
  */
 class VisitLinkRepository extends DocumentRepository
 {
