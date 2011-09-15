@@ -11,7 +11,9 @@
     {% endfor %}
   </ul>
     <div id="chatDiv"></div>
-    <script src="{{ asset("js/jquery.js") }}"></script>
+    {% javascripts '@ServerGroveLiveChatBundle/Resources/public/js/jquery.js' output='js/jquery.js' %}
+    <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
     <script src="{{ path('sglc_track_status', {'_format': 'js'}) }}"></script>
   </body>
 </html>
