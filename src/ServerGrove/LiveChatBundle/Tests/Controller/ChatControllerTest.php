@@ -13,7 +13,7 @@ use Symfony\Component\DomCrawler\Form;
 class ChatControllerTest extends ControllerTest
 {
 
-    public function testIndexGet()
+    public function testIndexAction()
     {
         /* @var $client \Symfony\Bundle\FrameworkBundle\Client */
         $client = self::createClient();
@@ -31,32 +31,14 @@ class ChatControllerTest extends ControllerTest
 
         $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting: ' . $this->getErrorMessage($client->getResponse()));
 
-        unset($client, $crawler);
-    }
-
-    public function testIndexPost()
-    {
-        /* @var $client Symfony\Bundle\FrameworkBundle\Client */
-        $client = self::createClient();
-
-        /* @var $crawler Symfony\Component\DomCrawler\Crawler */
-        $crawler = $client->request('GET', $this->getUrl('sglc_chat_homepage'));
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful: ' . $this->getErrorMessage($client->getResponse()));
-
-        $form = $crawler->selectButton('Start Chat')->form();
-        $this->fillLoginFormFields($form);
-
-        $client->submit($form);
-        $this->assertTrue($client->getResponse()->isRedirect(), 'Is not redirecting: ' . $this->getErrorMessage($client->getResponse()));
-
         $crawler = $client->followRedirect();
 
         $this->assertTrue($crawler->filter('a:contains("submit a support ticket")')->count() > 0, $this->getErrorMessage($client->getResponse()));
+
         unset($client, $crawler);
     }
 
-    public function testFaq()
+    public function testFaqAction()
     {
         /* @var $client Symfony\Bundle\FrameworkBundle\Client */
         $client = self::createClient();
@@ -64,7 +46,7 @@ class ChatControllerTest extends ControllerTest
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'GET response not successful: ' . $this->getErrorMessage($client->getResponse()));
     }
 
-    public function testInvite()
+    public function testInviteAction()
     {
         $this->markTestIncomplete('Implement admin controller test first');
     }
@@ -72,7 +54,7 @@ class ChatControllerTest extends ControllerTest
     /**
      * @return void
      */
-    public function testLoad()
+    public function testLoadAction()
     {
         /* @var $client Symfony\Bundle\FrameworkBundle\Client */
         $client = self::createClient();
