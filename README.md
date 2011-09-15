@@ -66,7 +66,7 @@ Installation
 
 10. You can also test the livechat functionality by loading:
 
-    http://livechat.example.com/test.html
+    http://livechat.example.com/sglivechat/test.html
 
 Contributing
 ------------
