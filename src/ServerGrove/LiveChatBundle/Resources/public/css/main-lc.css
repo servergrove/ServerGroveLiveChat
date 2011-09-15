@@ -26,7 +26,7 @@ br {
 
 #chatWin_header
 {
-    background: url('../../../../../../web/images/header_bgr.jpg') repeat-x top;
+    background: url('/bundles/servergrovelivechat/images/header_bgr.jpg') repeat-x top;
     height: 37px;
 }
 
