@@ -1,2 +1,0 @@
-doctrine_mongodb:
-  auto_generate_proxy_classes: false
