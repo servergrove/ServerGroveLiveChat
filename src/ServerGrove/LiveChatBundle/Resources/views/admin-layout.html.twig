@@ -2,8 +2,8 @@
 
 {% block stylesheets %}
 {{ parent() }}
-{% stylesheets "@ServerGroveLiveChatBundle/Resources/public/css/admin.css"
-               "@ServerGroveLiveChatBundle/Resources/public/css/admin-lc.css"
+{% stylesheets "@ServerGroveLiveChatBundle/Resources/public/css/bootstrap.css"
+               "@ServerGroveLiveChatBundle/Resources/public/css/admin.css"
                output="css/sglc-admin.css"
 %}
 <link rel="stylesheet" type="text/css" media="screen" href="{{ asset_url }}" />
@@ -15,5 +15,7 @@
 {% endblock %}
 
 {% block body %}
-    {% block content %}{% endblock %}
+<div id="wrapper">
+{% block content %}{% endblock %}
+</div>
 {% endblock %}
