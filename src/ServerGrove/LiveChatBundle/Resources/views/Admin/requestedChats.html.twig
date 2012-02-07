@@ -5,20 +5,20 @@
         });
     </script>
     <h2>Requested Chats: {{chats.count()}}</h2>
-    <table width="100%">
-        <thead>
-            <tr class="header">
-                <td>Chat ID</td>
-                <td>Visitor</td>
-                <td>Email</td>
-                <td>Question</td>
-                <td>Time</td>
-                <td>Duration</td>
-                <td>Operator</td>
-                <td>Action</td>
+    <table width="100%" class="table table-condensed">
+        <thead class="alert alert-error">
+            <tr>
+                <th>Chat ID</th>
+                <th>Visitor</th>
+                <th>Email</th>
+                <th>Question</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Operator</th>
+                <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="alert">
             {% for chat in chats %}
             {% include "ServerGroveLiveChatBundle:Admin:requestItem.html.twig" with {'chat': chat} only %}
             {% endfor %}
