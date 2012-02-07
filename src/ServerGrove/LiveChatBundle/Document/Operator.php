@@ -27,26 +27,38 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      * @MongoDB\Field(type="boolean")
      */
     private $isOnline;
+
     /**
      * @var boolean
      * @MongoDB\Field(type="boolean")
      */
     private $isActive = true;
+
     /**
      * @var string
      * @MongoDB\String
      */
     private $passwd;
+
     /**
      * @var ServerGrove\LiveChatBundle\Document\Operator\Rating
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
     private $ratings = array();
+
     /**
      * @var Department[]
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Department")
      */
     private $departments;
+
+    /** @MongoDB\String */
+    private $salt;
+
+    public function __construct()
+    {
+        $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
+    }
 
     public function addRating(Operator\Rating $rating)
     {
@@ -63,6 +75,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
 
     /**
      * @param boolean $isOnline
+     *
      * @return void
      */
     public function setIsOnline($isOnline)
@@ -80,6 +93,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
 
     /**
      * @param boolean $isActive
+     *
      * @return void
      */
     public function setIsActive($isActive)
@@ -97,6 +111,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
 
     /**
      * @param string $passwd
+     *
      * @return void
      */
     public function setPasswd($passwd)
@@ -136,12 +151,14 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     {
         return strtr('(:id) :name, :email', array(
             ':email' => $this->getEmail(),
-            ':name' => $this->getName(),
-            ':id' => $this->getId()));
+            ':name'  => $this->getName(),
+            ':id'    => $this->getId()
+        ));
     }
 
     /**
      * @param AccountInterface $account
+     *
      * @return boolean
      */
     public function equals(UserInterface $account)
@@ -168,12 +185,13 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     public function getRoles()
     {
         return array(
-            'ROLE_USER');
+            'ROLE_USER'
+        );
     }
 
     public function getSalt()
     {
-        return __NAMESPACE__ . '\\' . __CLASS__;
+        return $this->salt;
     }
 
     public function getUsername()
@@ -183,7 +201,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
 
     public function encodePassword($raw, $salt)
     {
-        return md5(md5($raw) . '-' . $salt);
+        return md5(md5($raw).'-'.$salt);
     }
 
     public function isPasswordValid($encoded, $raw, $salt)
