@@ -6,25 +6,25 @@
         </a>
         <div class="container">
             <ul class="nav">
-                <li class="active">
+                <li{% if "sglc_admin_console_sessions" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_console_sessions') }}">Active Sessions</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_chat_sessions" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_chat_sessions') }}">Chat Sessions</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_operators" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_operators') }}">Operators</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_operator_departments" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_operator_departments') }}">Departments</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_canned_messages" == currentRoute %} class="active"{% endif %}>
                     <a href="{{path('sglc_admin_canned_messages')}}">Canned Messages</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_visitors" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_visitors') }}">Visitors</a>
                 </li>
-                <li>
+                <li{% if "sglc_admin_visits" == currentRoute %} class="active"{% endif %}>
                     <a href="{{ path('sglc_admin_visits') }}">Visits</a>
                 </li>
                 <li>
