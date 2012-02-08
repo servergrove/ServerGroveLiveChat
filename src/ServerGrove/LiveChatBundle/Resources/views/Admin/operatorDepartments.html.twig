@@ -44,10 +44,9 @@
                 No
                 {% endif %}
             </td>
-            <td>
-                <!--<a href="#">{% if department.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
-                &nbsp;-->
-                <a href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
+            <td class="btn-group">
+                <a class="btn btn-small" href="#">{% if department.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
+                <a class="btn btn-small" href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}

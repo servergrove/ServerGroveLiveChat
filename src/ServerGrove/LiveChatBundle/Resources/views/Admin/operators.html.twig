@@ -55,10 +55,9 @@
                 No
                 {% endif %}
             </td>
-            <td>
-                <!--<a href="#">{% if operator.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
-                &nbsp;-->
-                <a href="{{path('sglc_admin_operator_edit', {'id': operator.getId()})}}">Edit</a>
+            <td class="btn-group">
+                <a class="btn btn-small" href="#">{% if operator.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
+                <a class="btn btn-small" href="{{path('sglc_admin_operator_edit', {'id': operator.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}
