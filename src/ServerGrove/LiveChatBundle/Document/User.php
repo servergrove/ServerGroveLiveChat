@@ -3,6 +3,7 @@
 namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Description of User
@@ -22,12 +23,15 @@ abstract class User
     /**
      * @var string
      * @MongoDB\String
+     * @Assert\NotBlank()
      */
     private $name;
 
     /**
      * @var string
      * @MongoDB\String
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private $email;
 
@@ -78,6 +82,7 @@ abstract class User
 
     /**
      * @param string $name
+     *
      * @return void
      */
     public function setName($name)
@@ -95,6 +100,7 @@ abstract class User
 
     /**
      * @param string $email
+     *
      * @return void
      */
     public function setEmail($email)
@@ -112,6 +118,7 @@ abstract class User
 
     /**
      * @param string $createdAt
+     *
      * @return void
      */
     public function setCreatedAt($createdAt)
@@ -129,6 +136,7 @@ abstract class User
 
     /**
      * @param string $updatedAt
+     *
      * @return void
      */
     public function setUpdatedAt($updatedAt)
