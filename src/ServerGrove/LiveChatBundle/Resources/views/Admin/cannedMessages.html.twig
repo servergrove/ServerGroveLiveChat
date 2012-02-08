@@ -2,34 +2,24 @@
 {% block content %}
 <h1>Canned Messages list</h1>
 <h2>{{msg}}</h2>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col width="150px">
-        <col>
-        <col width="75px">
-    </colgroup>
+<table class="table table-striped">
     <thead>
-        <tr class="header">
-            <th>
+        <tr>
+            <th class="span3">
                 Id
             </th>
             <th>
                 Title
             </th>
-            <th>
+            <th class="span3">
                 &nbsp;
             </th>
         </tr>
     </thead>
     <tfoot>
         <tr>
-            <td colspan="3" style="text-align: right;">
-            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_canned_messages'} %}
-            </td>
-        </tr>
-        <tr>
             <td colspan="3">
-                <a href="{{path('sglc_admin_canned_message')}}">New</a>
+            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_canned_messages'} %}
             </td>
         </tr>
     </tfoot>
@@ -38,17 +28,20 @@
         {% for cannedMessage in cannedMessages %}
         <tr>
             <td>
-                {{cannedMessage.getId()}}
+                <a href="{{path('sglc_admin_canned_message_edit', {'id': cannedMessage.getId()})}}">{{cannedMessage.getId()}}</a>
             </td>
             <td>
                 {{cannedMessage.getTitle()}}
             </td>
             <td>
-                <a href="{{path('sglc_admin_canned_message_edit', {'id': cannedMessage.getId()})}}">Edit</a>
+                <a class="btn btn-small" href="{{path('sglc_admin_canned_message_edit', {'id': cannedMessage.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}
         {% endif %}
     </tbody>
 </table>
+<p class="well">
+    <a class="btn" href="{{path('sglc_admin_canned_message')}}">New</a>
+</p>
 {% endblock %}
