@@ -1,20 +1,19 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
-{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
-
 
 {% block content %}
-<div class="span8 offset2">
-<h3>Please enter your e-mail and password to access the admin panel</h3>
-<form action="{{ path('_security_check') }}" method="post" class="well">
 
+<h2>ServerGrove LiveChat Admin</h2>
+
+<form action="{{ path('_security_check') }}" method="post" class="form-horizontal">
+    <legend>Please enter your e-mail and password to access the admin panel</legend>
     {{ form_widget(form) }}
 
-    <p class="actions">
+    <div class="form-actions">
         <button type="submit" class="btn btn-primary">Login</button>
-    </p>
+    </div>
 
 </form>
-</div>
+
 <script type="text/javascript">
     jQuery(document).ready(function() {
         jQuery(':text').focus();
