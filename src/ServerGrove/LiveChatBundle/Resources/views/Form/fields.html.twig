@@ -2,16 +2,27 @@
 
 {% block field_row %}
 {% spaceless %}
-        <div {{ block('row_container_attributes') }}>
-            {{ form_label(form, label|default(null)) }}
-            <div class="input">
-                {{ form_widget(form) }}
-                {{ form_errors(form) }}
-            </div>
-        </div>
-    </tr>
+<div {{ block('row_container_attributes') }}>
+    {{ form_label(form, label|default(null)) }}
+    <div class="controls">
+        {{ form_widget(form) }}
+        {{ form_errors(form) }}
+    </div>
+</div>
 {% endspaceless %}
 {% endblock field_row %}
+
+{% block repeated_row %}
+{% spaceless %}
+<div {{ block('row_container_attributes') }}>
+    {{ form_label(form, label|default(null)) }}
+    <div class="controls">
+        {{ form_widget(form.first) }} &nbsp; {{ form_widget(form.second) }}
+        {{ form_errors(form) }}
+    </div>
+</div>
+{% endspaceless %}
+{% endblock repeated_row %}
 
 {% block textarea_widget %}
 {% spaceless %}
@@ -165,7 +176,7 @@
 
 {% block row_container_attributes %}
 {% spaceless %}
-    class="clearfix{% if errors|length > 0 %} error{% endif %}"
+    class="control-group{% if errors|length > 0 %} error{% endif %}"
     {% for attrname,attrvalue in attr %}{{attrname}}="{{attrvalue}}" {% endfor %}
 {% endspaceless %}
 {% endblock row_container_attributes %}
