@@ -27,9 +27,20 @@ class OperatorType extends AbstractType
     {
         $builder->add('id', 'hidden');
         $builder->add('name', 'text', array('label' => 'Name'));
-        $builder->add('email', 'repeated', array('label' => 'e-mail'));
-        $builder->add('passwd', 'repeated', array('type' => 'password', 'label' => 'Password', 'required' => !$this->edit));
-        $builder->add('isActive', 'checkbox', array('label' => 'Is Active', 'required' => false));
+        $builder->add('email', 'repeated', array(
+            'label'   => 'e-mail',
+            'options' => array('attr' => array('autocomplete' => 'off'))
+        ));
+        $builder->add('passwd', 'repeated', array(
+            'type'     => 'password',
+            'label'    => 'Password',
+            'required' => !$this->edit,
+            'options'  => array('attr' => array('autocomplete' => 'off'))
+        ));
+        $builder->add('isActive', 'checkbox', array(
+            'label'    => 'Is Active',
+            'required' => false
+        ));
 
         $departments = $this->dm->getRepository('ServerGroveLiveChatBundle:Operator\Department')->getDepartments();
 
@@ -41,9 +52,9 @@ class OperatorType extends AbstractType
 
         $builder->add('departments', 'document', array(
             'document_manager' => $this->dm,
-            'class' => 'ServerGroveLiveChatBundle:Operator\Department',
-            'multiple' => true,
-            'required' => false
+            'class'            => 'ServerGroveLiveChatBundle:Operator\Department',
+            'multiple'         => true,
+            'required'         => false
         ));
     }
 

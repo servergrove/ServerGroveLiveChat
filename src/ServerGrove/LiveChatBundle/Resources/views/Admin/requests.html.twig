@@ -4,7 +4,6 @@
 {% endblock #}
 
 {% block content %}
-{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 <h1>Active sessions</h1>
 {% if chats %}
 {% render "ServerGroveLiveChatBundle:Admin:sessionsApi" with {'_format' : 'html'} %}

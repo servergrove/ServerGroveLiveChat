@@ -3,41 +3,31 @@
 {% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 <h1>Visitors list</h1>
 <h2>{{msg}}</h2>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col width="150px">
-        <col width="120px">
-        <col>
-        <col>
-        <col>
-        <col width="160px">
-        <col width="120px">
-        <col width="75px">
-    </colgroup>
+<table class="table">
     <thead>
-        <tr class="header">
-            <th>
+        <tr>
+            <th class="span3">
                 Id
             </th>
-            <th>
+            <th class="span2">
                 Created At
             </th>
             <th>
                 Name
             </th>
-            <th>
+            <th class="span4">
                 e-mail
             </th>
-            <th>
+            <th class="span6">
                 Agent
             </th>
-            <th>
+            <th class="span3">
                 Visitor key
             </th>
-            <th>
+            <th class="span2">
                 Remote Addr
             </th>
-            <th>
+            <th class="span2">
                 Languages
             </th>
         </tr>

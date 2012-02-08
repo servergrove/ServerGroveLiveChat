@@ -3,25 +3,19 @@
 {% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 <h1>Departments list</h1>
 <h2>{{msg}}</h2>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col width="150px">
-        <col>
-        <col width="75px">
-        <col width="75px">
-    </colgroup>
+<table class="table">
     <thead>
-        <tr class="header">
-            <th>
+        <tr>
+            <th class="span3">
                 Id
             </th>
             <th>
                 Name
             </th>
-            <th>
+            <th class="span2">
                 Is Active
             </th>
-            <th>
+            <th class="span2">
                 &nbsp;
             </th>
         </tr>
@@ -29,12 +23,7 @@
     <tfoot>
         <tr>
             <td colspan="4" style="text-align: right;">
-            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_operator_departments'} %}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4">
-                <a href="{{path('sglc_admin_operator_department')}}">New</a>
+                {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_operator_departments'} %}
             </td>
         </tr>
     </tfoot>
@@ -55,14 +44,16 @@
                 No
                 {% endif %}
             </td>
-            <td>
-                <!--<a href="#">{% if department.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
-                &nbsp;-->
-                <a href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
+            <td class="btn-group">
+                <a class="btn btn-small" href="#">{% if department.isActive() %}Deactivate{% else %}Activate{% endif %}</a>
+                <a class="btn btn-small" href="{{path('sglc_admin_operator_department_edit', {'id': department.getId()})}}">Edit</a>
             </td>
         </tr>
         {% endfor %}
         {% endif %}
     </tbody>
 </table>
+<p class="well">
+    <a class="btn" href="{{path('sglc_admin_operator_department')}}">New</a>
+</p>
 {% endblock %}

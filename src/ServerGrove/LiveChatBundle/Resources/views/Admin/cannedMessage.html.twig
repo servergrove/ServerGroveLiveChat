@@ -1,29 +1,25 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
-{% form_theme form 'ServerGroveLiveChatBundle:Admin:form.html.twig' %}
 
 {% block content %}
-{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 
-{% if cannedMessage.getId() %}
-<h1>Edit canned message "{{cannedMessage.getTitle()}}"</h1>
-{% else %}
-<h1>Add new canned message</h1>
-{% endif %}
+<h2>Canned Message</h2>
+
 
 {% set route = cannedMessage.getId() ? 'sglc_admin_canned_message_edit' : 'sglc_admin_canned_message' %}
 {% set vars = cannedMessage.getId() ? {'id': cannedMessage.getId()} : {} %}
-<script type="text/javascript">
-    jQuery(document).ready(function(){
-        jQuery(':text:first').focus();
-    });
-</script>
-<form action="{{ path(route, vars) }}" method="post">
-    <div style="padding-left: 30px;padding-right: 30px;">
-        <div>{{ form_errors(form) }}</div>
-        {{ form_row(form.title) }}
-        <p></p>
-        {{ form_row(form.content) }}
-        <p>{{ form_rest(form) }}</p>
-        <input type="submit" value="Submit" />
+
+<form action="{{ path(route, vars) }}" method="post" class="form-horizontal">
+    {% if cannedMessage.getId() %}
+    <legend>Edit canned message "{{cannedMessage.getTitle()}}"</legend>
+    {% else %}
+    <legend>Add new canned message</legend>
+    {% endif %}
+
+    {{ form_widget(form) }}
+
+    <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Submit</button>
+        <a class="btn" href="{{ path('sglc_admin_canned_messages') }}">Cancel</a>
     </div>
-</form> {% endblock %}
+</form>
+{% endblock %}

@@ -1,39 +1,29 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 {% block content %}
-{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 <h1>Visits list</h1>
 <h2>{{msg}}</h2>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col width="150px">
-        <col width="120px">
-        <col width="160px">
-        <col width="150px">
-        <col>
-        <col>
-        <col width="50px">
-    </colgroup>
+<table class="table">
     <thead>
-        <tr class="header">
-            <th>
+        <tr>
+            <th class="span3">
                 Id
             </th>
-            <th>
+            <th class="span2">
                 Created At
             </th>
             <th>
                 Visit Key
             </th>
-            <th>
+            <th class="span3">
                 Visitor
             </th>
-            <th>
+            <th class="span2">
                 Remote Addr
             </th>
-            <th>
+            <th class="span3">
                 Local Time
             </th>
-            <th>
+            <th class="span1">
                 Hits
             </th>
         </tr>

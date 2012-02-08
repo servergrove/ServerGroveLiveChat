@@ -1,0 +1,182 @@
+{% extends 'form_div_layout.html.twig' %}
+
+{% block field_row %}
+{% spaceless %}
+<div {{ block('row_container_attributes') }}>
+    {{ form_label(form, label|default(null)) }}
+    <div class="controls">
+        {{ form_widget(form) }}
+        {{ form_errors(form) }}
+    </div>
+</div>
+{% endspaceless %}
+{% endblock field_row %}
+
+{% block repeated_row %}
+{% spaceless %}
+<div {{ block('row_container_attributes') }}>
+    {{ form_label(form, label|default(null)) }}
+    <div class="controls">
+        {{ form_widget(form.first) }} &nbsp; {{ form_widget(form.second) }}
+        {{ form_errors(form) }}
+    </div>
+</div>
+{% endspaceless %}
+{% endblock repeated_row %}
+
+{% block textarea_widget %}
+{% spaceless %}
+    {% set attr = attr|merge({"class": attr.class|default('') ~ ' xlarge'}) %}
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+{% endspaceless %}
+{% endblock textarea_widget %}
+
+{% block choice_widget %}
+{% spaceless %}
+    {% if expanded %}
+        <div {{ block('widget_container_attributes') }}>
+            <ul class="inputs-list">
+            {% for child in form %}
+                <li>
+                    <label>
+                        {{ form_widget(child) }}
+                        {{ form_label(child, null, { attr: { span: true } }) }}
+                    </label>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+    {% set attr = attr|merge({"class": attr.class|default('') ~ ' xlarge'}) %}
+    <select {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+        {% if empty_value is not none %}
+            <option value="">{{ empty_value|trans }}</option>
+        {% endif %}
+        {% if preferred_choices|length > 0 %}
+            {% set options = preferred_choices %}
+            {{ block('widget_choice_options') }}
+            {% if choices|length > 0 and separator is not none %}
+                <option disabled="disabled">{{ separator }}</option>
+            {% endif %}
+        {% endif %}
+        {% set options = choices %}
+        {{ block('widget_choice_options') }}
+    </select>
+    {% endif %}
+{% endspaceless %}
+{% endblock choice_widget %}
+
+{% block datetime_widget %}
+{% spaceless %}
+    {% if widget == 'single_text' %}
+        {{ block('field_widget') }}
+    {% else %}
+        {% set attr = attr|merge({class: attr.class|default('') ~ 'row'}) %}
+        <div {{ block('widget_container_attributes') }}>
+            {{ form_errors(form.date) }}
+            {{ form_errors(form.time) }}
+            {{ form_widget(form.date) }}
+            {{ form_widget(form.time) }}
+        </div>
+    {% endif %}
+{% endspaceless %}
+{% endblock datetime_widget %}
+
+{% block date_widget %}
+{% spaceless %}
+    {% if widget == 'single_text' %}
+        {{ block('field_widget') }}
+    {% else %}
+        {% set attr = attr|merge({class: attr.class|default('') ~ 'pull-left'}) %}
+        <div {{ block('widget_container_attributes') }}>
+            {{ date_pattern|replace({
+                '{{ year }}':  form_widget(form.year, { attr: { class: 'mini' } }),
+                '{{ month }}': form_widget(form.month, { attr: { class: 'mini' } }),
+                '{{ day }}':   form_widget(form.day, { attr: { class: 'mini' } }),
+            })|raw }}
+        </div>
+    {% endif %}
+{% endspaceless %}
+{% endblock date_widget %}
+
+{% block time_widget %}
+{% spaceless %}
+    {% if widget == 'single_text' %}
+        {{ block('field_widget') }}
+    {% else %}
+        {% set attr = attr|merge({class: attr.class|default('') ~ 'pull-left', style: attr.style|default('') ~ 'margin-left: 10px;'}) %}
+        <div {{ block('widget_container_attributes') }}>
+            {{ form_widget(form.hour, { 'attr': { 'size': '1', 'class': 'mini' } }) }}:{{ form_widget(form.minute, { 'attr': { 'size': '1', 'class': 'mini' } }) }}{% if with_seconds %}:{{ form_widget(form.second, { 'attr': { 'size': '1', 'class': 'mini' } }) }}{% endif %}
+        </div>
+    {% endif %}
+{% endspaceless %}
+{% endblock time_widget %}
+
+{% block prepended_widget %}
+{% spaceless %}
+<div class="input-prepend">
+    <label class="add-on">
+        <input type="checkbox" class="enabler">
+    </label>
+    {{ form_widget(form, { attr: { "style": "margin-left: 0px" } }) }}
+</div>
+{% endspaceless %}
+{% endblock prepended_widget %}
+
+{% block field_widget %}
+{% spaceless %}
+    {% set type = type|default('text') %}
+    {% set attr = attr|merge({"class": attr.class|default('') ~ ' xlarge'}) %}
+    <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+{% endspaceless %}
+{% endblock field_widget %}
+
+{% block form_widget %}
+{% spaceless %}
+    <fieldset {{ block('widget_container_attributes') }}>
+        {{ block('field_rows') }}
+        {{ form_rest(form) }}
+    </fieldset>
+{% endspaceless %}
+{% endblock form_widget %}
+
+{% block field_errors %}
+{% spaceless %}
+    {% if errors|length > 0 %}
+    <span class="help-inline">
+        {% for error in errors %}
+            {% if loop.index > 1 %}
+            ,&nbsp;
+            {% endif %}
+            {{ error.messageTemplate|trans(error.messageParameters, 'validators') }}
+        {% endfor %}
+    </span>
+    {% endif %}
+{% endspaceless %}
+{% endblock field_errors %}
+
+{% block generic_label %}
+{% spaceless %}
+    {% if attr.span|default(false) %}
+    <span>{{ label|trans }}</span>
+    {% else %}
+    {{ parent() }}
+    {% endif %}
+{% endspaceless %}
+{% endblock %}
+
+{% block widget_attributes %}
+{% spaceless %}
+    {% if attr.class|default(null) %}
+    {% set attr = attr|merge({class: attr.class|replace({'mini xlarge': 'mini'})})%}
+    {% endif %}
+    {{ parent() }}
+{% endspaceless %}
+{% endblock widget_attributes %}
+
+{% block row_container_attributes %}
+{% spaceless %}
+    class="control-group{% if errors|length > 0 %} error{% endif %}"
+    {% for attrname,attrvalue in attr %}{{attrname}}="{{attrvalue}}" {% endfor %}
+{% endspaceless %}
+{% endblock row_container_attributes %}

@@ -1,32 +1,38 @@
-<style type="text/css">
-    ul#header-menu li {
-        list-style: none;
-        display: inline-block;
-    }
-</style>
-<ul id="header-menu">
-    <li>
-        <a href="{{ path('sglc_admin_console_sessions') }}">Active Sessions</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_chat_sessions') }}">Chat Sessions</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_operators') }}">Operators</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_operator_departments') }}">Departments</a>
-    </li>
-    <li>
-        <a href="{{path('sglc_admin_canned_messages')}}">Canned Messages</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_visitors') }}">Visitors</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_visits') }}">Visits</a>
-    </li>
-    <li>
-        <a href="{{ path('sglc_admin_logout') }}">Logout</a>
-    </li>
-</ul>
+{% spaceless %}
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <a class="brand" href="#">
+            ServerGrove LiveChat
+        </a>
+        <div class="container">
+            <ul class="nav">
+                <li{% if "sglc_admin_console_sessions" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_console_sessions') }}">Active Sessions</a>
+                </li>
+                <li{% if "sglc_admin_chat_sessions" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_chat_sessions') }}">Chat Sessions</a>
+                </li>
+                <li{% if "sglc_admin_operators" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_operators') }}">Operators</a>
+                </li>
+                <li{% if "sglc_admin_operator_departments" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_operator_departments') }}">Departments</a>
+                </li>
+                <li{% if "sglc_admin_canned_messages" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{path('sglc_admin_canned_messages')}}">Canned Messages</a>
+                </li>
+                <li{% if "sglc_admin_visitors" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_visitors') }}">Visitors</a>
+                </li>
+                <li{% if "sglc_admin_visits" == currentRoute %} class="active"{% endif %}>
+                    <a href="{{ path('sglc_admin_visits') }}">Visits</a>
+                </li>
+                <li>
+                    <a href="{{ path('sglc_admin_logout') }}">Logout</a>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+{% endspaceless %}

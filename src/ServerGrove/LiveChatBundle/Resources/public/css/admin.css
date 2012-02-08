@@ -1,21 +1,4 @@
-body , td {
-    font-size: x-small;
-    font-family: helvetica, impact, sans-serif;
-}
 
-ul li { display: inline; padding-left: 10px; }
-
-.header {
-    background-color: #330066;
-    color: #fff;
-    font-weight: bold;
-    text-align: center;
-}
-
-.td1 {
-    background-color: #FFF;
-}
-
-table tbody a img {
-    border: none;
+body #wrapper {
+    padding-top: 50px;
 }

@@ -20,6 +20,9 @@ framework:
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
+    form:
+        resources:
+            - "ServerGroveLiveChatBundle:Form:fields.html.twig"
 
 # Assetic Configuration
 assetic:

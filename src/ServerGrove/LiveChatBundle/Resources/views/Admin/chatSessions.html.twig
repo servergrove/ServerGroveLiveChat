@@ -1,42 +1,33 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 {% block content %}
-{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
+
 <h1>Chat sessions list</h1>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col style="width: 140px;"/>
-        <col style="width: 120px;"/>
-        <col style="width: 140px;"/>
-        <col style="width: 140px;"/>
-        <col/>
-        <col style="width: 75px;"/>
-        <col style="width: 120px;"/>
-        <col style="width: 120px;"/>
-    </colgroup>
+
+<table class="table">
     <thead>
-        <tr class="header">
-            <th>
+        <tr>
+            <th class="span2">
                 Id
             </th>
-            <th>
+            <th class="span2">
                 Created At
             </th>
-            <th>
+            <th class="span2">
                 Operator
             </th>
-            <th>
+            <th class="span1">
                 Visitor
             </th>
             <th>
                 Question
             </th>
-            <th>
+            <th class="span1">
                 Messages
             </th>
-            <th>
+            <th class="span1">
                 Status
             </th>
-            <th>
+            <th class="span1">
                 Rating
             </th>
         </tr>
