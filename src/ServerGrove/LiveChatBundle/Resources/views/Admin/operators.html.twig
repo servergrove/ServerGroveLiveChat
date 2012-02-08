@@ -2,33 +2,25 @@
 {% block content %}
 <h1>Operators list</h1>
 <h2>{{msg}}</h2>
-<table cellpadding="3" cellspacing="3" border="0" width="100%">
-    <colgroup>
-        <col width="150px">
-        <col>
-        <col>
-        <col width="120px">
-        <col width="75px">
-        <col width="75px">
-    </colgroup>
+<table class="table">
     <thead>
         <tr class="header">
-            <th>
+            <th class="span3">
                 Id
             </th>
             <th>
                 Name
             </th>
-            <th>
+            <th class="span3">
                 e-mail
             </th>
-            <th>
+            <th class="span2">
                 Created At
             </th>
-            <th>
+            <th class="span2">
                 Is Active
             </th>
-            <th>
+            <th class="span2">
                 &nbsp;
             </th>
         </tr>
@@ -36,12 +28,7 @@
     <tfoot>
         <tr>
             <td colspan="6" style="text-align: right;">
-            {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_operators'} %}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="6">
-                <a href="{{path('sglc_admin_operator')}}">New</a>
+                {% include "ServerGroveLiveChatBundle:Admin:pager.html.twig" with {'pages': pages, 'route': 'sglc_admin_operators'} %}
             </td>
         </tr>
     </tfoot>
@@ -78,4 +65,7 @@
         {% endif %}
     </tbody>
 </table>
+<p class="well">
+    <a class="btn" href="{{path('sglc_admin_operator')}}">New</a>
+</p>
 {% endblock %}
