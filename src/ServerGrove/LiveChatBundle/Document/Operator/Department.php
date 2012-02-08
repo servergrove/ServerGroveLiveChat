@@ -4,6 +4,7 @@ namespace ServerGrove\LiveChatBundle\Document\Operator;
 
 use ServerGrove\LiveChatBundle\Document\Operator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Description of Department
@@ -25,6 +26,7 @@ class Department
     /**
      * @var string
      * @MongoDB\String
+     * @Assert\NotBlank()
      */
     private $name;
     /**
