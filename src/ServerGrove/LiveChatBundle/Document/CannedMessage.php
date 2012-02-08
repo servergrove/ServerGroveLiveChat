@@ -3,6 +3,7 @@
 namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Description of CannedMessage
@@ -21,12 +22,14 @@ class CannedMessage
     /**
      * @var string
      * @MongoDB\String
+     * @Assert\NotBlank()
      */
     private $content;
     /**
      * @var string
      * @MongoDB\String
      * @MongoDB\UniqueIndex(order="asc")
+     * @Assert\NotBlank()
      */
     private $title;
     /**

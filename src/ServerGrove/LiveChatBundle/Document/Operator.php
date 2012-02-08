@@ -3,6 +3,7 @@
 namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ServerGrove\LiveChatBundle\Document\Operator\Department;
@@ -37,6 +38,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     /**
      * @var string
      * @MongoDB\String
+     * @Assert\NotBlank()
      */
     private $passwd;
 
