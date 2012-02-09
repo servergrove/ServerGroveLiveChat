@@ -2,15 +2,15 @@
     var sg = window.ServerGrove = {
         Cookie: {
             create: function(name, value, days) {
+                var expiration, date = new Date();
                 if (days) {
-                    var date = new Date();
                     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    var expires = "; expires=" + date.toGMTString();
+                    expiration = '; expires=' + date.toGMTString();
                 } else {
-                    var expires = "";
+                    expiration = "";
                 }
 
-                document.cookie = name + "=" + value + expires + "; path=/";
+                document.cookie = name + "=" + value + expiration + "; path=/";
             },
 
             read: function(name) {
