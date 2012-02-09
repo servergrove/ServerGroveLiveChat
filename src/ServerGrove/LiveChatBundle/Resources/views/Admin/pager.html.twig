@@ -1,13 +1,39 @@
+{% spaceless %}
 {% if pages > 1 %}
-<ul class="pager">
-    {% spaceless %}
-    <li><a href="{{path(route, {'page': 1})}}">First</a></li>
-    {% set _from = pages > 10 and page > 5 ? page < pages - 10 ? page - 5 : pages - 10 : 1 %}
-    {% set limit = pages > 10 ? _from + 10 : pages %}
-    {% for i in _from..limit %}
-    <li><a href="{{path(route, {'page': i})}}">{{i}}</a></li>
-    {% endfor %}
-    <li><a href="{{path(route, {'page': pages})}}">Last</a></li>
-    {% endspaceless %}
-</ul>
+<div class="pagination">
+    <ul>
+        <li{% if 1 == page %} class="disabled"{% endif %}>
+            <a  href="{% if 1 == page %}#{% else %}{{ path(route, { 'page': 1 }) }}{% endif %}">&lArr; First</a>
+        </li>
+
+        <li{% if 1 == page %} class="disabled"{% endif %}>
+            <a href="{% if 1 == page %}#{% else %}{{ path(route, { 'page': page - 1 }) }}{% endif %}">&larr; Prev</a>
+        </li>
+
+        {% set _from = pages > 10 and page > 5 ? page < pages - 10 ? page - 5 : pages - 10 : 1 %}
+        {% set limit = pages > 10 ? _from + 10 : pages %}
+        {% for i in _from..limit %}
+        <li{% if i == page %} class="active"{% endif %}>
+            <a href="{{path(route, {'page': i})}}">
+                {{i}}
+            </a>
+        </li>
+        {% endfor %}
+
+        <li{% if pages == page %} class="disabled"{% endif %}>
+            <a href="{{ path(route, { 'page': page+1 }) }}">
+                Next &rarr;
+            </a>
+        </li>
+
+        <li{% if pages == page %} class="disabled"{% endif %}>
+            <a href="{{ path(route, { 'page': pages }) }}">
+                Last &rArr;
+            </a>
+        </li>
+    </ul>
+</div>
+
 {% endif %}
+{% endspaceless %}
+
