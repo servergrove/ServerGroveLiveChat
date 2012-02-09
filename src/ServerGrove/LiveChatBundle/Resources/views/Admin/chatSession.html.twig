@@ -1,6 +1,8 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Chat session "{{session.getId()}}"{% endblock %}
+
 {% block content %}
-<h1>Chat session "{{session.getId()}}"</h1>
 <div>
     <div style="overflow: auto;height: 400px;" id="messages">
         <div id="user-messages">

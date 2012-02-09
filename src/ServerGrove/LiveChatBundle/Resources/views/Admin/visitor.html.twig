@@ -1,8 +1,9 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
-{% block content %}
-{% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 
-<h1>Visitor "{{visitor.getId()}}"</h1>
+{% block h1 %}Visitor "{{visitor.getId()}}"{% endblock %}
+
+{% block content %}
+
 <script type="text/javascript">
     //<![CDATA[
     {% include "ServerGroveLiveChatBundle:Admin:sessionsApi.js.twig" %}
