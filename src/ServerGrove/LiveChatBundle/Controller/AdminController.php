@@ -77,7 +77,7 @@ class AdminController extends BaseController
 
         return array(
             'cannedMessage' => $cannedMessage,
-            'form' => $form->createView()
+            'form'          => $form->createView()
         );
     }
 
@@ -215,9 +215,9 @@ class AdminController extends BaseController
         }
 
         return $this->render('ServerGroveLiveChatBundle:Admin:login.html.twig', array(
-                                                                                     'form' => $form->createView(),
-                                                                                     'errorMsg' => $errorMsg
-                                                                                ), $response);
+            'form'     => $form->createView(),
+            'errorMsg' => $errorMsg
+        ), $response);
     }
 
     /**
@@ -283,7 +283,7 @@ class AdminController extends BaseController
 
         return array(
             'department' => $department,
-            'form' => $form->createView()
+            'form'       => $form->createView()
         );
     }
 
@@ -342,8 +342,8 @@ class AdminController extends BaseController
 
         return array(
             'operator' => $operator,
-            'form' => $form->createView(),
-            'edit' => $edit
+            'form'     => $form->createView(),
+            'edit'     => $edit
         );
     }
 
@@ -381,7 +381,7 @@ class AdminController extends BaseController
 
         $chats = $this->getRequestedChats();
 
-        return $this->render('ServerGroveLiveChatBundle:Admin:requestedChats.' . $_format . '.twig', array('chats' => $chats), $response);
+        return $this->render('ServerGroveLiveChatBundle:Admin:requestedChats.'.$_format.'.twig', array('chats' => $chats), $response);
     }
 
     /**
@@ -447,8 +447,9 @@ class AdminController extends BaseController
 
         return array(
             'visitor' => $visitor,
-            'visits' => $this->getVisitRepository()->toArray($visitor->getVisits()
-            ));
+            'visits'  => $this->getVisitRepository()->toArray($visitor->getVisits()
+            )
+        );
     }
 
     /**
