@@ -469,6 +469,26 @@ class AdminController extends BaseController
         return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Visit', 'visits');
     }
 
+    /**
+     * @Template
+     * @return array
+     */
+    public function adminMessagesAction()
+    {
+        $messages = array();
+
+        $success = $this->getSessionStorage()->getFlash('msg', '');
+        if (!empty($success)) {
+            $messages[] = array(
+                'type'    => 'success',
+                'title'   => 'Success!',
+                'message' => $success
+            );
+        }
+
+        return array('messages' => $messages);
+    }
+
     private function simpleListAction($page, $documentName, $documentTemplateKey)
     {
         if (!is_null($response = $this->checkLogin())) {
@@ -482,12 +502,10 @@ class AdminController extends BaseController
 
         $documents = $this->getDocumentManager()->getRepository($documentName)->findSlice($offset, $length);
 
-        $msg = $this->getSessionStorage()->getFlash('msg', '');
         return array(
             $documentTemplateKey => $documents,
-            'msg' => $msg,
-            'page' => $page,
-            'pages' => $pages
+            'page'               => $page,
+            'pages'              => $pages
         );
     }
 
