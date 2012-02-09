@@ -102,7 +102,7 @@ var SessionToolkit = {
                 jQuery(document.createElement('td')).html(item.createdAt).appendTo(row);
                 jQuery(document.createElement('td')).html(item.currentPageDuration + " ago / " + item.duration + " ago").appendTo(row);
                 jQuery(document.createElement('td')).html(item.visitor.languages).appendTo(row);
-                jQuery(document.createElement('td')).html(item.visitor.agent).appendTo(row);
+                /*jQuery(document.createElement('td')).html(item.visitor.agent).appendTo(row);
                 jQuery(document.createElement('td')).append(
 					jQuery(document.createElement('a')).attr({
                     	href: item.visitor.currentPage,
@@ -114,7 +114,7 @@ var SessionToolkit = {
                     	href: item.visitor.currentPage,
                     	target: '_blank'
                 	}).html(item.visitor.referer)
-				).appendTo(row);
+				).appendTo(row);*/
 				jQuery(document.createElement('tbody')).append(row).appendTo(SessionToolkit.Visit._listContainer + ' table:first');
                 SessionToolkit.Visit.Item.drawHits(item);
             },
@@ -145,12 +145,9 @@ var SessionToolkit = {
 					jQuery(document.createElement('div')).attr({ // Div created
 	                    id: 'visit_' + item.id
 	                }).append(
-						jQuery(document.createElement('table')).attr({ // hits table created
-		                    width: '100%'
-		                }).css({
-		                    'background-color': '#EEE',
-		                    'color': '#000'
-		                }).append('<tr class="header"><td>Hit ID</td><td>Time</td><td>Duration</td><td>URL</td><td>Referrer</td></tr>')
+						jQuery(document.createElement('table'))
+                            .addClass('table')
+                            .append('<tr><th>Hit ID</th><th>Time</th><th>Duration</th><th>URL</th><th>Referrer</th></tr>')
 					)
 				).appendTo(row);
                 

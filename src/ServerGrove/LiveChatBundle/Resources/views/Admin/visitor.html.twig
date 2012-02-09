@@ -7,53 +7,49 @@
 <script type="text/javascript">
     //<![CDATA[
     {% include "ServerGroveLiveChatBundle:Admin:sessionsApi.js.twig" %}
-    jQuery(document).ready(function(){
-        SessionToolkit.Visit.setListContainer('#visits');
+    jQuery(document).ready(function() {
+        SessionToolkit.Visit.setListContainer('#visitor-visits');
         SessionToolkit.Visit.disableChatInvitation();
         SessionToolkit.Visit.Item.drawAll({{visits|json_encode|raw}});
-    });
-    //]]>
+    });//]]>
 </script>
-<h2>Details</h2>
+<section id="visitor-details">
+    <h2>Details</h2>
 
-<table width="100%">
-	<tbody>
-		<tr>
-			<td>Visitor ID</td>
-			<td>{{visitor.getId()}}</td>
-		</tr>
-		<tr>
-			<td>Browser</td>
-			<td>{{visitor.getAgent()}}</td>
-		</tr>
-		<tr>
-			<td>Languages</td>
-			<td>{{visitor.getLanguages()}}</td>
-		</tr>
-		<tr>
-			<td>Hostname</td>
-			<td>{{visitor.getHostname()}}</td>
-		</tr>
-		<tr>
-			<td>Name</td>
-			<td>{{visitor.getName()}}</td>
-		</tr>
-		<tr>
-			<td>Email</td>
-			<td>
-			<a href="mailto:{{visitor.getEmail()}}">{{visitor.getEmail()}}</a>
-			</td>
-		</tr>
-		<tr>
-			<td>Chat sessions #</td>
-			<td>N/A</td>
-		</tr>
-	</tbody>
-</table>
+    <div class="row">
+        <div class="span2">Visitor ID</div>
+        <div class="span10">{{visitor.getId()}}</div>
+    </div>
+    <div class="row">
+        <div class="span2">Browser</div>
+        <div class="span10">{{visitor.getAgent()}}</div>
+    </div>
+    <div class="row">
+        <div class="span2">Languages</div>
+        <div class="span10">{{visitor.getLanguages()}}</div>
+    </div>
+    <div class="row">
+        <div class="span2">Hostname</div>
+        <div class="span10">{{visitor.getHostname()}}</div>
+    </div>
+    <div class="row">
+        <div class="span2">Name</div>
+        <div class="span10">{{visitor.getName()}}</div>
+    </div>
+    <div class="row">
+        <div class="span2">Email</div>
+        <div class="span10"><a href="mailto:{{visitor.getEmail()}}">{{visitor.getEmail()}}</a></div>
+    </div>
+    <div class="row">
+        <div class="span2">Chat sessions #</div>
+        <div class="span10">N/A</div>
+    </div>
+</section>
+<br/>
+<section id="visitor-visits">
+    <h2>Visits</h2>
 
-<h2>Visits</h2>
-<div id="visits" class="visitsList">
-    <table width="100%" border="0" cellpadding="3" cellspacing="0">
+    <table class="table">
         <thead>
             <tr class="header">
                 <th>Visitor ID (# visits)</th>
@@ -62,14 +58,12 @@
                 <th>Time</th>
                 <th>Duration (current page/Total)</th>
                 <th>Languages</th>
-                <th>Browser</th>
-                <th>Current Page</th>
-                <th>Referrer</th>
             </tr>
         </thead>
         <tbody>
 
         </tbody>
     </table>
-</div>
+</section>
+
 {% endblock %}
