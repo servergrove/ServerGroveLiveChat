@@ -1,8 +1,8 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
 
-{% block content %}
+{% block h1 %}Operator Departments{% endblock %}
 
-<h2>Operator Departments</h2>
+{% block content %}
 
 {% set route = department.getId() ? 'sglc_admin_operator_department_edit' : 'sglc_admin_operator_department' %}
 {% set vars = department.getId() ? {'id': department.getId()} : {} %}

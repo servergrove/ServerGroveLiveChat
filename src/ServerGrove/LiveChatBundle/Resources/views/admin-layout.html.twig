@@ -1,5 +1,7 @@
 {% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
 
+{% block title %}{{ parent() }} - {{ block('h1') }}{% endblock title %}
+
 {% block stylesheets %}
 {{ parent() }}
 {% stylesheets "@ServerGroveLiveChatBundle/Resources/public/css/bootstrap.min.css"
@@ -10,12 +12,20 @@
 {% endstylesheets %}
 {% endblock %}
 
-{% block header %}
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}
+
+{% block preheader %}
 {% include "ServerGroveLiveChatBundle:Admin:header.html.twig" %}
 {% endblock %}
 
-{% block body %}
-<div class="container" id="wrapper">
-{% block content %}{% endblock %}
-</div>
+{% block header %}
+<h1>{% block h1 %}{% endblock h1 %}</h1>
+<br/>
+{% endblock %}
+
+{% block postheader %}
+{% render "ServerGroveLiveChatBundle:Admin:adminMessages" %}
 {% endblock %}

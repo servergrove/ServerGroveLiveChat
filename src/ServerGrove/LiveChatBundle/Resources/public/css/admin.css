@@ -1,4 +1,4 @@
 
-body #wrapper {
-    padding-top: 50px;
+body .top-margin {
+    margin-top: 50px;
 }

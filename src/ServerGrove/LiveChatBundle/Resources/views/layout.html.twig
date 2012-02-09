@@ -16,18 +16,24 @@
         <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
-        <div id="wrap">
+        {% block body %}
+        <div class="container">
+            {% block preheader %}{% endblock %}
             {% block header %}
             <div id="chatWin_header">
                 <img src="{{asset('/bundles/servergrovelivechat/images/sg_logo.jpg')}}" width="182" height="37" alt="Online Support ServerGrove" class="logo" />
                 {% block head_buttons %}{% endblock %}
             </div>
             {% endblock %}
-            {% block body %}
+            {% block postheader %}{% endblock %}
+
             <div class="vspacer"></div>
             {% block content %}{% endblock %}
-            {% endblock %}
+
+            {% block prefooter %}{% endblock %}
             {% block footer %}{% endblock %}
+            {% block postfooter %}{% endblock %}
         </div>
+        {% endblock %}
     </body>
 </html>

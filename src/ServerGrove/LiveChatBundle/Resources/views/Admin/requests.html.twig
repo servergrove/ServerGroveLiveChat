@@ -1,10 +1,8 @@
 {% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
-{# block metas %}
-<meta http-equiv="refresh" content="10" />
-{% endblock #}
+
+{% block h1 %}Active sessions{% endblock %}
 
 {% block content %}
-<h1>Active sessions</h1>
 {% if chats %}
 {% render "ServerGroveLiveChatBundle:Admin:sessionsApi" with {'_format' : 'html'} %}
 {% include "ServerGroveLiveChatBundle:Admin:requestedChats.html.twig" with {'chats': chats} only %}

@@ -1,0 +1,15 @@
+{% spaceless %}
+<div id="admin-messages">
+    {% for message in messages %}
+    <div class="alert alert-block alert-{{ message.type }} fade in">
+        <a data-dismiss="alert" class="close">&times;</a>
+
+        {% if message.title|default(false) %}
+        <h4 class="alert-heading">{{ message.title }}</h4>
+        {% endif%}
+
+        {{ message.message }}
+    </div>
+    {% endfor %}
+</div>
+{% endspaceless %}
