@@ -21,12 +21,20 @@ class LoadUserData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $this->createOperator($manager, 'John Doe', 'john@example.com', 'testing');
+        $this->createOperator($manager, 'Jane Doe', 'jane@example.com', 'testing');
+        $this->createOperator($manager, 'Ismael Ambrosi', 'ismael@servergrove.com', 'testing');
+
+        $manager->flush();
+    }
+
+    private function createOperator($manager, $name, $email, $passwd)
+    {
         $admin = new Administrator();
-        $admin->setName('John Doe');
-        $admin->setEmail('john@example.com');
-        $admin->setPasswd('testing');
+        $admin->setName($name);
+        $admin->setEmail($email);
+        $admin->setPasswd($passwd);
 
         $manager->persist($admin);
-        $manager->flush();
     }
 }
