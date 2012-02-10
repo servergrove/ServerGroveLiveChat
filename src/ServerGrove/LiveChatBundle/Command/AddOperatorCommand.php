@@ -6,7 +6,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use ServerGrove\LiveChatBundle\Document\Operator;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use MongoCursorException;
 
 /**
@@ -21,11 +20,12 @@ class AddOperatorCommand extends BaseCommand
     protected function configure()
     {
         $this->setDefinition(
-                array(
-                    new InputArgument('name', InputArgument::REQUIRED, 'The operator name'),
-                    new InputArgument('email', InputArgument::REQUIRED, 'The operator e-mail'),
-                    new InputArgument('password', InputArgument::REQUIRED, 'The admin password')))->setName('sglivechat:admin:add-operator')->setDescription('Create new Operator');
-        ;
+            array(
+                new InputArgument('name', InputArgument::REQUIRED, 'The operator name'),
+                new InputArgument('email', InputArgument::REQUIRED, 'The operator e-mail'),
+                new InputArgument('password', InputArgument::REQUIRED, 'The admin password')
+            )
+        )->setName('sglivechat:admin:add-operator')->setDescription('Create new Operator');
     }
 
     /**

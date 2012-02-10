@@ -2,8 +2,6 @@
 
 namespace ServerGrove\LiveChatBundle\Cache;
 
-use ServerGrove\LiveChatBundle\Cache\Engine\Apc;
-
 /**
  * Description of Manager
  *
@@ -27,6 +25,7 @@ class Manager implements Cacheable
 
     /**
      * Constructor
+     *
      * @param Engine\Base $engine
      */
     public function __construct(Engine\Base $engine)

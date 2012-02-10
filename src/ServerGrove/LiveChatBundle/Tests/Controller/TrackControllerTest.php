@@ -4,11 +4,6 @@ namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
 use Symfony\Component\BrowserKit\Client;
 
-use Symfony\Component\BrowserKit\Response;
-
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
-
 /**
  * TrackController test case.
  */
@@ -78,8 +73,11 @@ class TrackControllerTest extends ControllerTest
         $client = $this->createClient();
         $client->request('GET', $this->getUrl('sglc_track_reset'));
 
-        $this->assertNull($client->getRequest()->cookies->get('vtrid'));
-        $this->assertNull($client->getRequest()->cookies->get('vsid'));
+        /** @var $request \Symfony\Component\HttpFoundation\Request */
+        $request = $client->getRequest();
+
+        $this->assertNull($request->cookies->get('vtrid'));
+        $this->assertNull($request->cookies->get('vsid'));
     }
 
     private function createSession(Client $client)

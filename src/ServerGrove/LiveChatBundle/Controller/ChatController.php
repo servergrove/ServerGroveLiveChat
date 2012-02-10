@@ -7,7 +7,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use ServerGrove\LiveChatBundle\Chat\ChatRequest;
 use ServerGrove\LiveChatBundle\Document\CannedMessage;
 use ServerGrove\LiveChatBundle\Document\Operator;
-use ServerGrove\LiveChatBundle\Document\Operator\Rating;
 use ServerGrove\LiveChatBundle\Document\Session;
 use ServerGrove\LiveChatBundle\Document\User;
 use ServerGrove\LiveChatBundle\Document\Visit;

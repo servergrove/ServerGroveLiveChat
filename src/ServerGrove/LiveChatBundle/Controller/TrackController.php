@@ -4,7 +4,6 @@ namespace ServerGrove\LiveChatBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Cookie;
 use ServerGrove\LiveChatBundle\Document\VisitHit;
-use ServerGrove\LiveChatBundle\Controller\BaseController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -93,7 +92,6 @@ class TrackController extends PublicController
         if ($chats->count() > 0) {
             /* @var $chat \ServerGrove\LiveChatBundle\Document\Session */
             $chat = $chats->getSingleResult();
-
 
             if (!$this->getSessionStorage()->get('chat_invite', null)) {
                 $this->getSessionStorage()->set('chat_invite', $chat->getId());

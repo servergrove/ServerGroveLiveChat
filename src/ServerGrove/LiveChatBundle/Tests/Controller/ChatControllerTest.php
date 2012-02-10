@@ -3,8 +3,6 @@
 namespace ServerGrove\LiveChatBundle\Tests\Controller;
 
 use Symfony\Component\BrowserKit\Client;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\DomCrawler\Form;
 
 /**
