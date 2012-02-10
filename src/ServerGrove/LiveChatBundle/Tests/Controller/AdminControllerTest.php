@@ -79,7 +79,7 @@ class AdminControllerTest extends ControllerTest
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message_edit', array('id' => $cannedMessage->getId())));
 
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit canned message")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Edit canned message")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
         $newTitle = $form['canned_message[title]'] = 'New Title of canned message';
@@ -106,7 +106,7 @@ class AdminControllerTest extends ControllerTest
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message'));
 
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Add new canned message")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
         $title = $form['canned_message[title]'] = 'Title of canned message';
@@ -158,7 +158,7 @@ class AdminControllerTest extends ControllerTest
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator'));
 
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new operator")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Add new operator")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
 
@@ -207,7 +207,7 @@ class AdminControllerTest extends ControllerTest
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_edit', array('id' => $operator->getId())));
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit operator ")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Edit operator ")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
 
@@ -253,7 +253,7 @@ class AdminControllerTest extends ControllerTest
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_department'));
 
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new department")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Add new department")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
 
@@ -298,7 +298,7 @@ class AdminControllerTest extends ControllerTest
         /* @var $crawler \Symfony\Component\DomCrawler\Crawler */
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_operator_department_edit', array('id' => $department->getId())));
         $this->assertGetSuccessful($this->client);
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Edit department ")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Edit department ")')->count());
 
         $form = $crawler->selectButton('Submit')->form();
 
@@ -371,7 +371,7 @@ class AdminControllerTest extends ControllerTest
         $crawler = $this->client->request('GET', $this->getUrl('sglc_admin_canned_message'));
 
         $this->assertGetSuccessful();
-        $this->assertGreaterThan(0, $crawler->filter('h1:contains("Add new canned message")')->count());
+        $this->assertGreaterThan(0, $crawler->filter('form legend:contains("Add new canned message")')->count());
 
         $this->logout();
     }
