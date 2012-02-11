@@ -4,23 +4,18 @@ namespace ServerGrove\LiveChatBundle\Controller;
 
 use ServerGrove\LiveChatBundle\Document\CannedMessage;
 use ServerGrove\LiveChatBundle\Form\CannedMessageType;
-use ServerGrove\LiveChatBundle\Form\OperatorType;
 use ServerGrove\LiveChatBundle\Form\OperatorDepartmentType;
-use ServerGrove\LiveChatBundle\Form\OperatorLoginType;
 use ServerGrove\LiveChatBundle\Controller\BaseController;
 use ServerGrove\LiveChatBundle\Document\Session as ChatSession;
 use ServerGrove\LiveChatBundle\Document\Operator;
 use ServerGrove\LiveChatBundle\Document\Operator\Department;
 use Doctrine\ODM\MongoDB\Mapping\Document;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
-
-use Symfony\Component\Security\Core\SecurityContext;
 
 /**
  * Description of AdminController
@@ -196,62 +191,6 @@ class AdminController extends BaseController
     public function operatorDepartmentsAction($page)
     {
         return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
-    }
-
-    /**
-     * @Route("/operator", name="sglc_admin_operator")
-     * @Route("/operator/{id}", name="sglc_admin_operator_edit")
-     * @Template
-     */
-    public function operatorAction($id = null)
-    {
-        $message = null;
-
-        if ($id) {
-            $operator = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator', $id);
-            $edit = true;
-        } else {
-            $operator = new Operator();
-            $edit = false;
-        }
-
-        /* @var $form Symfony\Component\Form\Form */
-        $form = $this->get('form.factory')->create(new OperatorType($this->getDocumentManager(), $edit));
-        $form->setData($operator);
-
-        switch ($this->getRequest()->getMethod()) {
-            case 'POST':
-            case 'PUT':
-
-                $form->bindRequest($this->getRequest());
-
-                if ($form->isValid()) {
-                    $this->getDocumentManager()->persist($operator);
-                    $this->getDocumentManager()->flush();
-                    $this->getSessionStorage()->setFlash('msg', 'The operator has been successfully updated');
-
-                    return $this->redirect($this->generateUrl('sglc_admin_operators'));
-                }
-
-                break;
-            case 'DELETE':
-                break;
-        }
-
-        return array(
-            'operator' => $operator,
-            'form'     => $form->createView(),
-            'edit'     => $edit
-        );
-    }
-
-    /**
-     * @Route("/operators/{page}", name="sglc_admin_operators", defaults={"page"="1"})
-     * @Template
-     */
-    public function operatorsAction($page)
-    {
-        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Operator', 'operators');
     }
 
     /**

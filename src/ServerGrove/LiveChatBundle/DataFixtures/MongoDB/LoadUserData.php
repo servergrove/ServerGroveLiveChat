@@ -6,7 +6,6 @@ use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use ServerGrove\LiveChatBundle\Document\Administrator;
 use ServerGrove\LiveChatBundle\Document\Operator;
-use ServerGrove\LiveChatBundle\Document\User;
 
 /**
  * Class LoadUserData
