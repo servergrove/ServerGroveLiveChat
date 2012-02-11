@@ -5,6 +5,8 @@ namespace ServerGrove\LiveChatBundle\DataFixtures\MongoDB;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use ServerGrove\LiveChatBundle\Document\Administrator;
+use ServerGrove\LiveChatBundle\Document\Operator;
+use ServerGrove\LiveChatBundle\Document\User;
 
 /**
  * Class LoadUserData
@@ -21,6 +23,7 @@ class LoadUserData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $this->createAdministrator($manager, 'Administrator', 'admin@example.com', 'testing');
         $this->createOperator($manager, 'John Doe', 'john@example.com', 'testing');
         $this->createOperator($manager, 'Jane Doe', 'jane@example.com', 'testing');
         $this->createOperator($manager, 'Ismael Ambrosi', 'ismael@servergrove.com', 'testing');
@@ -28,13 +31,24 @@ class LoadUserData implements FixtureInterface
         $manager->flush();
     }
 
-    private function createOperator($manager, $name, $email, $passwd)
+    private function createOperator(ObjectManager $manager, $name, $email, $passwd)
     {
-        $admin = new Administrator();
-        $admin->setName($name);
-        $admin->setEmail($email);
-        $admin->setPasswd($passwd);
+        return $this->saveUser($manager, new Operator(), $name, $email, $passwd);
+    }
 
-        $manager->persist($admin);
+    private function createAdministrator(ObjectManager $manager, $name, $email, $passwd)
+    {
+        return $this->saveUser($manager, new Administrator(), $name, $email, $passwd);
+    }
+
+    private function saveUser(ObjectManager $manager, Operator $operator, $name, $email, $passwd)
+    {
+        $operator->setName($name);
+        $operator->setEmail($email);
+
+        $encoder = new \Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder();
+        $operator->setPasswd($encoder->encodePassword($passwd, $operator->getSalt()));
+
+        $manager->persist($operator);
     }
 }

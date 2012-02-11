@@ -3,6 +3,11 @@ sglc_admin:
   type:     annotation
   prefix:   /admin
 
+sglc_admin_2:
+  resource: "@ServerGroveLiveChatBundle/Controller/Admin/"
+  type:     annotation
+  prefix:   /admin
+
 sglc_chat:
   resource: "@ServerGroveLiveChatBundle/Controller/ChatController.php"
   type:     annotation

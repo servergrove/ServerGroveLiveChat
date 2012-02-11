@@ -8,6 +8,7 @@
             </a>
 
             <div class="nav-collapse">
+                {% if is_granted('ROLE_OPERATOR') %}
                 <ul class="nav">
                     <li{% if "sglc_admin_console_sessions" == currentRoute %} class="active"{% endif %}>
                         <a href="{{ path('sglc_admin_console_sessions') }}">Active Sessions</a>
@@ -37,6 +38,7 @@
                         <a href="{{ path('sglc_admin_logout') }}">Logout</a>
                     </li>
                 </ul>
+                {% endif %}
             </div>
         </div>
     </div>

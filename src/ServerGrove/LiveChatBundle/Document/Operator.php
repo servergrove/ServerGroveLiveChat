@@ -4,9 +4,9 @@ namespace ServerGrove\LiveChatBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ServerGrove\LiveChatBundle\Document\Operator\Department;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Description of Operator
@@ -20,7 +20,7 @@ use ServerGrove\LiveChatBundle\Document\Operator\Department;
  * @MongoDB\DiscriminatorField(fieldName="type")
  * @MongoDB\DiscriminatorMap({"admin"="Administrator", "operator"="Operator"})
  */
-class Operator extends User implements UserInterface, PasswordEncoderInterface
+class Operator extends User implements UserInterface
 {
 
     /**
@@ -43,13 +43,11 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     private $passwd;
 
     /**
-     * @var ServerGrove\LiveChatBundle\Document\Operator\Rating
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
     private $ratings = array();
 
     /**
-     * @var Department[]
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Department")
      */
     private $departments;
@@ -60,11 +58,18 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     public function __construct()
     {
         $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
+        $this->departments = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
     }
 
     public function addRating(Operator\Rating $rating)
     {
-        $this->ratings[] = $rating;
+        $this->ratings->add($rating);
+    }
+
+    public function getRatings()
+    {
+        return $this->ratings;
     }
 
     /**
@@ -118,11 +123,11 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      */
     public function setPasswd($passwd)
     {
-        $this->passwd = $this->encodePassword($passwd, $this->getSalt());
+        $this->passwd = $passwd;
     }
 
     /**
-     * @return Department[] $departments
+     * @return \Doctrine\Common\Collections\ArrayCollection
      */
     public function getDepartments()
     {
@@ -131,7 +136,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
 
     public function addDepartment(Department $department)
     {
-        $this->departments[] = $department;
+        $this->departments->add($department);
     }
 
     public function setDepartments($departments)
@@ -165,7 +170,9 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      */
     public function equals(UserInterface $account)
     {
-        return $account instanceof Operator && $account->getId() == $this->getId();
+        return $account instanceof Operator
+            && $account->getId() == $this->getId()
+            && $account->getUsername() == $this->getUsername();
     }
 
     public function eraseCredentials()
@@ -186,9 +193,7 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
      */
     public function getRoles()
     {
-        return array(
-            'ROLE_USER'
-        );
+        return array('ROLE_OPERATOR');
     }
 
     public function getSalt()
@@ -200,15 +205,4 @@ class Operator extends User implements UserInterface, PasswordEncoderInterface
     {
         return $this->getEmail();
     }
-
-    public function encodePassword($raw, $salt)
-    {
-        return md5(md5($raw).'-'.$salt);
-    }
-
-    public function isPasswordValid($encoded, $raw, $salt)
-    {
-        return $encoded == $this->encodePassword($raw, $salt);
-    }
-
 }

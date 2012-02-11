@@ -1,16 +1,17 @@
 security:
     encoders:
+        ServerGrove\LiveChatBundle\Document\Operator: sha512
+        ServerGrove\LiveChatBundle\Document\Administrator: sha512
         Symfony\Component\Security\Core\User\User: plaintext
 
     role_hierarchy:
-        ROLE_ADMIN:       ROLE_USER
+        ROLE_OPERATOR:    ROLE_USER
+        ROLE_ADMIN:       ROLE_OPERATOR
         ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     providers:
-        in_memory:
-            users:
-                user:  { password: userpass, roles: [ 'ROLE_USER' ] }
-                admin: { password: adminpass, roles: [ 'ROLE_ADMIN' ] }
+        user_db:
+            id: server_grove_live_chat.user.provider
 
     firewalls:
         dev:
@@ -22,17 +23,26 @@ security:
             security: false
 
         secured_area:
-            pattern:    ^/demo/secured/
+            pattern:   ^/
+            anonymous: ~
             form_login:
-                check_path: /demo/secured/login_check
-                login_path: /demo/secured/login
+                default_target_path: /sglivechat/admin
+                login_path:          /sglivechat/admin/login
+                check_path:          /sglivechat/admin/login-check
+                username_parameter: login[email]
+                password_parameter: login[passwd]
             logout:
-                path:   /demo/secured/logout
-                target: /demo/
+                path:   /sglivechat/admin/logout
+                target: /sglivechat/admin/login
             #anonymous: ~
             #http_basic:
             #    realm: "Secured Demo Area"
 
     access_control:
-        #- { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
-        #- { path: ^/_internal, roles: IS_AUTHENTICATED_ANONYMOUSLY, ip: 127.0.0.1 }
+        - { path: ^/sglivechat/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/sglivechat/admin/operators/new, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/operators/create, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/operators/[\w]+/[\w\/]*edit, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/operators/[\w]+/update, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/operators/[\w]+/delete, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin, roles: ROLE_USER }
