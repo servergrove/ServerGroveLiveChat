@@ -1,0 +1,39 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Departments list{% endblock %}
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Isactive</th>
+            <th>Operators</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for document in documents %}
+        <tr>
+            <td><a href="{{ path('sglc_admin_operators_departments_show', { 'id': document.id }) }}">{{ document.id }}</a></td>
+            <td>{{ document.name }}</td>
+            <td>{{ document.isActive }}</td>
+            <td>{{ document.operators.count() }}</td>
+            <td class="btn-group">
+                <a class="btn" href="{{ path('sglc_admin_operators_departments_show', { 'id': document.id }) }}">show</a>
+                <a class="btn" href="{{ path('sglc_admin_operators_departments_edit', { 'id': document.id }) }}">edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_granted('ROLE_ADMIN') %}
+<p class="well">
+    <a class="btn" href="{{ path('sglc_admin_operators_departments_new') }}">
+        Create a new entry
+    </a>
+</p>
+{% endif %}
+{% endblock %}

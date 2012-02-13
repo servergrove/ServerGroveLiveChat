@@ -4,11 +4,8 @@ namespace ServerGrove\LiveChatBundle\Controller;
 
 use ServerGrove\LiveChatBundle\Document\CannedMessage;
 use ServerGrove\LiveChatBundle\Form\CannedMessageType;
-use ServerGrove\LiveChatBundle\Form\OperatorDepartmentType;
 use ServerGrove\LiveChatBundle\Controller\BaseController;
 use ServerGrove\LiveChatBundle\Document\Session as ChatSession;
-use ServerGrove\LiveChatBundle\Document\Operator;
-use ServerGrove\LiveChatBundle\Document\Operator\Department;
 use Doctrine\ODM\MongoDB\Mapping\Document;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -141,56 +138,6 @@ class AdminController extends BaseController
     public function indexAction()
     {
         return $this->redirect($this->generateUrl('sglc_admin_console_sessions'));
-    }
-
-    /**
-     * @Route("/operator/department", name="sglc_admin_operator_department")
-     * @Route("/operator/department/{id}", name="sglc_admin_operator_department_edit")
-     * @Template
-     */
-    public function operatorDepartmentAction($id = null)
-    {
-        $message = null;
-
-        if ($id) {
-            $department = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Operator\Department', $id);
-        } else {
-            $department = new Department();
-        }
-
-        $form = $this->get('form.factory')->create(new OperatorDepartmentType());
-        $form->setData($department);
-
-        switch ($this->getRequest()->getMethod()) {
-            case 'POST':
-            case 'PUT':
-                $form->bindRequest($this->getRequest());
-                if ($form->isValid()) {
-                    $this->getDocumentManager()->persist($department);
-                    $this->getDocumentManager()->flush();
-                    $this->getSessionStorage()->setFlash('msg', 'The department has been successfully updated');
-
-                    return $this->redirect($this->generateUrl('sglc_admin_operator_departments'));
-                }
-
-                break;
-            case 'DELETE':
-                break;
-        }
-
-        return array(
-            'department' => $department,
-            'form'       => $form->createView()
-        );
-    }
-
-    /**
-     * @Route("/operator/departments/{page}", name="sglc_admin_operator_departments", defaults={"page"="1"})
-     * @Template
-     */
-    public function operatorDepartmentsAction($page)
-    {
-        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Operator\Department', 'departments', 'operator-departments');
     }
 
     /**

@@ -1,0 +1,35 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Department{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="span2">Id</div>
+    <div class="span10">{{ document.id }}</div>
+</div>
+<br />
+<div class="row">
+    <div class="span2">Name</div>
+    <div class="span10">{{ document.name }}</div>
+</div>
+<br />
+<div class="row">
+    <div class="span2">Isactive</div>
+    <div class="span10">{{ document.isActive }}</div>
+</div>
+<br />
+<form action="{{ path('sglc_admin_operators_departments_delete', { 'id': document.id }) }}" method="post">
+    <p class="well">
+        <a class="btn" href="{{ path('sglc_admin_operators_departments') }}">
+            Back to the list
+        </a>
+        <a class="btn" href="{{ path('sglc_admin_operators_departments_edit', { 'id': document.id }) }}">
+            Edit
+        </a>
+        <button class="btn btn-danger" type="submit">Delete</button>
+        {{ form_widget(delete_form) }}
+    </p>
+</form>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Department edit{% endblock %}
+
+{% block content %}
+<form class="form-horizontal" action="{{ path('sglc_admin_operators_departments_update', { 'id': document.id }) }}" method="post" {{ form_enctype(edit_form) }}>
+    {{ form_widget(edit_form) }}
+    <p class="form-actions">
+        <button class="btn btn-primary" type="submit">Edit</button>
+        <a class="btn" href="{{ path('sglc_admin_operators_departments') }}">
+            Cancel
+        </a>
+    </p>
+</form>
+{% endblock %}
