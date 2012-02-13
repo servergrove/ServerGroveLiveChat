@@ -1,0 +1,15 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Department creation{% endblock %}
+
+{% block content %}
+<form class="form-horizontal" action="{{ path('sglc_admin_operators_departments_create') }}" method="post" {{ form_enctype(form) }}>
+    {{ form_widget(form) }}
+    <p class="form-actions">
+        <button class="btn btn-primary" type="submit">Create</button>
+        <a class="btn" href="{{ path('sglc_admin_operators_departments') }}">
+            Cancel
+        </a>
+    </p>
+</form>
+{% endblock %}

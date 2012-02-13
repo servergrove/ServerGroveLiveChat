@@ -1,0 +1,73 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Operators{% endblock %}
+
+{% block content %}
+<div class="row">
+    <strong class="span2">Id</strong>
+
+    <div class="span10">{{ document.id }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Name</strong>
+
+    <div class="span10">{{ document.name }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Email</strong>
+
+    <div class="span10">{{ document.email }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Createdat</strong>
+
+    <div class="span10">{{ document.createdAt|date('Y-m-d H:i:s') }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Updatedat</strong>
+
+    <div class="span10">{{ document.updatedAt|date('Y-m-d H:i:s') }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Isonline</strong>
+
+    <div class="span10">{{ document.isOnline }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Isactive</strong>
+
+    <div class="span10">{{ document.isActive }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Departments</strong>
+
+    <div class="span10">{{ document.departments|join(', ') }}</div>
+</div>
+<br />
+<div>
+    <form action="{{ path('sglc_admin_operators_delete', { 'id': document.id }) }}" method="post">
+        <a class="btn" href="{{ path('sglc_admin_operators') }}">
+            Back to the list
+        </a>
+
+        {% if is_granted('ROLE_ADMIN') %}
+        <a class="btn" href="{{ path('sglc_admin_operators_edit', { 'id': document.id }) }}">
+            Edit
+        </a>
+        <a class="btn" href="{{ path('sglc_admin_operators_password_edit', { 'id': document.id }) }}">
+            Password
+        </a>
+        <button class="btn btn-danger" type="submit">Delete</button>
+        {{ form_widget(delete_form) }}
+        {% endif %}
+
+    </form>
+</div>
+{% endblock %}

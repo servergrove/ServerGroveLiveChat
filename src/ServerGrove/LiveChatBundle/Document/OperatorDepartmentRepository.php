@@ -1,15 +1,15 @@
 <?php
 
-namespace ServerGrove\LiveChatBundle\Document\Operator;
+namespace ServerGrove\LiveChatBundle\Document;
 
 use ServerGrove\LiveChatBundle\Document\DocumentRepository;
 
 /**
- * Description of DepartmentRepository
+ * Description of OperatorDepartmentRepository
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-class DepartmentRepository extends DocumentRepository
+class OperatorDepartmentRepository extends DocumentRepository
 {
 
     public function getDepartments()

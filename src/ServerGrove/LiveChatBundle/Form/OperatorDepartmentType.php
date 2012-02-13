@@ -12,27 +12,13 @@ use Symfony\Component\Form\AbstractType;
  */
 class OperatorDepartmentType extends AbstractType
 {
-
     public function buildForm(FormBuilder $builder, array $options)
     {
-        $builder->add('id', 'hidden');
-        $builder->add('name', 'text', array('label' => 'Name'));
-        $builder->add('isActive', 'checkbox', array('label' => 'Is Active', 'required' => false));
+        $builder->add('name');
+        $builder->add('isActive');
     }
 
-    public function getDefaultOptions(array $options)
-    {
-        return array(
-            'data_class' => 'ServerGrove\LiveChatBundle\Document\Operator\Department',
-        );
-    }
-
-    /**
-     * Returns the name of this type.
-     *
-     * @return string The name of this type
-     */
-    function getName()
+    public function getName()
     {
         return 'operator_department';
     }

@@ -1,0 +1,50 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Operators list{% endblock %}
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Createdat</th>
+            <th>Updatedat</th>
+            <th>Isonline</th>
+            <th>Isactive</th>
+            <th>Departments</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for document in documents %}
+        <tr>
+            <td><a href="{{ path('sglc_admin_operators_show', { 'id': document.id }) }}">{{ document.id }}</a></td>
+            <td>{{ document.name }}</td>
+            <td>{{ document.email }}</td>
+            <td>{% if document.createdAt %}{{ document.createdAt|date('Y-m-d H:i:s') }}{% endif%}</td>
+            <td>{% if document.updatedAt %}{{ document.updatedAt|date('Y-m-d H:i:s') }}{% endif%}</td>
+            <td>{{ document.isOnline }}</td>
+            <td>{{ document.isActive }}</td>
+            <td>{{ document.departments|join(', ') }}</td>
+            <td class="btn-group">
+                <a class="btn btn-small" href="{{ path('sglc_admin_operators_show', { 'id': document.id }) }}">show</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn btn-small" href="{{ path('sglc_admin_operators_edit', { 'id': document.id }) }}">edit</a>
+                <a class="btn btn-small" href="{{ path('sglc_admin_operators_password_edit', { 'id': document.id }) }}">password</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_granted('ROLE_ADMIN') %}
+<p class="well">
+    <a class="btn" href="{{ path('sglc_admin_operators_new') }}">
+        Create a new entry
+    </a>
+</p>
+{% endif %}
+{% endblock %}

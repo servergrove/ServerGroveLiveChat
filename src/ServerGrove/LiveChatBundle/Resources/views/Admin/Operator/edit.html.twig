@@ -1,0 +1,51 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Operator edit{% endblock %}
+
+{% block content %}
+<form id="operator_edit_form" class="form-horizontal" action="{{ path(post_route, { 'id': document.id }) }}" method="post" {{ form_enctype(edit_form) }}>
+    {{ form_widget(edit_form) }}
+
+    <p class="form-actions">
+        <button class="btn btn-primary" type="submit">Edit</button>
+        <a class="btn" href="{{ path('sglc_admin_operators') }}">
+            Cancel
+        </a>
+    </p>
+
+</form>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#operator_edit_form :submit').click(function() {
+            $(':password', this).each(function() {
+                if (0 == this.value.length) {
+                    this.disabled = true;
+                }
+            });
+
+            return true;
+        });
+    });
+</script>
+{% endblock %}
+
+        {#
+<ul class="record_actions">
+    <li>
+        <a href="{{ path('sglc_admin_operators') }}">
+            Back to the list
+        </a>
+    </li>
+    <li>
+        <form action="{{ path('sglc_admin_operators_delete', { 'id': document.id }) }}" method="post">
+            {{ form_widget(delete_form) }}
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+</ul>
+#}

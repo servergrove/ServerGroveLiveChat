@@ -8,6 +8,7 @@
             </a>
 
             <div class="nav-collapse">
+                {% if is_granted('ROLE_OPERATOR') %}
                 <ul class="nav">
                     <li{% if "sglc_admin_console_sessions" == currentRoute %} class="active"{% endif %}>
                         <a href="{{ path('sglc_admin_console_sessions') }}">Active Sessions</a>
@@ -19,7 +20,7 @@
                         <a href="{{ path('sglc_admin_operators') }}">Operators</a>
                     </li>
                     <li{% if "sglc_admin_operator_departments" == currentRoute %} class="active"{% endif %}>
-                        <a href="{{ path('sglc_admin_operator_departments') }}">Departments</a>
+                        <a href="{{ path('sglc_admin_operators_departments') }}">Departments</a>
                     </li>
                     <li{% if "sglc_admin_canned_messages" == currentRoute %} class="active"{% endif %}>
                         <a href="{{path('sglc_admin_canned_messages')}}">Canned Messages</a>
@@ -37,9 +38,17 @@
                         <a href="{{ path('sglc_admin_logout') }}">Logout</a>
                     </li>
                 </ul>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 <div class="top-margin"></div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.navbar a').click(function(){
+            SessionToolkit.Global.disableMonitor();
+        });
+    });
+</script>
 {% endspaceless %}

@@ -2,12 +2,15 @@
 
 var SessionToolkit = {
     Global: {
+        _enabled: true,
         _timeOut: null,
         loadTimeout: function() {
-            SessionToolkit.Visit._timeOut = window.setTimeout(function() {
-                window.clearTimeout(SessionToolkit.Visit._timeOut);
-                SessionToolkit.Global.refresh();
-            }, 10000);
+            if (SessionToolkit.Global._enabled) {
+                SessionToolkit.Visit._timeOut = window.setTimeout(function() {
+                    window.clearTimeout(SessionToolkit.Visit._timeOut);
+                    SessionToolkit.Global.refresh();
+                }, 10000);
+            }
         },
         refresh: function() {
             jQuery.ajax({
@@ -29,6 +32,9 @@ var SessionToolkit = {
                     }
                 }
             });
+        },
+        disableMonitor: function(){
+            SessionToolkit.Global._enabled = false;
         },
         Data: {
             display: function(json) {
