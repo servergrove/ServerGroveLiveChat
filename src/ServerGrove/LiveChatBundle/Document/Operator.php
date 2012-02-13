@@ -5,7 +5,6 @@ namespace ServerGrove\LiveChatBundle\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
-use ServerGrove\LiveChatBundle\Document\Operator\Department;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
@@ -45,10 +44,10 @@ class Operator extends User implements UserInterface
     /**
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
-    private $ratings = array();
+    private $ratings;
 
     /**
-     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Department")
+     * @MongoDB\ReferenceMany(targetDocument="OperatorDepartment", inversedBy="operators")
      */
     private $departments;
 
@@ -134,7 +133,7 @@ class Operator extends User implements UserInterface
         return $this->departments;
     }
 
-    public function addDepartment(Department $department)
+    public function addDepartment(OperatorDepartment $department)
     {
         $this->departments->add($department);
     }

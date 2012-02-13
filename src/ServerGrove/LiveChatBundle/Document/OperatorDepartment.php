@@ -1,10 +1,10 @@
 <?php
 
-namespace ServerGrove\LiveChatBundle\Document\Operator;
+namespace ServerGrove\LiveChatBundle\Document;
 
-use ServerGrove\LiveChatBundle\Document\Operator;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Description of Department
@@ -12,10 +12,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @author Ismael Ambrosi<ismael@servergrove.com>
  * @MongoDB\Document(
  *  collection="operator_department",
- *  repositoryClass="ServerGrove\LiveChatBundle\Document\Operator\DepartmentRepository"
+ *  repositoryClass="ServerGrove\LiveChatBundle\Document\OperatorDepartmentRepository"
  * )
  */
-class Department
+class OperatorDepartment
 {
 
     /**
@@ -33,12 +33,18 @@ class Department
      * @var boolean
      * @MongoDB\Field(type="boolean")
      */
-    private $isActive = true;
+    private $isActive;
+
     /**
-     * @var \ServerGrove\LiveChatBundle\Document\Operator[]
-     * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator")
+     * @MongoDB\ReferenceMany(targetDocument="Operator", inversedBy="departments")
      */
-    private $operators = array();
+    private $operators;
+
+    public function __construct()
+    {
+        $this->isActive = true;
+        $this->operators = new ArrayCollection();
+    }
 
     /**
      * @return string $name
@@ -50,6 +56,7 @@ class Department
 
     /**
      * @param string $name
+     *
      * @return void
      */
     public function setName($name)
@@ -67,6 +74,7 @@ class Department
 
     /**
      * @param boolean $isActive
+     *
      * @return void
      */
     public function setIsActive($isActive)
@@ -90,6 +98,11 @@ class Department
     public function addOperator(Operator $operator)
     {
         $this->operators[] = $operator;
+    }
+
+    public function setOperators($operators)
+    {
+        $this->operators = $operators;
     }
 
     public function __toString()
