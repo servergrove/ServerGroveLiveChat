@@ -9,7 +9,12 @@
         {% endstylesheets %}
         {% endblock %}
         {% block javascripts %}
-        {% javascripts '@ServerGroveLiveChatBundle/Resources/public/js/*' output='js/sglc.js' %}
+        {% javascripts
+            '@ServerGroveLiveChatBundle/Resources/public/js/jquery-1.7.1.min.js'
+            '@ServerGroveLiveChatBundle/Resources/public/js/bootstrap.min.js'
+            '@ServerGroveLiveChatBundle/Resources/public/js/sgapi.js'
+            output='js/sglc.js'
+        %}
         <script type="text/javascript" src="{{ asset_url }}"></script>
         {% endjavascripts %}
         {% endblock %}

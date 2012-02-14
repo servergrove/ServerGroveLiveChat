@@ -14,7 +14,16 @@
 
 
 {% block javascripts %}
-{{ parent() }}
+{% javascripts
+    '@ServerGroveLiveChatBundle/Resources/public/js/jquery-1.7.1.min.js'
+    '@ServerGroveLiveChatBundle/Resources/public/js/bootstrap.min.js'
+    '@ServerGroveLiveChatBundle/Resources/public/js/underscore-min.js'
+    '@ServerGroveLiveChatBundle/Resources/public/js/backbone-min.js'
+    '@ServerGroveLiveChatBundle/Resources/public/js/sgapi-admin.js'
+    output='js/sglc-admin.js'
+%}
+<script type="text/javascript" src="{{ asset_url }}"></script>
+{% endjavascripts %}
 {% endblock %}
 
 {% block preheader %}
@@ -23,7 +32,7 @@
 
 {% block header %}
 <h1>{% block h1 %}{% endblock h1 %}</h1>
-<br/>
+<br />
 {% endblock %}
 
 {% block postheader %}
