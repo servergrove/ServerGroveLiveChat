@@ -46,7 +46,7 @@
                         window.open(url, "livechat" + this.model.get("id"), "width=700,height=575,toolbar=no,location=no");
                     },
 
-                    confirmClosure: function(lnk) {
+                    confirmClosure: function() {
                         return confirm("Are you sure?");
                     },
 
@@ -54,16 +54,18 @@
                         this.$el.html(_.template($("#chat-request-item").html(), {model: this.model.toJSON()}));
 
                         if (this.model.get("closed")) {
+                            var self = this;
                             _(this.model.get("rating").grade).times(function() {
-                                $(".btn-group", this.$el).append(document.createTextNode("*"));
+                                self.$('.btn-group').append(document.createTextNode("*"));
                             });
-                            $(".btn-group", this.$el).append(document.createTextNode(this.model.get("rating").comments));
+                            this.$('.btn-group').append(document.createTextNode(" - "));
+                            this.$('.btn-group').append(document.createTextNode(this.model.get("rating").comments));
                         } else if (this.model.get("acceptable")) {
-                            $(".btn-group", this.$el).append(_.template($("#chat-accept-button").html(), {model: this.model.toJSON()}));
+                            this.$('.btn-group').append(_.template($("#chat-accept-button").html(), {model: this.model.toJSON()}));
                         } else if (this.model.get("inProgress")) {
-                            $(".btn-group", this.$el).append(_.template($("#chat-close-button").html(), {model: this.model.toJSON()}));
+                            this.$('.btn-group').append(_.template($("#chat-close-button").html(), {model: this.model.toJSON()}));
                         } else {
-                            $(".btn-group", this.$el).append(_.template($("#chat-reload-button").html(), {model: this.model.toJSON()}));
+                            this.$('.btn-group').append(_.template($("#chat-reload-button").html(), {model: this.model.toJSON()}));
                         }
 
                         return this.el;
