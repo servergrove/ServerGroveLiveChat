@@ -1,0 +1,50 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Canned Message edit{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <strong class="span2">Id</strong>
+
+    <div class="span10">{{ document.id }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Content</strong>
+
+    <div class="span10">{{ document.content }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Title</strong>
+
+    <div class="span10">{{ document.title }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Created At</strong>
+
+    <div class="span10">{{ document.createdAt|date('Y-m-d H:i:s') }}</div>
+</div>
+<br />
+<div class="row">
+    <strong class="span2">Updated At</strong>
+
+    <div class="span10">{{ document.updatedAt|date('Y-m-d H:i:s') }}</div>
+</div>
+<br />
+
+<form action="{{ path('sglc_admin_canned_messages_delete', { 'id': document.id }) }}" method="post">
+    <p class="well">
+        <a class="btn" href="{{ path('sglc_admin_canned_messages') }}">
+            Back to the list
+        </a>
+        <a class="btn" href="{{ path('sglc_admin_canned_messages_edit', { 'id': document.id }) }}">
+            Edit
+        </a>
+        <button class="btn btn-danger" type="submit">Delete</button>
+        {{ form_widget(delete_form) }}
+    </p>
+</form>
+{% endblock %}

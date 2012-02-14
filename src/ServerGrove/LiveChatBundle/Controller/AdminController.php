@@ -24,58 +24,6 @@ class AdminController extends BaseController
     const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
     /**
-     * @Route("/canned-message", name="sglc_admin_canned_message")
-     * @Route("/canned-message/{id}", name="sglc_admin_canned_message_edit")
-     * @Template
-     */
-    public function cannedMessageAction($id = null)
-    {
-        if ($id) {
-            $cannedMessage = $this->getCannedMessageRepository()->find($id);
-            if (!$cannedMessage) {
-                throw new NotFoundHttpException('Non existent canned-message');
-            }
-        } else {
-            $cannedMessage = new CannedMessage();
-        }
-
-        /* @var $form Symfony\Component\Form\Form */
-        $form = $this->get('form.factory')->create(new CannedMessageType());
-        $form->setData($cannedMessage);
-
-        switch ($this->getRequest()->getMethod()) {
-            case 'POST':
-            case 'PUT':
-                $form->bindRequest($this->getRequest());
-                if ($form->isValid()) {
-                    $this->getDocumentManager()->persist($cannedMessage);
-                    $this->getDocumentManager()->flush();
-                    $this->getSessionStorage()->setFlash('msg', 'The canned message has been successfully updated');
-
-                    return $this->redirect($this->generateUrl('sglc_admin_canned_messages'));
-                }
-
-                break;
-            case 'DELETE':
-                break;
-        }
-
-        return array(
-            'cannedMessage' => $cannedMessage,
-            'form'          => $form->createView()
-        );
-    }
-
-    /**
-     * @Route("/canned-messages/{page}", name="sglc_admin_canned_messages", defaults={"page"="1"})
-     * @Template
-     */
-    public function cannedMessagesAction($page)
-    {
-        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:CannedMessage', 'cannedMessages', 'canned-messages');
-    }
-
-    /**
      * @Route("/console/chat-session/{id}", name="sglc_admin_chat_session")
      * @Template
      */

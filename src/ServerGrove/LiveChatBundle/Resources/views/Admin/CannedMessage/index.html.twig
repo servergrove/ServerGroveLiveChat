@@ -1,0 +1,43 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Canned Messages list{% endblock %}
+
+{% block content %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Content</th>
+            <th>Title</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for document in documents %}
+        <tr>
+            <td><a href="{{ path('sglc_admin_canned_messages_show', { 'id': document.id }) }}">{{ document.id }}</a></td>
+            <td>{{ document.content }}</td>
+            <td>{{ document.title }}</td>
+            <td>{% if document.createdAt %}{{ document.createdAt|date('Y-m-d H:i:s') }}{% endif%}</td>
+            <td>{% if document.updatedAt %}{{ document.updatedAt|date('Y-m-d H:i:s') }}{% endif%}</td>
+            <td class="btn-group">
+                <a class="btn" href="{{ path('sglc_admin_canned_messages_show', { 'id': document.id }) }}">show</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                <a class="btn" href="{{ path('sglc_admin_canned_messages_edit', { 'id': document.id }) }}">edit</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if is_granted('ROLE_ADMIN') %}
+<p class="well">
+    <a class="btn" href="{{ path('sglc_admin_canned_messages_new') }}">
+        Create a new entry
+    </a>
+</p>
+{% endif %}
+{% endblock %}
