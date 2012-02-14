@@ -154,4 +154,13 @@ class Visitor extends User
         return 'Client';
     }
 
+    public function __toString()
+    {
+        if ($name = $this->getName()) {
+            return $name;
+        }
+
+        return $this->getId();
+    }
+
 }

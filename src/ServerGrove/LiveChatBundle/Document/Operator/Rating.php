@@ -56,6 +56,7 @@ class Rating
 
     /**
      * Constructor
+     *
      * @param \ServerGrove\LiveChatBundle\Document\Session $session
      */
     public function __construct(Session $session)
@@ -91,6 +92,7 @@ class Rating
 
     /**
      * @param Integer $grade
+     *
      * @return void
      */
     public function setGrade($grade)
@@ -108,6 +110,7 @@ class Rating
 
     /**
      * @param string $comments
+     *
      * @return void
      */
     public function setComments($comments)
@@ -125,6 +128,7 @@ class Rating
 
     /**
      * @param string $createdAt
+     *
      * @return void
      */
     public function setCreatedAt($createdAt)
@@ -142,6 +146,7 @@ class Rating
 
     /**
      * @param \ServerGrove\LiveChatBundle\Document\Session $session
+     *
      * @return void
      */
     public function setSession($session)
@@ -165,6 +170,7 @@ class Rating
 
     /**
      * @param \ServerGrove\LiveChatBundle\Document\Operator $operator
+     *
      * @return void
      */
     public function setOperator($operator)
@@ -178,6 +184,11 @@ class Rating
     public function getId()
     {
         return $this->id;
+    }
+
+    public function __toString()
+    {
+        return str_repeat('*', $this->getGrade()).' - '.$this->getComments();
     }
 
 }
