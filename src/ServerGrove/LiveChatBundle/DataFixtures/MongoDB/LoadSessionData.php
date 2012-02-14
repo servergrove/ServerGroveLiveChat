@@ -6,6 +6,7 @@ use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use ServerGrove\LiveChatBundle\Document\Session;
+use ServerGrove\LiveChatBundle\Document\Message;
 
 /**
  * Class
@@ -28,10 +29,17 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
         $session = new Session();
         $session->setQuestion('Can I test this Live Chat?');
         $session->setVisit($visit);
-        $session->setVisitor($visit->getVisitor());
+        $session->setVisitor($visitor = $visit->getVisitor());
         $session->setRemoteAddr($visit->getRemoteAddr());
-        $session->setStatusId(Session::STATUS_WAITING);
+        $session->setStatusId(Session::STATUS_IN_PROGRESS);
+        $session->setOperator($operator = $manager->getRepository('ServerGroveLiveChatBundle:Operator')->findOneBy(array('email' => 'john@example.com')));
 
+        $manager->persist($session);
+
+        $session->addChatMessage('Hello', $operator);
+        $session->addChatMessage('Hi', $visitor);
+        $session->addChatMessage('How can I help you?', $operator);
+        $session->addChatMessage('Nevermind, good bye!', $visitor);
         $manager->persist($session);
 
         /** @var $visit \ServerGrove\LiveChatBundle\Document\Visit */
@@ -54,6 +62,6 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
      */
     function getOrder()
     {
-        return 1;
+        return 2;
     }
 }

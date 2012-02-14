@@ -3,6 +3,7 @@
 namespace ServerGrove\LiveChatBundle\DataFixtures\MongoDB;
 
 use Doctrine\Common\DataFixtures\FixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use ServerGrove\LiveChatBundle\Document\Administrator;
 use ServerGrove\LiveChatBundle\Document\Operator;
@@ -13,7 +14,7 @@ use ServerGrove\LiveChatBundle\Document\OperatorDepartment;
  *
  * @author Ismael Ambrosi<ismael@servergrove.com>
  */
-class LoadUserData implements FixtureInterface
+class LoadUserData implements FixtureInterface, OrderedFixtureInterface
 {
 
     /**
@@ -57,5 +58,15 @@ class LoadUserData implements FixtureInterface
         $operator->setPasswd($encoder->encodePassword($passwd, $operator->getSalt()));
 
         $manager->persist($operator);
+    }
+
+    /**
+     * Get the order of this fixture
+     *
+     * @return integer
+     */
+    public function getOrder()
+    {
+        return 1;
     }
 }
