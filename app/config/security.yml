@@ -40,9 +40,9 @@ security:
 
     access_control:
         - { path: ^/sglivechat/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/sglivechat/admin/[\w\/]+/new, roles: ROLE_ADMIN }
-        - { path: ^/sglivechat/admin/[\w\/]+/create, roles: ROLE_ADMIN }
-        - { path: ^/sglivechat/admin/[\w\/]+/edit, roles: ROLE_ADMIN }
-        - { path: ^/sglivechat/admin/[\w\/]+/update, roles: ROLE_ADMIN }
-        - { path: ^/sglivechat/admin/[\w\/]+/delete, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/[\w\/\-]+/new, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/[\w\/\-]+/create, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/[\w\/\-]+/edit, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/[\w\/\-]+/update, roles: ROLE_ADMIN }
+        - { path: ^/sglivechat/admin/[\w\/\-]+/delete, roles: ROLE_ADMIN }
         - { path: ^/sglivechat/admin, roles: ROLE_USER }
