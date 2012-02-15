@@ -19,41 +19,44 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @MongoDB\DiscriminatorField(fieldName="type")
  * @MongoDB\DiscriminatorMap({"admin"="Administrator", "operator"="Operator"})
  */
-class Operator extends User implements UserInterface
+class Operator extends User implements UserInterface, \Serializable
 {
 
     /**
      * @var boolean
      * @MongoDB\Field(type="boolean")
      */
-    private $isOnline;
+    protected $isOnline;
 
     /**
      * @var boolean
      * @MongoDB\Field(type="boolean")
      */
-    private $isActive = true;
+    protected $isActive = true;
 
     /**
      * @var string
      * @MongoDB\String
      * @Assert\NotBlank()
      */
-    private $passwd;
+    protected $passwd;
 
     /**
      * @MongoDB\ReferenceMany(targetDocument="ServerGrove\LiveChatBundle\Document\Operator\Rating")
      */
-    private $ratings;
+    protected $ratings;
 
     /**
      * @MongoDB\ReferenceMany(targetDocument="OperatorDepartment", inversedBy="operators")
      */
-    private $departments;
+    protected $departments;
 
     /** @MongoDB\String */
-    private $salt;
+    protected $salt;
 
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
@@ -61,14 +64,36 @@ class Operator extends User implements UserInterface
         $this->ratings = new ArrayCollection();
     }
 
+    /**
+     * @param Operator\Rating $rating
+     *
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
+     */
     public function addRating(Operator\Rating $rating)
     {
         $this->ratings->add($rating);
+
+        return $this;
     }
 
+    /**
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
     public function getRatings()
     {
         return $this->ratings;
+    }
+
+    /**
+     * @param $ratings
+     *
+     * @return Operator
+     */
+    public function setRatings($ratings)
+    {
+        $this->ratings = $ratings;
+
+        return $this;
     }
 
     /**
@@ -82,11 +107,13 @@ class Operator extends User implements UserInterface
     /**
      * @param boolean $isOnline
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
      */
     public function setIsOnline($isOnline)
     {
         $this->isOnline = $isOnline;
+
+        return $this;
     }
 
     /**
@@ -100,11 +127,13 @@ class Operator extends User implements UserInterface
     /**
      * @param boolean $isActive
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
      */
     public function setIsActive($isActive)
     {
         $this->isActive = $isActive;
+
+        return $this;
     }
 
     /**
@@ -118,11 +147,13 @@ class Operator extends User implements UserInterface
     /**
      * @param string $passwd
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
      */
     public function setPasswd($passwd)
     {
         $this->passwd = $passwd;
+
+        return $this;
     }
 
     /**
@@ -133,14 +164,28 @@ class Operator extends User implements UserInterface
         return $this->departments;
     }
 
+    /**
+     * @param OperatorDepartment $department
+     *
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
+     */
     public function addDepartment(OperatorDepartment $department)
     {
         $this->departments->add($department);
+
+        return $this;
     }
 
+    /**
+     * @param $departments
+     *
+     * @return \ServerGrove\LiveChatBundle\Document\Operator
+     */
     public function setDepartments($departments)
     {
         $this->departments = $departments;
+
+        return $this;
     }
 
     public function getKind()
@@ -195,13 +240,77 @@ class Operator extends User implements UserInterface
         return array('ROLE_OPERATOR');
     }
 
+    /**
+     * @return string
+     */
     public function getSalt()
     {
         return $this->salt;
     }
 
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         return $this->getEmail();
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * String representation of object
+     *
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or &null;
+     */
+    public function serialize()
+    {
+        return @serialize(
+            array(
+                'id'          => $this->getId(),
+                'name'        => $this->getName(),
+                'active'      => $this->getIsActive(),
+                'email'       => $this->getEmail(),
+                'ratings'     => $this->getRatings(),
+                'departments' => $this->getDepartments(),
+                'online'      => $this->getIsOnline(),
+                'kind'        => $this->getKind(),
+                'passwd'      => $this->getPasswd(),
+                'roles'       => $this->getRoles(),
+                'salt'        => $this->getSalt(),
+                'created'     => $this->getCreatedAt(),
+                'updated'     => $this->getUpdatedAt()
+            )
+        );
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Constructs the object
+     *
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     *
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     *
+     * @return mixed the original value unserialized.
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+
+        $this->id = $data['id'];
+        $this->salt = $data['salt'];
+
+        $this->setIsActive($data['active'])
+            ->setRatings($data['ratings'])
+            ->setPasswd($data['passwd'])
+            ->setDepartments($data['departments'])
+            ->setIsOnline($data['online'])
+            ->setCreatedAt($data['created'])
+            ->setUpdatedAt($data['updated'])
+            ->setEmail($data['email'])
+            ->setName($data['name']);
     }
 }

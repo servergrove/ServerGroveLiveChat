@@ -18,14 +18,14 @@ abstract class User
      * @var integer
      * @MongoDB\Id
      */
-    private $id;
+    protected $id;
 
     /**
      * @var string
      * @MongoDB\String
      * @Assert\NotBlank()
      */
-    private $name;
+    protected $name;
 
     /**
      * @var string
@@ -33,19 +33,19 @@ abstract class User
      * @Assert\NotBlank()
      * @Assert\Email()
      */
-    private $email;
+    protected $email;
 
     /**
      * @var string
      * @MongoDB\Date
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @var string
      * @MongoDB\Date
      */
-    private $updatedAt;
+    protected $updatedAt;
 
     /**
      * @MongoDB\PrePersist
@@ -83,11 +83,13 @@ abstract class User
     /**
      * @param string $name
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\User
      */
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -101,11 +103,13 @@ abstract class User
     /**
      * @param string $email
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\User
      */
     public function setEmail($email)
     {
         $this->email = $email;
+
+        return $this;
     }
 
     /**
@@ -119,11 +123,13 @@ abstract class User
     /**
      * @param string $createdAt
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\User
      */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
+
+        return $this;
     }
 
     /**
@@ -137,11 +143,13 @@ abstract class User
     /**
      * @param string $updatedAt
      *
-     * @return void
+     * @return \ServerGrove\LiveChatBundle\Document\User
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 
     public abstract function getKind();
