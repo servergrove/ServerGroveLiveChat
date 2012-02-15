@@ -1,0 +1,41 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Session list{% endblock %}
+
+{% block content %}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th class="span2">Id</th>
+            <th>Created At</th>
+            <th>Operator</th>
+            <th class="span3">Question</th>
+            <th class="span2">Visitor</th>
+            <th>Status</th>
+            <th>Messages</th>
+            <th>Rating</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for document in documents %}
+        <tr>
+            <td><a href="{{ path('sglc_admin_sessions_show', { 'id': document.id }) }}">{{ document.id }}</a></td>
+            <td>{% if document.createdAt %}{{ document.createdAt|date('Y-m-d H:i:s') }}{% endif%}</td>
+            <td>{% if document.operator %}{{ document.operator.name }}{% else %}Unknown{% endif %}</td>
+            <td>{{ document.question }}</td>
+            <td>
+                <a target="_blank" href="{{ path('sglc_admin_visitor', { 'id': document.visitor.id })}}">{{ document.visitor.name ? document.visitor.name : document.visitor }}</a>
+            </td>
+            <td>{{ document.status }}</td>
+            <td>{{ document.messages|length }}</td>
+            <td>{{ document.rating.grade }}</td>
+            <td class="btn-group">
+                <a class="btn btn-small" href="{{ path('sglc_admin_sessions_show', { 'id': document.id }) }}">show</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

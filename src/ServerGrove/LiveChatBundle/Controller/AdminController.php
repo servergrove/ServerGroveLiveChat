@@ -24,30 +24,6 @@ class AdminController extends BaseController
     const DEFAULT_PAGE_ITEMS_LENGTH = 20;
 
     /**
-     * @Route("/console/chat-session/{id}", name="sglc_admin_chat_session")
-     * @Template
-     */
-    public function chatSessionAction($id)
-    {
-        $chatSession = $this->getDocumentManager()->find('ServerGroveLiveChatBundle:Session', $id);
-
-        if (!$chatSession) {
-            throw new NotFoundHttpException();
-        }
-
-        return array('session' => $chatSession);
-    }
-
-    /**
-     * @Route("/console/chat-sessions/{page}", name="sglc_admin_chat_sessions", defaults={"page"="1"})
-     * @Template
-     */
-    public function chatSessionsAction($page)
-    {
-        return $this->simpleListAction($page, 'ServerGroveLiveChatBundle:Session', 'sessions', 'chat-sessions');
-    }
-
-    /**
      * @Route("/console/close/{id}", name="sglc_admin_console_close")
      */
     public function closeChatAction($id)

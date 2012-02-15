@@ -1,0 +1,117 @@
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Session{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="span6">
+        <div class="row">
+            <strong class="span2">Id</strong>
+
+            <div class="span4">{{ document.id }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Sessionid</strong>
+
+            <div class="span4">{{ document.sessionId }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Created At</strong>
+
+            <div class="span4">{{ document.createdAt|date('Y-m-d H:i:s') }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Updated At</strong>
+
+            <div class="span4">{{ document.updatedAt|date('Y-m-d H:i:s') }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Remote Addr</strong>
+
+            <div class="span4">{{ document.remoteAddr }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Visitor</strong>
+
+            <div class="span4">{{ document.visitor }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Operator</strong>
+
+            <div class="span4">{{ document.operator }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Visit</strong>
+
+            <div class="span4">{{ document.visit.id }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Question</strong>
+
+            <div class="span4">{{ document.question }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Statusid</strong>
+
+            <div class="span4">{{ document.statusId }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Messages</strong>
+
+            <div class="span4">{{ document.messages|length }}</div>
+        </div>
+        <br />
+
+        <div class="row">
+            <strong class="span2">Rating</strong>
+
+            <div class="span4">{{ document.rating }}</div>
+        </div>
+    </div>
+    <div class="span6" style="overflow: auto; height: 400px;">
+        <table class="table table-striped">
+            <tbody>
+                {% for message in document.getMessages() %}
+                <tr>
+                    <td class="span1">
+                        <span class="name {{message.isOperator() ? 'operator' : 'client'}}">
+                        {{message.getSenderName()}}
+                        </span>
+                    </td>
+                    <td class="span4">
+                        {{message.getContent()}}
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+</div>
+<br />
+<p class="well">
+    <a class="btn" href="{{ path('sglc_admin_sessions') }}">
+        Back to the list
+    </a>
+</p>
+{% endblock %}
