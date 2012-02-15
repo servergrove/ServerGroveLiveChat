@@ -31,9 +31,12 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
         $session->setVisit($visit);
         $session->setVisitor($visitor = $visit->getVisitor());
         $session->setRemoteAddr($visit->getRemoteAddr());
-        $session->setStatusId(Session::STATUS_IN_PROGRESS);
+        $session->setStatusId(Session::STATUS_CLOSED);
         $session->setOperator($operator = $manager->getRepository('ServerGroveLiveChatBundle:Operator')->findOneBy(array('email' => 'john@example.com')));
+        $session->getRating()->setComments('Very good chat!');
+        $session->getRating()->setGrade(5);
 
+        $manager->persist($session->getRating());
         $manager->persist($session);
 
         $session->addChatMessage('Hello', $operator);
