@@ -23,6 +23,28 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $this->createClosedSession($manager);
+        $this->createWaitingSession($manager);
+
+        $manager->flush();
+    }
+
+    private function createWaitingSession($manager)
+    {
+        /** @var $visit \ServerGrove\LiveChatBundle\Document\Visit */
+        $visit = $manager->merge($this->getReference('visit2'));
+
+        $session = new Session();
+        $session->setQuestion('Is this livechat open source?');
+        $session->setVisit($visit);
+        $session->setVisitor($visit->getVisitor());
+        $session->setRemoteAddr($visit->getRemoteAddr());
+        $session->setStatusId(Session::STATUS_WAITING);
+        $manager->persist($session);
+    }
+
+    private function createClosedSession($manager)
+    {
         /** @var $visit \ServerGrove\LiveChatBundle\Document\Visit */
         $visit = $manager->merge($this->getReference('visit1'));
 
@@ -45,17 +67,7 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
         $session->addChatMessage('Nevermind, good bye!', $visitor);
         $manager->persist($session);
 
-        /** @var $visit \ServerGrove\LiveChatBundle\Document\Visit */
-        $visit = $manager->merge($this->getReference('visit2'));
-
-        $session = new Session();
-        $session->setQuestion('Is this livechat open source?');
-        $session->setVisit($visit);
-        $session->setVisitor($visit->getVisitor());
-        $session->setRemoteAddr($visit->getRemoteAddr());
-        $session->setStatusId(Session::STATUS_WAITING);
-
-        $manager->flush();
+        return array($visit, $session);
     }
 
     /**
