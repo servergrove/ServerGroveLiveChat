@@ -56,12 +56,13 @@ class AdminController extends BaseController
 
     /**
      * @Route("/", name="sglc_admin_index")
+     * @Template
      *
      * @return RedirectResponse
      */
     public function indexAction()
     {
-        return $this->redirect($this->generateUrl('sglc_admin_console_sessions'));
+        return array();
     }
 
     /**
