@@ -25,6 +25,7 @@ class LoadSessionData extends AbstractFixture implements OrderedFixtureInterface
     {
         $this->createClosedSession($manager);
         $this->createWaitingSession($manager);
+        $this->createWaitingSession($manager);
 
         $manager->flush();
     }
