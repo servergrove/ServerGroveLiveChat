@@ -20,50 +20,46 @@ class SessionRepository extends DocumentRepository
     public function getRequestedChats()
     {
         $qb = $this->createQueryBuilder();
-        $qb->addOr(
-            $qb->expr()
-                    ->field('statusId')->equals(Session::STATUS_WAITING)
-                    ->field('updatedAt')->range(new MongoDate(time() - (3600)), new MongoDate(time())
-            )
+        return $qb->addOr(
+            $qb->expr()->field('statusId')->equals(Session::STATUS_WAITING)
         )->addOr(
-            $qb->expr()
-                    ->field('updatedAt')->range(new MongoDate(time() - 300), new MongoDate(time())
-            )
-        );
-        $query = $qb->getQuery();
-        return $query->execute();
+            $qb->expr()->field('updatedAt')->range(new MongoDate(time() - 300), new MongoDate(time()))
+        )->sort('createdAt', 'desc')
+            ->getQuery()
+            ->execute();
     }
 
     public function getRequestedChatsArray()
     {
         return array_map(function (Session $chat)
-            {
-                $operator = array();
-                if ($chat->getOperator()) {
-                    $operator['id'] = $chat->getOperator()->getId();
-                    $operator['name'] = $chat->getOperator()->getName();
-                }
-                return array(
-                    'id' => $chat->getId(),
-                    'visitor' => array(
-                        'id' => $chat->getVisitor()->getId(),
-                        'name' => $chat->getVisitor()->getName(),
-                        'email' => $chat->getVisitor()->getEmail()
-                    ),
-                    'question' => $chat->getQuestion(),
-                    'time' => $chat->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'duration' => $chat->getUpdatedAt()->format('U') - $chat->getCreatedAt()->format('U'),
-                    'operator' => $operator,
-                    'status' => array(
-                        'id' => $chat->getStatusId(),
-                        'name' => $chat->getStatus()
-                    ),
-                    'rating' => array(
-                        'grade' => $chat->getRating()->getGrade(),
-                        'comments' => $chat->getRating()->getComments()
-                    )
-                );
-            }, $this->getRequestedChats()->toArray());
+        {
+            $operator = array();
+            if ($chat->getOperator()) {
+                $operator['id'] = $chat->getOperator()->getId();
+                $operator['name'] = $chat->getOperator()->getName();
+            }
+            return array(
+                'id'         => $chat->getId(),
+                'visitor'    => array(
+                    'id'    => $chat->getVisitor()->getId(),
+                    'name'  => $chat->getVisitor()->getName(),
+                    'email' => $chat->getVisitor()->getEmail()
+                ),
+                'question'   => $chat->getQuestion(),
+                'createdAt'  => $chat->getCreatedAt()->format('Y-m-d H:i:s'),
+                'duration'   => $chat->getUpdatedAt()->format('U') - $chat->getCreatedAt()->format('U'),
+                'operator'   => $operator,
+                'status'     => $chat->getStatus(),
+                'rating'     => array(
+                    'grade'    => $chat->getRating()->getGrade(),
+                    'comments' => $chat->getRating()->getComments()
+                ),
+                'closed'     => in_array($chat->getStatusId(), array(Session::STATUS_CLOSED, Session::STATUS_CANCELED)),
+                'inProgress' => Session::STATUS_IN_PROGRESS == $chat->getStatusId(),
+                'acceptable' => Session::STATUS_WAITING == $chat->getStatusId()
+
+            );
+        }, array_values($this->getRequestedChats()->toArray()));
     }
 
     public function closeSessions()
@@ -88,10 +84,10 @@ class SessionRepository extends DocumentRepository
     public function getOpenInvitesForVisitor(Visitor $visitor)
     {
         return $this->createQueryBuilder()
-                ->field('visitor')->references($visitor)
-                ->field('statusId')->equals(Session::STATUS_INVITE)
-                ->getQuery()
-                ->execute();
+            ->field('visitor')->references($visitor)
+            ->field('statusId')->equals(Session::STATUS_INVITE)
+            ->getQuery()
+            ->execute();
     }
 
 }
