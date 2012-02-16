@@ -24,15 +24,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 abstract class BaseController extends Controller
 {
 
-    private $request, $dm;
-
-    /**
-     * @return \Symfony\Component\HttpFoundation\Request
-     */
-    public function getRequest()
-    {
-        return $this->get('request');
-    }
+    private $dm;
 
     /**
      * @return \Symfony\Component\HttpFoundation\Session
