@@ -1,1 +1,61 @@
-{% extends "ServerGroveLiveChatBundle::layout.html.twig" %}
+{% extends "ServerGroveLiveChatBundle::admin-layout.html.twig" %}
+
+{% block h1 %}Active sessions{% endblock %}
+
+{% set popup_options = "width=700,height=575,toolbar=no,location=no" %}
+
+{% block content %}
+<table id="algo" class="table table-condensed">
+    <thead class="alert alert-error">
+        <tr>
+            <th>Chat ID</th>
+            <th>Visitor</th>
+            <th>Email</th>
+            <th>Question</th>
+            <th>Time</th>
+            <th>Duration</th>
+            <th>Operator</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody class="alert">
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        var myConsole = new ServerGrove.Console($('#algo tbody.alert'));
+        myConsole.start();
+    });
+</script>
+
+<script id="chat-request-item" type="text/template">
+    <td><%= model.id %> - <%= model.status %></td>
+    <td>#<%= model.visitor.id %> - <%= model.visitor.name %></td>
+    <td><%= model.visitor.email %></td>
+    <td><%= model.question %></td>
+    <td><%= model.createdAt %></td>
+    <td><%= model.duration %></td>
+    <td><% print(model.operator ? model.operator.name : "") %></td>
+    <td class="btn-group"></td>
+</script>
+
+<script id="chat-accept-button" type="text/template">
+    <button class="btn btn-primary btn-small">
+        Accept
+    </button>
+</script>
+
+<script id="chat-reload-button" type="text/template">
+    <button class="btn btn-info btn-small">
+        Reload
+    </button>
+</script>
+
+<script id="chat-close-button" type="text/template">
+    <button class="btn btn-danger btn-small" href="<%= model.closeUrl %>">
+        Close
+    </button>
+</script>
+
+{% endblock %}

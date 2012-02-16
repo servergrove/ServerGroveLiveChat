@@ -8,7 +8,29 @@
         Model: {
             Chat: {
                 Request: Backbone.Model.extend({
+                    parse: function(response) {
+                        return response;
+                    }
+                })
+            }
+        },
 
+        Collection: {
+            Chat: {
+                Request: Backbone.Collection.extend({
+                    url: '/sglivechat/admin/api/active-sessions.json',
+
+                    initialize: function() {
+                        this.model = sg.Model.Chat.Request;
+                    },
+
+                    parse: function(response) {
+                        if (!response.result) {
+                            return;
+                        }
+
+                        return response.rsp;
+                    }
                 })
             }
         },
@@ -31,7 +53,7 @@
                     events: {
                         "click .btn-group .btn-primary": "openAcceptPopup",
                         "click .btn-group .btn-info": "openChatPopup",
-                        "click .btn-group .btn-danger": "confirmClosure"
+                        "click .btn-group .btn-danger": "closeChatPopup"
                     },
 
                     openAcceptPopup: function() {
@@ -46,8 +68,8 @@
                         window.open(url, "livechat" + this.model.get("id"), "width=700,height=575,toolbar=no,location=no");
                     },
 
-                    confirmClosure: function() {
-                        return confirm("Are you sure?");
+                    closeChatPopup: function() {
+                        $.ajax({url: this.model.get('closeUrl')});
                     },
 
                     render: function() {
@@ -72,7 +94,42 @@
                     }
                 })
             }
+        },
+
+        Console: function(tbody) {
+            this._tbody = tbody;
+            this._requests = new sg.Collection.Chat.Request();
         }
     };
+
+    _.extend(sg.Console.prototype, Backbone.Events, {
+        _requests: null,
+        _tbody: null,
+
+        start: function() {
+            var fetch = function(requests, tbody) {
+                requests.fetch({
+                    success: function(collection) {
+                        $(tbody).empty();
+
+                        collection.each(function(request) {
+                            $(tbody).append((new sg.View.Chat.Request({model: request})).render())
+                        });
+
+                        window.setTimeout(function() {
+                            fetch.call(this, requests, tbody);
+                        }, 5000);
+                    },
+                    error: function() {
+                        window.setTimeout(function() {
+                            fetch.call(this, requests, tbody);
+                        }, 5000);
+                    }
+                });
+            };
+
+            fetch.call(this, this._requests, this._tbody);
+        }
+    });
 
 })(window, jQuery, Backbone, _.noConflict());
