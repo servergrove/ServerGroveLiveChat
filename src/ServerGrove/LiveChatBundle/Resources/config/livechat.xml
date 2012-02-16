@@ -5,6 +5,8 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <parameters>
         <parameter key="livechat.controller.listener.class">ServerGrove\LiveChatBundle\EventListener\ControllerListener</parameter>
+        <parameter key="livechat.api.listener.class">ServerGrove\LiveChatBundle\EventListener\ApiListener</parameter>
+
         <parameter key="livechat.cache.manager.class">ServerGrove\LiveChatBundle\Cache\Manager</parameter>
         <parameter key="livechat.cache.engine.apc.class">ServerGrove\LiveChatBundle\Cache\Engine\Apc</parameter>
         <parameter key="livechat.cache.engine.mongo.class">ServerGrove\LiveChatBundle\Cache\Engine\Mongo</parameter>
@@ -31,6 +33,10 @@
         <service id="livechat.controller.listener" class="%livechat.controller.listener.class%">
             <argument type="service" id="service_container"/>
             <tag name="kernel.event_listener" event="kernel.response" method="onKernelResponse"/>
+        </service>
+
+        <service id="livechat.api.listener" class="%livechat.api.listener.class%">
+            <tag name="kernel.event_listener" event="kernel.view" method="onKernelView"/>
         </service>
 
         <service id="livechat.cookies" class="%livechat.cookies.class%"></service>
