@@ -39,6 +39,7 @@ security:
             #    realm: "Secured Demo Area"
 
     access_control:
+        #- { path: ^/_internal/secure, roles: IS_AUTHENTICATED_ANONYMOUSLY, ip: 127.0.0.1 }
         - { path: ^/sglivechat/admin/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/sglivechat/admin/[\w\/\-]+/new, roles: ROLE_ADMIN }
         - { path: ^/sglivechat/admin/[\w\/\-]+/create, roles: ROLE_ADMIN }
