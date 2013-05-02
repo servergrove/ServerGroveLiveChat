@@ -12,7 +12,7 @@
         <parameter key="livechat.cookies.class">Symfony\Component\HttpFoundation\ParameterBag</parameter>
         <parameter key="livechat.twig.extension.globals.class">ServerGrove\LiveChatBundle\Extension\GlobalsExtension</parameter>
 
-        <parameter key="server_grove_live_chat.user.provider.class">Symfony\Bundle\DoctrineMongoDBBundle\Security\DocumentUserProvider</parameter>
+        <parameter key="server_grove_live_chat.user.provider.class">Symfony\Bridge\Doctrine\Security\User\EntityUserProvider</parameter>
         <parameter key="server_grove_live_chat.document.operator.class">ServerGrove\LiveChatBundle\Document\Operator</parameter>
     </parameters>
 
