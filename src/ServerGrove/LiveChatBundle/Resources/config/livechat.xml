@@ -41,7 +41,7 @@
         </service>
 
         <service id="server_grove_live_chat.user.provider" class="%server_grove_live_chat.user.provider.class%">
-            <argument type="service" id="doctrine_mongodb.odm.default_document_manager"/>
+            <argument type="service" id="doctrine_mongodb"/>
             <argument>%server_grove_live_chat.document.operator.class%</argument>
             <argument>email</argument>
         </service>
