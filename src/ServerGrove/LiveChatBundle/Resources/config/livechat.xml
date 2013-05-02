@@ -25,7 +25,7 @@
         <service id="livechat.cache.default_engine" alias="livechat.cache.engine.mongo" public="false"></service>
         <service id="livechat.cache.engine.apc" class="%livechat.cache.engine.apc.class%"></service>
         <service id="livechat.cache.engine.mongo" class="%livechat.cache.engine.mongo.class%">
-            <argument type="service" id="doctrine.odm.mongodb.default_document_manager"/>
+            <argument type="service" id="doctrine_mongodb.odm.default_document_manager"/>
         </service>
 
         <service id="livechat.controller.listener" class="%livechat.controller.listener.class%">
@@ -41,7 +41,7 @@
         </service>
 
         <service id="server_grove_live_chat.user.provider" class="%server_grove_live_chat.user.provider.class%">
-            <argument type="service" id="doctrine.odm.mongodb.default_document_manager"/>
+            <argument type="service" id="doctrine_mongodb.odm.default_document_manager"/>
             <argument>%server_grove_live_chat.document.operator.class%</argument>
             <argument>email</argument>
         </service>
