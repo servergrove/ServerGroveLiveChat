@@ -1,20 +1,19 @@
 imports:
-    - { resource: parameters.ini }
+    - { resource: parameters.yml }
     - { resource: security.yml }
 
 framework:
     #esi:             ~
     #translator:      { fallback: %locale% }
     secret:          %secret%
-    charset:         UTF-8
     router:          { resource: "%kernel.root_dir%/config/routing.yml" }
     form:            true
     csrf_protection: true
     validation:      { enable_annotations: true }
     templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
-    session:
-        default_locale: %locale%
-        auto_start:     true
+    default_locale: %locale%
+    router:
+        strict_requirements: %kernel.debug%
 
 # Twig Configuration
 twig:
@@ -34,6 +33,7 @@ assetic:
         #     jar: %kernel.root_dir%/java/compiler.jar
         # yui_css:
         #     jar: %kernel.root_dir%/java/yuicompressor-2.4.2.jar
+    bundles: []
 
 # Doctrine Configuration
 # doctrine:
@@ -45,7 +45,6 @@ assetic:
 #         user:     %database_user%
 #         password: %database_password%
 #         charset:  UTF8
- 
 doctrine_mongodb:
   connections:
     default:
@@ -67,10 +66,7 @@ swiftmailer:
     host:      %mailer_host%
     username:  %mailer_user%
     password:  %mailer_password%
-
-jms_security_extra:
-    secure_controllers:  true
-    secure_all_services: false
+    spool: { type: memory }
 
 server_grove_live_chat:
   cache_engine: mongo
