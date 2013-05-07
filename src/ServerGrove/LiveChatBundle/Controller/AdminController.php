@@ -196,7 +196,6 @@ class AdminController extends BaseController
         $session = new Session();
 
         $error = $session->getFlashBag()->get('error', array());
-
         if (!empty($error)) {
             $messages[] = array(
                 'type'    => 'error',
