@@ -10,8 +10,18 @@ class OperatorLoginType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('email');
-        $builder->add('passwd', 'password');
+        // although using "email" is correct, if no argument is
+        // passed (or "text" is passed) as parameter 2, it won't render anything
+        $builder->add('email', 'email', array(
+            'label' => 'Email address',
+            'attr' => array(
+                'placeholder' => 'email@domain.com'
+            )
+        ));
+
+        $builder->add('passwd', 'password', array(
+            'label' => 'Password'
+        ));
     }
 
     public function getDefaultOptions(array $options)
