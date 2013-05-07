@@ -3,12 +3,17 @@
 {% block h1 %}Admin access{% endblock %}
 
 {% block content %}
+
 <form action="{{ path('_security_check') }}" method="post" class="form-horizontal">
-    <legend>Please enter your e-mail and password to access the admin panel</legend>
+
+    <legend>Please, log in</legend>
+
     {{ form_widget(form) }}
 
     <div class="form-actions">
+
         <button type="submit" class="btn btn-primary">Login</button>
+
     </div>
 
 </form>
@@ -18,4 +23,5 @@
         jQuery(':text').focus();
     });
 </script>
+
 {% endblock %}
