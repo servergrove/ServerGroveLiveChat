@@ -41,7 +41,7 @@ class AddOperatorCommand extends BaseCommand
             $operator->setPasswd($input->getArgument('password'));
 
             $this->getDocumentManager()->persist($operator);
-            $this->getDocumentManager()->flush(array('safe' => true));
+            $this->getDocumentManager()->flush();
         } catch (MongoCursorException $e) {
             $output->write($e->getMessage(), true);
         }

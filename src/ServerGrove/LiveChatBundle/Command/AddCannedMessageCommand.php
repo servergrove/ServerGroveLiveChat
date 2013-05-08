@@ -38,9 +38,9 @@ class AddCannedMessageCommand extends BaseCommand
             $cannedMessage->setContent($input->getArgument('content'));
 
             $this->getDocumentManager()->persist($cannedMessage);
-            $this->getDocumentManager()->flush(array('safe' => true));
+            $this->getDocumentManager()->flush();
 
-            $output->write("Pronto", true);
+            $output->write("Done", true);
         } catch (MongoCursorException $e) {
             $output->write($e->getMessage(), true);
         }
