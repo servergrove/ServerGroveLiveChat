@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Description of AdminController
@@ -185,14 +186,16 @@ class AdminController extends BaseController
     }
 
     /**
+     * @Route("/messages", name="sglc_admin_messages")
      * @Template
      * @return array
      */
     public function adminMessagesAction()
     {
         $messages = array();
+        $session = new Session();
 
-        $error = $this->getSessionStorage()->getFlash('error', '');
+        $error = $session->getFlashBag()->get('error', array());
         if (!empty($error)) {
             $messages[] = array(
                 'type'    => 'error',
@@ -200,7 +203,8 @@ class AdminController extends BaseController
                 'message' => $error
             );
         }
-        $success = $this->getSessionStorage()->getFlash('msg', '');
+
+        $success = $session->getFlashBag()->get('msg', array());
         if (!empty($success)) {
             $messages[] = array(
                 'type'    => 'success',

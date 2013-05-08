@@ -7,12 +7,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\Security\Core\SecurityContext;
+use Symfony\Component\HttpFoundation\Session\Session;
 use ServerGrove\LiveChatBundle\Form\OperatorLoginType;
 
 /**
  * Class AdminController
  *
- * @author Ismael Ambrosi<ismael@servergrove.com>
+ * @author Ismael Ambrosi <ismael@servergrove.com>
  */
 class AdminController extends Controller
 {
@@ -26,13 +27,14 @@ class AdminController extends Controller
     public function loginAction()
     {
         $request = $this->getRequest();
-        $session = $request->getSession();
+        $session = new Session();
+        $session->start();
 
         // get the login error if there is one
         if ($request->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
-            $session->setFlash('error', $request->attributes->get(SecurityContext::AUTHENTICATION_ERROR));
+            $session->getFlashBag()->add('error', $request->attributes->get(SecurityContext::AUTHENTICATION_ERROR));
         } else {
-            $session->setFlash('error', $session->get(SecurityContext::AUTHENTICATION_ERROR));
+            $session->getFlashBag()->add('error', $session->get(SecurityContext::AUTHENTICATION_ERROR));
         }
 
         return array(
