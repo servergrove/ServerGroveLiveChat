@@ -34,7 +34,7 @@ class AdminController extends Controller
         if ($request->attributes->has(SecurityContext::AUTHENTICATION_ERROR)) {
             $session->getFlashBag()->add('error', $request->attributes->get(SecurityContext::AUTHENTICATION_ERROR));
         } else {
-            $session->getFlashBag()->add('error', $session->get(SecurityContext::AUTHENTICATION_ERROR));
+            //$session->getFlashBag()->add('error', $session->get(SecurityContext::AUTHENTICATION_ERROR));
         }
 
         return array(
